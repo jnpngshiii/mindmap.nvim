@@ -1,10 +1,13 @@
 local M = {}
 
-M.selection = {}
+M.saveVisualSelection = function(range_start, range_end)
+	-- 如果未提供范围，则使用默认范围 '<,'>，表示选中的部分
+	range_start = range_start or "<"
+	range_end = range_end or ">"
 
-M.saveVisualSelection = function()
-	local cursor_pos1 = vim.api.nvim_buf_get_mark(0, "<")
-	local cursor_pos2 = vim.api.nvim_buf_get_mark(0, ">")
+	-- 获取选中部分的起始和结束位置
+	local cursor_pos1 = vim.api.nvim_buf_get_mark(0, range_start)
+	local cursor_pos2 = vim.api.nvim_buf_get_mark(0, range_end)
 
 	local start_line = math.min(cursor_pos1[1], cursor_pos2[1])
 	local end_line = math.max(cursor_pos1[1], cursor_pos2[1])
@@ -18,26 +21,19 @@ M.saveVisualSelection = function()
 		end_col = cursor_pos1[2]
 	end
 
-	local file_path = vim.api.nvim_buf_get_name(0) -- 获取当前 buffer 的文件路径
+	-- 获取当前 buffer 的文件路径
+	local file_path = vim.api.nvim_buf_get_name(0)
 
+	-- 保存选中部分的信息
 	M.selection = {
 		start_line = start_line,
 		start_col = start_col,
 		end_line = end_line,
 		end_col = end_col,
-		file_path = file_path, -- 将文件路径保存在 selection 表中
+		file_path = file_path,
 	}
 
-	if file_path == nil then
-		vim.api.nvim_out_write("Error: Cannot get file path.\n")
-	else
-		vim.api.nvim_out_write("Visual selection saved.\n")
-		vim.api.nvim_out_write("Start line: " .. start_line .. "\n")
-		vim.api.nvim_out_write("Start column: " .. start_col .. "\n")
-		vim.api.nvim_out_write("End line: " .. end_line .. "\n")
-		vim.api.nvim_out_write("End column: " .. end_col .. "\n")
-		vim.api.nvim_out_write("File path: " .. file_path .. "\n")
-	end
+	vim.api.nvim_out_write("Visual selection saved.\n")
 end
 
 M.getSavedVisualSelection = function()
