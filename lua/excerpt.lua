@@ -37,7 +37,7 @@ end
 -- MAIN
 --------------------
 
-M.sr_info_table = {}
+M.excerpt_info_table = {}
 
 M.saveVisualSelection = function(range_start, range_end)
 	-- 如果未提供范围，则使用默认范围 '<,'>，表示选中的部分
@@ -60,12 +60,9 @@ M.saveVisualSelection = function(range_start, range_end)
 		end_col = cursor_pos1[2]
 	end
 
-	-- 获取当前 buffer 的文件路径
-	local file_path = vim.api.nvim_buf_get_name(0)
-
 	-- 保存选中部分的信息
-	M.sr_info_table = {
-		file_path = file_path,
+	M.excerpt_info_table = {
+		file_path = vim.api.nvim_buf_get_name(0),
 		start_row = start_line,
 		start_col = start_col,
 		end_row = end_line,
@@ -76,36 +73,44 @@ M.saveVisualSelection = function(range_start, range_end)
 end
 
 M.appendSavedVisualSelection = function()
-	local start_row = M.sr_info_table.start_row
-	local start_col = M.sr_info_table.start_col
-	local end_row = M.sr_info_table.end_row
-	local end_col = M.sr_info_table.end_col
-	local file_path = M.sr_info_table.file_path
-
-	local lines = {}
-	local file = io.open(file_path, "r")
+	local file = io.open(M.excerpt_info_table.file_path, "r")
 	if not file then
 		vim.api.nvim_out_write("Error: Cannot open file.\n")
 		return
 	end
+
+	local lines = {}
 	for line in file:lines() do
 		table.insert(lines, line)
 	end
 	file:close()
 
-	M.sr_info_table.file_path = getRelativePath(vim.api.nvim_buf_get_name(0), M.sr_info_table.file_path)
-	local sr_info = table.concat({
-		M.sr_info_table.file_path,
-		M.sr_info_table.start_row,
-		M.sr_info_table.start_col,
-		M.sr_info_table.end_row,
-		M.sr_info_table.end_col,
+	M.excerpt_info_table.file_path = getRelativePath(vim.api.nvim_buf_get_name(0), M.excerpt_info_table.file_path)
+	local excerpt_info = table.concat({
+		M.excerpt_info_table.file_path,
+		M.excerpt_info_table.start_row,
+		M.excerpt_info_table.start_col,
+		M.excerpt_info_table.end_row,
+		M.excerpt_info_table.end_col,
 	}, "::")
 
-	local cursor_pos = vim.api.nvim_win_get_cursor(0)
-	local cursor_line = vim.api.nvim_buf_get_lines(0, cursor_pos[1] - 1, cursor_pos[1], false)[1]
-	local new_cursor_line = string.gsub(cursor_line, "$", " " .. "%" .. sr_info)
-	vim.api.nvim_buf_set_lines(0, cursor_pos[1] - 1, cursor_pos[1], false, { new_cursor_line })
+	local currrent_cursor = vim.api.nvim_win_get_cursor(0)
+	local current_line = vim.api.nvim_buf_get_lines(0, currrent_cursor[1] - 1, currrent_cursor[1], false)[1]
+
+	local new_cursor_line = string.gsub(current_line, "$", " " .. "%% <<" .. excerpt_info .. " >> %%")
+
+	vim.api.nvim_buf_set_lines(0, currrent_cursor[1] - 1, currrent_cursor[1], false, { new_cursor_line })
+end
+
+M.getSavedVisualSelection = function()
+	local currrent_cursor = vim.api.nvim_win_get_cursor(0)
+	local current_line = vim.api.nvim_buf_get_lines(0, currrent_cursor[1] - 1, currrent_cursor[1], false)[1]
+
+	local start_row = M.excerpt_info_table.start_row
+	local start_col = M.excerpt_info_table.start_col
+	local end_row = M.excerpt_info_table.end_row
+	local end_col = M.excerpt_info_table.end_col
+	local file_path = M.excerpt_info_table.file_path
 
 	-- 提取选中的文本
 	local selected_lines = {}
@@ -126,7 +131,5 @@ M.appendSavedVisualSelection = function()
 	local concatenated_lines = table.concat(selected_lines, "\n")
 	vim.api.nvim_out_write("Selected text:\n" .. concatenated_lines .. "\n")
 end
-
-M.getSavedVisualSelection = function() end
 
 return M
