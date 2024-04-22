@@ -75,7 +75,7 @@ M.saveVisualSelection = function(range_start, range_end)
 	vim.api.nvim_out_write("Visual selection saved.\n")
 end
 
-M.getSavedVisualSelection = function()
+M.appendSavedVisualSelection = function()
 	local start_row = M.sr_info_table.start_row
 	local start_col = M.sr_info_table.start_col
 	local end_row = M.sr_info_table.end_row
@@ -126,5 +126,7 @@ M.getSavedVisualSelection = function()
 	local concatenated_lines = table.concat(selected_lines, "\n")
 	vim.api.nvim_out_write("Selected text:\n" .. concatenated_lines .. "\n")
 end
+
+M.getSavedVisualSelection = function() end
 
 return M
