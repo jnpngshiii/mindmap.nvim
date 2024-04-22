@@ -18,12 +18,11 @@ local M = {}
 
 local function getRelativePath(basePath, targetPath)
 	local baseParts = {}
-	local targetParts = {}
-
 	for part in string.gmatch(basePath, "[^/]+") do
 		table.insert(baseParts, part)
 	end
 
+	local targetParts = {}
 	for part in string.gmatch(targetPath, "[^/]+") do
 		table.insert(targetParts, part)
 	end
@@ -41,6 +40,26 @@ local function getRelativePath(basePath, targetPath)
 	relativePath = relativePath .. table.concat(targetParts, "/", i)
 
 	return relativePath:sub(4, -1)
+end
+
+local function getAbsolutePath(currentPath, relativePath)
+	currentPath = string.gsub(currentPath, "[^/]*$", "", 1)
+
+	local function countOccurrences(inputString, pattern)
+		local count = 0
+		for _ in inputString:gmatch(pattern) do
+			count = count + 1
+		end
+		return count
+	end
+
+	local occurrences = countOccurrences(relativePath, "%.%.")
+	currentPath = string.gsub(currentPath, "[^/]*/$", "", occurrences)
+	-- vim.api.nvim_out_write("currentPath: " .. currentPath .. "\n")
+	relativePath = string.gsub(relativePath, "^%.%./", "", occurrences)
+	-- vim.api.nvim_out_write("relativePath: " .. relativePath .. "\n")
+
+	return currentPath .. relativePath
 end
 
 --------------------
@@ -125,7 +144,9 @@ M.getSavedVisualSelection = function()
 	-- 	vim.api.nvim_out_write(v .. "\n")
 	-- end
 
-	local file = io.open(file_path, "r")
+	-- 打开文件
+	local abs_file_path = getAbsolutePath(vim.api.nvim_buf_get_name(0), file_path)
+	local file = io.open(abs_file_path, "r")
 	if not file then
 		vim.api.nvim_out_write("Error: Cannot open file.\n")
 		return
@@ -154,7 +175,7 @@ M.getSavedVisualSelection = function()
 
 	-- 输出选中的文本
 	local concatenated_lines = table.concat(selected_lines, "\n")
-	vim.api.nvim_out_write("Selected text:\n" .. concatenated_lines .. "\n")
+	vim.api.nvim_out_write(concatenated_lines .. "\n")
 end
 
 return M
