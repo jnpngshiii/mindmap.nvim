@@ -17,7 +17,7 @@ local function getRelativePath(basePath, targetPath)
 	end
 
 	local i = 1
-	while baseParts[i] == targetParts[i] and baseParts[i] ~= nil and targetParts[i] ~= nil do
+	while baseParts[i] == targetParts[i] and baseParts[i] do
 		i = i + 1
 	end
 
@@ -26,11 +26,9 @@ local function getRelativePath(basePath, targetPath)
 		relativePath = relativePath .. "../"
 	end
 
-	for j = i, #targetParts do
-		relativePath = relativePath .. targetParts[j] .. "/"
-	end
+	relativePath = relativePath .. table.concat(targetParts, "/", i)
 
-	return relativePath
+	return relativePath:sub(4, -1)
 end
 
 --------------------
@@ -73,18 +71,6 @@ M.saveVisualSelection = function(range_start, range_end)
 end
 
 M.appendSavedVisualSelection = function()
-	local file = io.open(M.excerpt_info_table.file_path, "r")
-	if not file then
-		vim.api.nvim_out_write("Error: Cannot open file.\n")
-		return
-	end
-
-	local lines = {}
-	for line in file:lines() do
-		table.insert(lines, line)
-	end
-	file:close()
-
 	M.excerpt_info_table.file_path = getRelativePath(vim.api.nvim_buf_get_name(0), M.excerpt_info_table.file_path)
 	local excerpt_info = table.concat({
 		M.excerpt_info_table.file_path,
@@ -97,7 +83,7 @@ M.appendSavedVisualSelection = function()
 	local currrent_cursor = vim.api.nvim_win_get_cursor(0)
 	local current_line = vim.api.nvim_buf_get_lines(0, currrent_cursor[1] - 1, currrent_cursor[1], false)[1]
 
-	local new_cursor_line = string.gsub(current_line, "$", " " .. "%% <<" .. excerpt_info .. " >> %%")
+	local new_cursor_line = string.gsub(current_line, "$", " " .. "%% <<" .. excerpt_info .. ">> %%")
 
 	vim.api.nvim_buf_set_lines(0, currrent_cursor[1] - 1, currrent_cursor[1], false, { new_cursor_line })
 end
@@ -106,11 +92,38 @@ M.getSavedVisualSelection = function()
 	local currrent_cursor = vim.api.nvim_win_get_cursor(0)
 	local current_line = vim.api.nvim_buf_get_lines(0, currrent_cursor[1] - 1, currrent_cursor[1], false)[1]
 
-	local start_row = M.excerpt_info_table.start_row
-	local start_col = M.excerpt_info_table.start_col
-	local end_row = M.excerpt_info_table.end_row
-	local end_col = M.excerpt_info_table.end_col
-	local file_path = M.excerpt_info_table.file_path
+	local excerpt_info = {}
+	local excerpt_info_regex = "<<([^>]*)>>"
+	for info in current_line:gmatch(excerpt_info_regex) do
+		local excerpt_info_slice = {}
+		local excerpt_info_slice_regex = "([^::]+)"
+		for slice in info:gmatch(excerpt_info_slice_regex) do
+			table.insert(excerpt_info_slice, slice)
+		end
+		table.insert(excerpt_info, excerpt_info_slice)
+	end
+
+	local file_path = excerpt_info[1][1]
+	local start_row = excerpt_info[1][2]
+	local start_col = excerpt_info[1][3]
+	local end_row = excerpt_info[1][4]
+	local end_col = excerpt_info[1][5]
+
+	-- for i, v in ipairs(excerpt_info[1]) do
+	-- 	vim.api.nvim_out_write(v .. "\n")
+	-- end
+
+	local file = io.open(file_path, "r")
+	if not file then
+		vim.api.nvim_out_write("Error: Cannot open file.\n")
+		return
+	end
+
+	local lines = {}
+	for line in file:lines() do
+		table.insert(lines, line)
+	end
+	file:close()
 
 	-- 提取选中的文本
 	local selected_lines = {}
