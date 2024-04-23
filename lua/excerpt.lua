@@ -12,9 +12,38 @@ local M = {}
 -- [ ] 允许高亮打开
 -- [ ] 集成 telescope
 
+M.config = {
+	regex = "!![^!]+![^!]+![^!]+![^!]+![^!]+!!",
+}
+
 --------------------
 -- MISC
 --------------------
+
+---@param regex string
+---@param processer function
+---@param fallbacker function
+---@return nil
+M.processCurrentLine = function(regex, processer, fallbacker)
+	local cursor_row = vim.api.nvim_win_get_cursor(0)[1]
+	local line_text = vim.api.nvim_buf_get_lines(0, cursor_row - 1, cursor_row, false)[1]
+	local processed_line_text = line_text
+
+	for matched_text in string.gmatch(line_text, regex) do
+		local prcessed_text = processer(matched_text)
+		processed_line_text = string.gsub(processed_line_text, matched_text, prcessed_text, 1)
+	end
+
+	if processed_line_text ~= line_text then
+		vim.api.nvim_buf_set_lines(0, cursor_row - 1, cursor_row, false, { processed_line_text })
+	else
+		vim.api.nvim_buf_set_lines(0, cursor_row - 1, cursor_row, false, { fallbacker(line_text) })
+	end
+end
+
+M.processer1 = function(text)
+	return string.upper(text)
+end
 
 local function getRelativePath(basePath, targetPath)
 	local baseParts = {}
