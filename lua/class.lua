@@ -1,15 +1,17 @@
+local misc = require("misc")
+
 local M = {}
 
 --------------------
 -- Class Position
 --------------------
 
----@class Excerpt.Position
+---@class Position
 ---@field base_dir string Absolute path of the file.
 ---@field base_name string Name of the file.
 ---@field row number Position of the row.
 ---@field col number Position of the column.
-Position = {
+M.Position = {
 	base_dir = "",
 	base_name = "",
 	row = 0,
@@ -20,7 +22,7 @@ Position = {
 ---@param base_name string Name of the file.
 ---@param row number Position of the row.
 ---@param col number Position of the column.
-function Position:new(base_dir, base_name, row, col)
+function M.Position:new(base_dir, base_name, row, col)
 	local obj = {}
 
 	setmetatable(obj, self)
@@ -35,20 +37,20 @@ function Position:new(base_dir, base_name, row, col)
 end
 
 --------------------
--- Class Area
+-- Class Excerpt
 --------------------
 
----@class Excerpt.Area
----@field start_position Excerpt.Position Start position of the area.
----@field end_position Excerpt.Position End position of the area.
-Area = {
-	start_position = Position:new("", "", 0, 0),
-	end_position = Position:new("", "", 0, 0),
+---@class Excerpt
+---@field start_position Position Start position of the excerpt.
+---@field end_position Position End position of the excerpt.
+M.Excerpt = {
+	start_position = M.Position:new("", "", 0, 0),
+	end_position = M.Position:new("", "", 0, 0),
 }
 
----@param start_position Excerpt.Position Start position of the area.
----@param end_position Excerpt.Position End position of the area.
-function Area:new(start_position, end_position)
+---@param start_position Position Start position of the excerpt.
+---@param end_position Position End position of the excerpt.
+function M.Excerpt:new(start_position, end_position)
 	local obj = {}
 
 	setmetatable(obj, self)
@@ -60,26 +62,26 @@ function Area:new(start_position, end_position)
 	return obj
 end
 
---- Get the area defined by start_position and end_position.
-function Area:get_area()
+--- Get the excerpt defined by start_position and end_position.
+function M.Excerpt:get_excerpt()
 	local start_row = self.start_position.row
 	local start_col = self.start_position.col
 	local end_row = self.end_position.row
 	local end_col = self.end_position.col
-	local file_path = self.start_position.base_dir .. self.start_position.base_name
-	local lines = M.read_file(file_path)
+	local file_path = misc.merge_path({ self.start_position.base_dir, self.start_position.base_name })
 
-	local selected_lines = {}
+	local line_list = misc.get_lines_from_file(file_path)
+	local excerpt_context = {}
 	for i = start_row, end_row do
 		if i == start_row then
-			table.insert(selected_lines, lines[i]:sub(start_col + 1))
+			table.insert(excerpt_context, line_list[i]:sub(start_col + 1))
 		elseif i == end_row then
-			table.insert(selected_lines, lines[i]:sub(1, end_col))
+			table.insert(excerpt_context, line_list[i]:sub(1, end_col))
 		else
-			table.insert(selected_lines, lines[i])
+			table.insert(excerpt_context, line_list[i])
 		end
 	end
-	return selected_lines
+	return excerpt_context
 end
 
 --------------------

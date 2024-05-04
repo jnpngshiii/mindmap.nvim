@@ -1,14 +1,8 @@
-require("io")
-
 local M = {}
-
---------------------
--- Private
---------------------
 
 ---@param path string
 ---@return string[]
-local function _split_path(path)
+function M.split_path(path)
 	local path_parts = {}
 	for part in string.gmatch(path, "[^/]+") do
 		table.insert(path_parts, part)
@@ -18,13 +12,9 @@ end
 
 ---@param path_parts string[]
 ---@return string
-local function _merge_path(path_parts)
+function M.merge_path(path_parts)
 	return table.concat(path_parts, "/")
 end
-
---------------------
--- Public
---------------------
 
 --- Check if a value is in a table.
 ---@generic T
@@ -42,11 +32,11 @@ end
 
 --- Open a file and return its content as a list of lines.
 ---@param path string
-function M.open_file(path)
+function M.get_lines_from_file(path)
 	local file = io.open(path, "r")
 	if not file then
 		vim.api.nvim_out_write("Error: Cannot open file in " .. path .. ".\n")
-		return
+		return nil
 	end
 
 	local line_list = {}
@@ -62,8 +52,8 @@ end
 ---@param reference_path string A reference path.
 ---@return string
 function M.get_abs_path(target_path, reference_path)
-	local target_path_parts = _split_path(target_path)
-	local reference_path_parts = _split_path(reference_path)
+	local target_path_parts = M.split_path(target_path)
+	local reference_path_parts = M.split_path(reference_path)
 
 	for _, part in ipairs(target_path_parts) do
 		if part == ".." then
@@ -73,7 +63,7 @@ function M.get_abs_path(target_path, reference_path)
 		end
 	end
 
-	return _merge_path(reference_path_parts)
+	return M.merge_path(reference_path_parts)
 end
 
 --- Convert absolute path (target_path) to relative path according to reference path (reference_path).
@@ -81,8 +71,8 @@ end
 ---@param reference_path string A reference path.
 ---@return string
 function M.get_rel_path(target_path, reference_path)
-	local target_parts = _split_path(target_path)
-	local reference_parts = _split_path(reference_path)
+	local target_parts = M.split_path(target_path)
+	local reference_parts = M.split_path(reference_path)
 	local rel_path = {}
 
 	while #target_parts > 0 and #reference_parts > 0 and target_parts[1] == reference_parts[1] do
@@ -97,7 +87,7 @@ function M.get_rel_path(target_path, reference_path)
 		table.insert(rel_path, part)
 	end
 
-	return _merge_path(rel_path)
+	return M.merge_path(rel_path)
 end
 
 --------------------

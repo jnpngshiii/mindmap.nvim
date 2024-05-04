@@ -1,5 +1,5 @@
 vim.api.nvim_create_user_command("ExcerptSave", function()
-	require("excerpt").saveVisualSelection()
+	require("excerpt").create_excerpt_using_visual_selection()
 end, {
 	range = "%",
 })
@@ -9,5 +9,5 @@ vim.api.nvim_create_user_command("ExcerptAppend", function()
 end, {})
 
 vim.api.nvim_create_user_command("ExcerptGet", function()
-	require("excerpt").processCurrentLine(require("excerpt").processer1)
+	require("excerpt").show_lastest_excerpt()
 end, {})
