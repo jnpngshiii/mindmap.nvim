@@ -9,5 +9,5 @@ vim.api.nvim_create_user_command("ExcerptAppend", function()
 end, {})
 
 vim.api.nvim_create_user_command("ExcerptGet", function()
-	require("excerpt").show_lastest_excerpt()
+	require("excerpt").database:show_lastest()
 end, {})

@@ -3,23 +3,6 @@ local misc = require("excerpt.misc")
 local M = {}
 
 --------------------
--- Class Database
---------------------
-
----@class Database
-M.Database = {}
-
---- Initialize database.
-function M.Database:init()
-	local obj = {}
-
-	setmetatable(obj, self)
-	self.__index = self
-
-	return obj
-end
-
---------------------
 -- Class Position
 --------------------
 
@@ -79,8 +62,8 @@ function M.Excerpt:new(start_position, end_position)
 	return obj
 end
 
---- Get the excerpt defined by start_position and end_position.
-function M.Excerpt:get_excerpt()
+--- Get the context defined by start_position and end_position.
+function M.Excerpt:get_context()
 	local start_row = self.start_position.row
 	local start_col = self.start_position.col
 	local end_row = self.end_position.row
@@ -88,17 +71,53 @@ function M.Excerpt:get_excerpt()
 	local file_path = misc.merge_path({ self.start_position.base_dir, self.start_position.base_name })
 
 	local line_list = misc.get_lines_from_file(file_path)
-	local excerpt_context = {}
+	local context = {}
 	for i = start_row, end_row do
 		if i == start_row then
-			table.insert(excerpt_context, line_list[i]:sub(start_col + 1))
+			table.insert(context, line_list[i]:sub(start_col + 1))
 		elseif i == end_row then
-			table.insert(excerpt_context, line_list[i]:sub(1, end_col))
+			table.insert(context, line_list[i]:sub(1, end_col))
 		else
-			table.insert(excerpt_context, line_list[i])
+			table.insert(context, line_list[i])
 		end
 	end
-	return excerpt_context
+	return context
+end
+
+--------------------
+-- Class Database
+--------------------
+
+---@class Database
+---@field cache Excerpt[]
+M.Database = {
+	cache = {},
+}
+
+function M.Database:init()
+	local obj = {}
+
+	setmetatable(obj, self)
+	self.__index = self
+
+	-- TODO: Initialize with the data from the file.
+	obj.cache = {}
+
+	return obj
+end
+
+--- Add an excerpt to the cache.
+---@param excerpt Excerpt
+---@return nil
+function M.Database:add(excerpt)
+	self.cache[#self.cache + 1] = excerpt
+end
+
+--- Show the context of the lastest excerpt in the cache.
+---@return nil
+function M.Database:show_lastest()
+	local content = self.cache[#self.cache]:get_context()
+	vim.api.nvim_out_write(table.concat(content, "\n"))
 end
 
 --------------------
@@ -118,10 +137,5 @@ function M.LineParser:new()
 end
 
 --------------------
-
--- local target_path = "/a/b/c/d"
--- local reference_path = "/a/b/e/f"
---
--- print(M.get_rel_path(target_path, reference_path))
 
 return M

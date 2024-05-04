@@ -92,9 +92,4 @@ end
 
 --------------------
 
--- local target_path = "/a/b/c/d"
--- local reference_path = "/a/b/e/f"
---
--- print(M.get_rel_path(target_path, reference_path))
-
 return M
