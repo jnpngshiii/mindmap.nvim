@@ -3,6 +3,23 @@ local misc = require("excerpt.misc")
 local M = {}
 
 --------------------
+-- Class Database
+--------------------
+
+---@class Database
+M.Database = {}
+
+--- Initialize database.
+function M.Database:init()
+	local obj = {}
+
+	setmetatable(obj, self)
+	self.__index = self
+
+	return obj
+end
+
+--------------------
 -- Class Position
 --------------------
 
@@ -82,6 +99,22 @@ function M.Excerpt:get_excerpt()
 		end
 	end
 	return excerpt_context
+end
+
+--------------------
+-- Class LineParser
+--------------------
+
+---@class LineParser
+M.LineParser = {}
+
+function M.LineParser:new()
+	local obj = {}
+
+	setmetatable(obj, self)
+	self.__index = self
+
+	return obj
 end
 
 --------------------
