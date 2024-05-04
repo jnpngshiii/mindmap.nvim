@@ -36,7 +36,7 @@ function M.get_lines_from_file(path)
 	local file = io.open(path, "r")
 	if not file then
 		vim.api.nvim_out_write("Error: Cannot open file in " .. path .. ".\n")
-		return nil
+		return {}
 	end
 
 	local line_list = {}

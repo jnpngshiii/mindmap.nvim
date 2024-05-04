@@ -1,4 +1,4 @@
-local misc = require("misc")
+local misc = require("excerpt.misc")
 
 local M = {}
 
@@ -85,5 +85,10 @@ function M.Excerpt:get_excerpt()
 end
 
 --------------------
+
+-- local target_path = "/a/b/c/d"
+-- local reference_path = "/a/b/e/f"
+--
+-- print(M.get_rel_path(target_path, reference_path))
 
 return M
