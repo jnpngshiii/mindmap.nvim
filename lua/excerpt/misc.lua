@@ -90,6 +90,11 @@ function M.get_rel_path(target_path, reference_path)
 	return M.merge_path(rel_path)
 end
 
+function M.get_cursor_line_context(row)
+	-- Buf is 0 because cursor is in the current buffer.
+	local context = vim.api.nvim_buf_get_lines(0, row - 1, row, false)[1]
+end
+
 --------------------
 
 return M

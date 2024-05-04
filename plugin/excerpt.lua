@@ -1,8 +1,6 @@
 vim.api.nvim_create_user_command("ExcerptSave", function()
-	require("excerpt").create_excerpt_using_visual_selection()
-end, {
-	range = "%",
-})
+	require("excerpt").database:add_using_visual_selection()
+end, {})
 
 vim.api.nvim_create_user_command("ExcerptAppend", function()
 	require("excerpt").appendSavedVisualSelection()
