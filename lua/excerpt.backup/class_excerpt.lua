@@ -21,6 +21,7 @@ M.Position = {
 ---@param file_path string Path of the file.
 ---@param row number Position of the row.
 ---@param col number Position of the column.
+---@return table
 function M.Position:new(file_path, row, col)
 	local obj = {}
 
@@ -47,8 +48,13 @@ M.Excerpt = {
 	end_position = M.Position:new("", 0, 0),
 }
 
+----------
+-- Instance Method
+----------
+
 ---@param start_position Position Start position of the excerpt.
 ---@param end_position Position End position of the excerpt.
+---@return table
 function M.Excerpt:new(start_position, end_position)
 	local obj = {}
 
@@ -62,6 +68,7 @@ function M.Excerpt:new(start_position, end_position)
 end
 
 --- Get the context defined by start_position and end_position.
+---@return  string[]
 function M.Excerpt:get_context() -- FIXME:
 	local start_row = self.start_position.row
 	local start_col = self.start_position.col
@@ -83,94 +90,42 @@ function M.Excerpt:get_context() -- FIXME:
 	return context
 end
 
---------------------
--- Class Database
---------------------
+----------
+-- Class Method
+----------
 
----@class Database
----@field cache Excerpt[]
-M.Database = {
-	cache = {},
-}
-
-function M.Database:init()
-	local obj = {}
-
-	setmetatable(obj, self)
-	self.__index = self
-
-	-- TODO: Initialize with the data from the file.
-	obj.cache = {}
-
-	return obj
+--- Convert an excerpt to a string.
+--- Note that the rel_file_path is relative to the current file.
+---@param excerpt Excerpt Excerpt to be converted to a string.
+---@param excerpt_info_seq string "{seq}"
+---@return string "<rel_file_path{seq}start_row{seq}start_col{seq}end_row{seq}end_col>"
+function M.Excerpt.get_excerpt_info(excerpt, excerpt_info_seq)
+	return "<"
+		.. table.concat({
+			misc.merge_path({
+				misc.get_rel_path(excerpt.start_position.file_dir, misc.get_current_file_dir()),
+				excerpt.start_position.file_name,
+			}),
+			excerpt.start_position.row,
+			excerpt.start_position.col,
+			excerpt.end_position.row,
+			excerpt.end_position.col,
+		}, excerpt_info_seq)
+		.. ">"
 end
 
---- Add an excerpt to the database.
----@param excerpt Excerpt
----@return nil
-function M.Database:add(excerpt)
-	self.cache[#self.cache + 1] = excerpt
-
-	vim.api.nvim_out_write("Add an excerpt to the database.\n")
-end
-
---- Add an excerpt to the database using the latest visual selection.
----@return nil
-function M.Database.add_using_visual_selection()
-	local path = vim.api.nvim_buf_get_name(0)
-	local start_row = vim.api.nvim_buf_get_mark(0, "<")[1]
-	local start_col = vim.api.nvim_buf_get_mark(0, "<")[2]
-	local end_row = vim.api.nvim_buf_get_mark(0, ">")[1]
-	local end_col = vim.api.nvim_buf_get_mark(0, ">")[2]
-
-	local start_position = M.Position:new(path, start_row, start_col)
-	local end_position = M.Position:new(path, end_row, end_col)
-	local visual_selection_excerpt = M.Excerpt:new(start_position, end_position)
-
-	M.Database:add(visual_selection_excerpt)
-end
-
---- Show the context of an excerpt in the database.
----@param index number
----@return nil
-function M.Database:show(index)
-	if 0 < index and index <= #self.cache then
-		local content = self.cache[index]:get_context()
-		vim.api.nvim_out_write(table.concat(content, "\n"))
-	else
-		vim.api.nvim_out_write("No excerpt found.\n")
-	end
-end
-
---- Show the context of the lastest excerpt in the database.
----@return nil
-function M.Database:show_lastest()
-	M.Database:show(#self.cache)
-end
-
---------------------
--- Class LineParser
---------------------
-
----@class LineParser
-M.LineParser = {
-	file_dir = "",
-	file_name = "",
-	file_ext = "",
-	row = 0,
-}
-
-function M.LineParser:new(file_path, row)
-	local obj = {}
-
-	setmetatable(obj, self)
-	self.__index = self
-
-	obj.file_dir = vim.fs.dirname(file_path)
-	obj.file_name = vim.fs.basename(file_path)
-	obj.file_ext = vim.fn.fnamemodify(file_path, ":e")
-
-	return obj
+--- Convert a string to an excerpt.
+--- Note that the rel_file_path is relative to the current file.
+---@param excerpt_info string "<rel_file_path{seq}start_row{seq}start_col{seq}end_row{seq}end_col>"
+---@param excerpt_info_seq string "{seq}"
+---@return Excerpt Excerpt converted from the string.
+function M.Excerpt.parser_excerpt_info(excerpt_info, excerpt_info_seq)
+	-- remove < and > from info
+	local info = excerpt_info:sub(2, -2)
+	local info_list = misc.split_string(info, excerpt_info_seq)
+	local start_position = M.Position:new(info_list[1], info_list[2], info_list[3])
+	local end_position = M.Position:new(info_list[1], info_list[4], info_list[5])
+	return M.Excerpt:new(start_position, end_position)
 end
 
 --------------------
