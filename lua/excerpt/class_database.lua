@@ -1,5 +1,3 @@
-local misc = require("excerpt.misc")
-
 local M = {}
 
 --------------------
@@ -44,46 +42,13 @@ end
 
 ---@class Database
 ---@field cache Item[]
----@field json_path string Path to the JSON file used to store the database.
 M.Database = {
-	json_path = "",
 	cache = {},
 }
 
 ----------
 -- Class Method
 ----------
-
---- Write the database to a JSON file.
----@param cache Item[]
----@param json_path string
----@return nil
-function M.Database.write(cache, json_path)
-	local json_content = vim.fn.json_encode(cache)
-
-	local json, err = io.open(json_path, "w")
-	if not json then
-		error("Could not open file: " .. err)
-	end
-
-	json:write(json_content)
-	json:close()
-end
-
---- Read the database from a JSON file.
----@param json_path string
----@return nil
-function M.Database.read(json_path)
-	local json, _ = io.open(json_path, "r")
-	if not json then
-		M.Database.write({}, json_path)
-		return {}
-	end
-
-	local cache = vim.fn.json_decode(json:read("*a"))
-	json:close()
-	return cache
-end
 
 ----------
 -- Instance Method
@@ -92,8 +57,6 @@ end
 ---@return table
 function M.Database:init(obj)
 	obj = obj or {}
-	obj.json_path = vim.fn.stdpath("data") .. "/excerpt.json"
-	obj.cache = self.read(obj.json_path)
 
 	setmetatable(obj, self)
 	self.__index = self
@@ -164,10 +127,12 @@ function M.Database:remove(index)
 end
 
 --- Trigger a function for each item in the database.
----@param func function|string
----@param ... any
----@return nil
+---@param func function|string Function to trigger.
+---@param ... any Arguments for the function.
+---@return any[]
 function M.Database:trigger(func, ...)
+	-- TODO: Return the output of the function (may be nil) as a table.
+	local output = {}
 	if type(func) == "string" then
 		for _, item in pairs(self.cache) do
 			if type(item[func]) == "function" then
@@ -183,6 +148,7 @@ function M.Database:trigger(func, ...)
 	else
 		print("Invalid argument type for 'func'\n.")
 	end
+	return output
 end
 
 -- local database_instance = M.Database:init()

@@ -138,7 +138,7 @@ end
 function M.get_context(file_path, start_row, start_col, end_row, end_col)
 	local line_list = M.read_lines_from_file(file_path)
 	local context_list = {}
-	for i = start_row, end_row + 1 do
+	for i = start_row, end_row do
 		if i == start_row then
 			table.insert(context_list, line_list[i]:sub(start_col + 1))
 		elseif i == end_row then
@@ -155,18 +155,33 @@ end
 --------------------
 
 --- Check whether a index is in a table.
----@generic T
----@param index T
----@param table T[]
+---@param index number|string
+---@param tbl table
 ---@return boolean
-function M.value_is_in_table(index, table)
-	for key, _ in ipairs(table) do
-		if key == index then
+function M.check_table_index(index, tbl)
+	for k, _ in ipairs(tbl) do
+		if k == index then
 			return true
 		end
 	end
 
 	return false
+end
+
+--- Remove fields that are not string, number, or boolean in a table.
+--- This function is recursive.
+---@param tbl table
+---@return table
+function M.remove_table_field(tbl)
+	local proccessed_tbl = tbl
+	for k, v in pairs(proccessed_tbl) do
+		if type(v) == "table" then
+			M.remove_table_field(v)
+		elseif type(v) ~= "string" and type(v) ~= "number" and type(v) ~= "boolean" then
+			tbl[k] = nil
+		end
+	end
+	return proccessed_tbl
 end
 
 --- Match all patterns in the context.
