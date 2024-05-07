@@ -1,4 +1,5 @@
 local class_database = require("excerpt.class_database")
+local class_log = require("excerpt.class_log")
 local misc = require("excerpt.misc")
 
 local M = {}
@@ -101,13 +102,18 @@ function M.ExcerptItem:check_health()
 end
 
 function M.ExcerptItem:show_in_nvim_out_write()
-	local info = "path_to_root: " .. self.path_to_root .. "\n"
+	local info = ""
+	info = info .. "===== ExcerptItem Start =====" .. "\n"
+	info = info .. "timestamp: " .. self.timestamp .. "\n"
+	info = info .. "proj_name: " .. self.proj_name .. "\n"
+	info = info .. "path_to_root: " .. self.path_to_root .. "\n"
 	info = info .. "file_name: " .. self.file_name .. "\n"
 	info = info .. "start_row: " .. self.start_row .. "\n"
 	info = info .. "start_col: " .. self.start_col .. "\n"
 	info = info .. "end_row: " .. self.end_row .. "\n"
 	info = info .. "end_col: " .. self.end_col .. "\n"
-	info = info .. "context:\n" .. table.concat(self.context, "\n") .. "\n\n"
+	info = info .. "context:\n" .. table.concat(self.context, "\n") .. "\n"
+	info = info .. "===== ExcerptItem End =====" .. "\n"
 	vim.api.nvim_out_write(info)
 end
 
@@ -118,18 +124,25 @@ end
 ---@class ExcerptDatabase:Database
 ---@field cache ExcerptItem[]
 ---@field json_path string Path to the JSON file used to store the database.
+---@field logger class_log.Logger Logger of the database. NOTE: Logger should have a method log(msg, level).
 M.ExcerptDatabase = class_database.Database:init({
-	json_path = vim.fn.stdpath("data") .. "/excerpt.json",
+	json_path = "",
+	log_path = "",
+	logger = nil,
 })
 
 function M.ExcerptDatabase:init(obj)
 	obj = obj or {}
-	-- TODO:
-	obj.json_path = vim.fn.stdpath("data") .. "/excerpt.json"
-	self:load()
+	obj.json_path = obj.json_path or vim.fn.stdpath("data") .. "/excerpt.json"
+	obj.log_path = obj.log_path or vim.fn.stdpath("data") .. "/excerpt.log"
+	obj.logger = obj.logger or class_log.Logger:init({
+		log_path = obj.log_path,
+	})
 
 	setmetatable(obj, self)
 	self.__index = self
+
+	self:load()
 
 	return obj
 end
@@ -155,6 +168,7 @@ function M.ExcerptDatabase:save()
 
 	local json, err = io.open(self.json_path, "w")
 	if not json then -- TODO:
+		self:log("[Database] Could not save database at: " .. self.json_path, "error")
 		error("Could not open file: " .. err)
 	end
 
@@ -170,6 +184,7 @@ function M.ExcerptDatabase:load()
 	if not json then
 		-- Use save() to create a json file.
 		self:save()
+		self:log("[Database] Database not found at: " .. self.json_path .. ". Created a new one.", "info")
 		return
 	end
 	json_context = vim.fn.json_decode(json:read("*a"))
@@ -181,7 +196,26 @@ function M.ExcerptDatabase:load()
 		end
 	end
 
+	self:log("[Database] Database loaded at: " .. self.json_path, "info")
 	json:close()
+end
+
+--- Call log method of the logger, or call fallback method.
+---@param msg string Log message.
+---@param msg_level string Log message level.
+---@return nil
+function M.ExcerptDatabase:log(msg, msg_level)
+	if self.logger then
+		self.logger:log(msg, msg_level)
+	else
+		local formatted_timestamp = os.date("%Y-%m-%d %H:%M:%S", os.time())
+		msg = formatted_timestamp .. " " .. string.upper(msg_level) .. " " .. msg .. "\n"
+		if package.loaded["vim.api"] then
+			vim.api.nvim_out_write(msg)
+		else
+			print(msg)
+		end
+	end
 end
 
 --------------------

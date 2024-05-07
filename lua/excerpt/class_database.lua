@@ -22,7 +22,7 @@ M.Item = {
 ---@return table
 function M.Item:new(obj)
 	obj = obj or {}
-	obj.timestamp = os.time()
+	obj.timestamp = obj.timestamp or os.time()
 
 	setmetatable(obj, self)
 	self.__index = self
