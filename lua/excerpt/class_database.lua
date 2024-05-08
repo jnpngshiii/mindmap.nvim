@@ -57,6 +57,7 @@ M.Database = {
 ---@return table
 function M.Database:init(obj)
 	obj = obj or {}
+	obj.cache = obj.cache or self.cache
 
 	setmetatable(obj, self)
 	self.__index = self

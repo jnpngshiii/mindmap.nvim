@@ -14,6 +14,8 @@ local M = {}
 ---@class Logger
 ---@field cache string[] The cache of log messages.
 ---@field log_path string Path to the log file.
+---@field log_level string Log level of the logger.
+---@field log_level_table table<string, number> The table of log levels.
 M.Logger = {
 	cache = {},
 	log_path = "",
@@ -49,8 +51,6 @@ function M.Logger:init(obj)
 
 	setmetatable(obj, self)
 	self.__index = self
-
-	self:log("Init logger", "INFO")
 
 	return obj
 end

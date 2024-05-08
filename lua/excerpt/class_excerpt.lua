@@ -118,31 +118,32 @@ function M.ExcerptItem:show_in_nvim_out_write()
 end
 
 --------------------
--- Class Database
+-- Class ExcerptDatabase
 --------------------
 
 ---@class ExcerptDatabase:Database
 ---@field cache ExcerptItem[]
 ---@field json_path string Path to the JSON file used to store the database.
----@field logger class_log.Logger Logger of the database. NOTE: Logger should have a method log(msg, level).
+---@field logger any Logger of the database. NOTE: Logger should have a method log(msg, msg_level).
 M.ExcerptDatabase = class_database.Database:init({
+	cache = {},
 	json_path = "",
-	log_path = "",
 	logger = nil,
 })
 
 function M.ExcerptDatabase:init(obj)
 	obj = obj or {}
-	obj.json_path = obj.json_path or vim.fn.stdpath("data") .. "/excerpt.json"
-	obj.log_path = obj.log_path or vim.fn.stdpath("data") .. "/excerpt.log"
-	obj.logger = obj.logger or class_log.Logger:init({
-		log_path = obj.log_path,
-	})
+	obj.cache = obj.cache or self.cache
+	obj.json_path = obj.json_path or self.json_path
+	obj.logger = obj.logger or self.logger
+	if obj.logger then
+		obj.logger:log("[Logger] Init logger.", "info")
+	end
 
 	setmetatable(obj, self)
 	self.__index = self
 
-	self:load()
+	-- self:load()
 
 	return obj
 end
@@ -206,7 +207,7 @@ end
 ---@return nil
 function M.ExcerptDatabase:log(msg, msg_level)
 	if self.logger then
-		self.logger:log(msg, msg_level)
+		self.logger:log(msg, msg_level) -- Use __call?
 	else
 		local formatted_timestamp = os.date("%Y-%m-%d %H:%M:%S", os.time())
 		msg = formatted_timestamp .. " " .. string.upper(msg_level) .. " " .. msg .. "\n"
