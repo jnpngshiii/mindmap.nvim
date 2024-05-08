@@ -88,7 +88,8 @@ end
 ---@return boolean
 function M.ExcerptItem:check_health()
 	if
-		self.proj_name == ""
+		self.timestamp == ""
+		or self.proj_name == ""
 		or self.path_to_root == ""
 		or self.file_name == ""
 		or self.start_row == -1
@@ -165,6 +166,8 @@ function M.ExcerptDatabase:save()
 	for _, excerpt in pairs(self.cache) do
 		if excerpt:check_health() then
 			json_context[#json_context + 1] = excerpt.to_table(excerpt)
+		else
+			self:log("[Database] Invalid Excerpt (" .. excerpt.timestamp .. "), skip saving.", "error")
 		end
 	end
 	json_context = vim.fn.json_encode(json_context)

@@ -37,8 +37,8 @@ end
 -- Public Functions
 --------------------
 
-function M.save_latest_visual_selection_as_excerpt()
-	excerpt_database:log("[Function] Save latest visual selection as excerpt.", "info")
+function M.create_excerpt_using_latest_visual_selection()
+	excerpt_database:log("[Function] Create excerpt using latest visual selection.", "info")
 
 	local excerpt_item = class_excerpt.ExcerptItem.create_using_latest_visual_selection()
 	excerpt_database:add(excerpt_item)
@@ -56,6 +56,27 @@ function M.show_all_excerpts_in_database()
 	excerpt_database:log("[Function] Show all excerpts in database.", "info")
 
 	excerpt_database.trigger(excerpt_database.cache, "show_in_nvim_out_write")
+end
+
+function M.append_lastest_excerpt_to_current_line()
+	excerpt_database:log("[Function] Append latest excerpt to current line.", "info")
+
+	local line = vim.api.nvim_win_get_cursor(0)[1]
+	local current_line_content = misc.parse_current_line()[5]
+
+	local max_id = "excerpt0000000000"
+	for id, _ in pairs(excerpt_database.cache) do
+		if id > max_id then
+			max_id = id
+		end
+	end
+
+	local new_line_content = current_line_content .. " " .. max_id
+	vim.api.nvim_buf_set_lines(0, line - 1, line, false, { new_line_content })
+end
+
+function M.show_log()
+	excerpt_database.logger:show_all()
 end
 
 --------------------

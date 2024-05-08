@@ -94,7 +94,6 @@ function M.Database:init(obj)
 	return obj
 end
 
----@deprecated
 function M.Database:get_max_id()
 	if #self.cache == 0 then
 		vim.api.nvim_out_write("No Max ID found. Database is empty.\n")
