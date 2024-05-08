@@ -1,5 +1,5 @@
- % <<../.luarc.json::5::0::7::5>> %
- % <<../LICENSE::669::0::674::49>> %
- % <<../lua/excerpt.lua::3::0::4::29>> %
+-- "timestamp": "excerpt0000000001",
+-- "timestamp": "excerpt0000000002",
+-- "timestamp": "excerpt0000000003",
 
-!!aa!! !!AB!AB!AB!AB!AB!! !ac! cc
+-- "timestamp": "excerpt0000000001", "timestamp": "excerpt0000000005",

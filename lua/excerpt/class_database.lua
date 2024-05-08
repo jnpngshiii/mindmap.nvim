@@ -50,6 +50,35 @@ M.Database = {
 -- Class Method
 ----------
 
+--- Trigger a function on given items.
+---@param items Item[] Items to trigger the function on.
+---@param func function|string Function to trigger.
+---@param ... any Arguments for the function.
+---@return any[]
+function M.Database.trigger(items, func, ...)
+	-- TODO: Return the output of the function (may be nil) as a table.
+	-- TODO: If items is not given, then use self.cache.
+	-- TODO: Support for single item.
+	-- TODO: Add type checking.
+	local output = {}
+	if type(func) == "string" then
+		for _, item in pairs(items) do
+			if type(item[func]) == "function" then
+				item[func](item, ...)
+			else
+				print("Method '" .. func .. "' does not exist for item.\n")
+			end
+		end
+	elseif type(func) == "function" then
+		for _, item in pairs(items) do
+			func(item, ...)
+		end
+	else
+		print("Invalid argument type for 'func'\n.")
+	end
+	return output
+end
+
 ----------
 -- Instance Method
 ----------
@@ -65,6 +94,7 @@ function M.Database:init(obj)
 	return obj
 end
 
+---@deprecated
 function M.Database:get_max_id()
 	if #self.cache == 0 then
 		vim.api.nvim_out_write("No Max ID found. Database is empty.\n")
@@ -103,6 +133,7 @@ function M.Database:pop(index)
 	return poped_item
 end
 
+---@deprecated
 --- Pop the lastest item from the database.
 ---@return Item|nil
 function M.Database:pop_lastest()
@@ -127,45 +158,22 @@ function M.Database:remove(index)
 	self.cache[index] = nil
 end
 
---- Trigger a function for each item in the database.
----@param func function|string Function to trigger.
----@param ... any Arguments for the function.
----@return any[]
-function M.Database:trigger(func, ...)
-	-- TODO: Return the output of the function (may be nil) as a table.
-	local output = {}
-	if type(func) == "string" then
-		for _, item in pairs(self.cache) do
-			if type(item[func]) == "function" then
-				item[func](item, ...)
-			else
-				print("Method '" .. func .. "' does not exist for item.\n")
-			end
+--- Find item(s) in the database.
+---@param timestamp string|string[]
+---@return Item|Item[]
+function M.Database:find(timestamp)
+	if type(timestamp) ~= "table" then
+		if type(timestamp) == "string" then
+			return self.cache[timestamp]
 		end
-	elseif type(func) == "function" then
-		for _, item in pairs(self.cache) do
-			func(item, ...)
-		end
-	else
-		print("Invalid argument type for 'func'\n.")
 	end
-	return output
-end
 
--- local database_instance = M.Database:init()
--- database_instance:add(M.Item:new())
--- os.execute("sleep 1")
--- database_instance:add(M.Item:new())
--- os.execute("sleep 1")
--- database_instance:add(M.Item:new())
---
--- database_instance:trigger("show_in_nvim_out_write")
---
--- local function show_in_nvim_out_write(item, word)
---   print(item.timestamp .. " " .. word .. "\n")
--- end
---
--- database_instance:trigger(show_in_nvim_out_write, "word")
+	local found_items = {}
+	for _, v in pairs(timestamp) do
+		found_items[v] = self:find(v)
+	end
+	return found_items
+end
 
 --------------------
 
