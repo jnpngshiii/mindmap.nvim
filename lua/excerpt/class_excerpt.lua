@@ -38,6 +38,7 @@ function M.ExcerptItem.create_using_latest_visual_selection()
 	local file_path = vim.api.nvim_buf_get_name(0)
 	local proj_root = misc.get_current_proj_path()
 
+	local timestamp = "excerpt" .. os.time()
 	local proj_name = misc.split_path(proj_root)[#misc.split_path(proj_root)]
 	local path_to_root = misc.get_rel_path(file_path, proj_root)
 	local file_name = misc.get_current_file_name()
@@ -48,6 +49,7 @@ function M.ExcerptItem.create_using_latest_visual_selection()
 	local context = misc.get_context(file_path, start_row, start_col, end_row, end_col)
 
 	return M.ExcerptItem:new({
+		timestamp = timestamp,
 		proj_name = proj_name,
 		path_to_root = path_to_root,
 		file_name = file_name,
