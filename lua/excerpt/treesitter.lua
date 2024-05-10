@@ -1,8 +1,9 @@
 local neorg = require("neorg.core")
+local ts_utils = require("nvim-treesitter.ts_utils")
 
 local M = {}
 
-function M.get_meta_root()
+function M.get_neorg_meta_root()
 	local parser = vim.treesitter.get_parser(0, "norg")
 	if not parser then
 		return nil
@@ -20,7 +21,7 @@ function M.get_meta_root()
 	return nil
 end
 
-function M.get_doc_root()
+function M.get_neorg_doc_root()
 	local parser = vim.treesitter.get_parser(0, "norg")
 	if not parser then
 		return nil
@@ -34,8 +35,8 @@ function M.get_doc_root()
 	return nil
 end
 
-function M.is_mindnode_file()
-	local meta_root = M.get_meta_root()
+function M.is_mindnode()
+	local meta_root = M.get_neorg_meta_root()
 	if not meta_root then
 		return false
 	end
@@ -129,67 +130,76 @@ function M.get_node_title(node)
 	return table.concat(lines, "\n")
 end
 
+function M.get_nearest_heading_node()
+	local current_node = ts_utils.get_node_at_cursor()
+
+	while not current_node:type():match("heading%d") do
+		current_node = current_node:parent()
+	end
+
+	return current_node
+end
+
+---@return string
+function M.get_nearest_heading_level()
+	local nearest_heading_node = M.get_nearest_heading_node()
+	local level = string.match(nearest_heading_node:type(), "heading(%d)")
+	return level
+end
+
+function M.get_nearest_heading_sub_level_node()
+	local current_level = M.get_nearest_heading_level()
+	local sub_level = tostring(tonumber(current_level) + 1)
+	local nearest_heading_node = M.get_nearest_heading_node()
+
+	local sub_level_node = {}
+	for node in nearest_heading_node:iter_children() do
+		print(node:type())
+		if node:type():match("heading" .. sub_level) then
+			sub_level_node[#sub_level_node + 1] = node
+		end
+	end
+	return sub_level_node
+end
+
 --------------------
 
 if true then
-	-- local meta_root = M.get_meta_root()
-	-- local doc_root = M.get_doc_root()
-	-- local is_mindnode = M.is_mindnode_file()
-	-- print(meta_root, doc_root, is_mindnode)
+	-- -- Lang tree
+	-- local lang_tree = vim.treesitter.get_parser(0, "norg")
+	-- print("Lang tree: ", lang_tree)
+	-- print("Lang tree type: ", type(lang_tree))
+	--
+	-- -- Lang tree -> TS tree table
+	-- local ts_tree_table = lang_tree:parse()
+	-- print("Lang tree table: ", ts_tree_table)
+	-- print("Lang tree table type: ", type(ts_tree_table))
+	--
+	-- -- TS tree table -> TS tree
+	-- local first_ts_tree = ts_tree_table[1]
+	-- print("First TS tree: ", first_ts_tree)
+	-- print("First TS tree type: ", type(first_ts_tree))
+	-- -- local second_ts_tree = ts_tree_table[2]
+	-- -- print("Second TS tree: ", second_ts_tree)
+	-- -- print("Second TS tree type: ", type(second_ts_tree))
+	--
+	-- -- TS tree -> TS node
+	-- local root_node = first_ts_tree:root()
+	-- print("Root node: ", root_node)
+	-- print("Root node type: ", type(root_node))
+	--
+	-- -- TS node -> Children node
+	-- local children = root_node:iter_children()
+	-- for child in children do
+	-- end
 
-	local query = neorg.utils.ts_parse_query(
-		"norg",
-		[[
-      (heading1
-        (heading1_prefix) @prefix
-        (#eq? @prefix "*")
-      )
-    ]]
-	)
+	local heading_node = M.get_nearest_heading_node()
+	-- print(M.get_node_title(heading_node))
+	-- print(M.get_nearest_heading_level())
 
-	-- Lang tree
-	local lang_tree = vim.treesitter.get_parser(0, "norg")
-	print("Lang tree: ", lang_tree)
-	print("Lang tree type: ", type(lang_tree))
-
-	-- Lang tree -> TS tree table
-	local ts_tree_table = lang_tree:parse()
-	print("Lang tree table: ", ts_tree_table)
-	print("Lang tree table type: ", type(ts_tree_table))
-
-	-- TS tree table -> TS tree
-	local first_ts_tree = ts_tree_table[1]
-	print("First TS tree: ", first_ts_tree)
-	print("First TS tree type: ", type(first_ts_tree))
-	-- local second_ts_tree = ts_tree_table[2]
-	-- print("Second TS tree: ", second_ts_tree)
-	-- print("Second TS tree type: ", type(second_ts_tree))
-
-	-- TS tree -> TS node
-	local root_node = first_ts_tree:root()
-	print("Root node: ", root_node)
-	print("Root node type: ", type(root_node))
-
-	-- TS node -> Children
-	local children = root_node:iter_children()
-	for child in children do
-		print("-----")
-		if child:type() == "heading1" then
-			print("Heading1 title: ", M.get_node_title(child))
-			print("Heading1 content: ", M.get_node_content(child))
-			-- print("Heading1 content: ", M.get_node_content(child))
-		end
-		print("-----")
-		-- print("Child: ", child)
-		-- print("Child type: ", type(child))
-		for _c in child:iter_children() do
-			-- print("Child child child: ", _c)
-			-- print("Child child type: ", type(_c))
-			-- if _c:type() == "heading2" then
-			-- 	print("Heading2 prefix: ", _c)
-			-- 	print("Heading2 prefix type: ", type(_c))
-			-- end
-		end
+	local sub_level_node = M.get_nearest_heading_sub_level_node()
+	for _, node in ipairs(sub_level_node) do
+		print(M.get_node_title(node))
 	end
 end
 
