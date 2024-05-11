@@ -133,7 +133,7 @@ end
 function M.get_nearest_heading_node()
 	local current_node = ts_utils.get_node_at_cursor()
 
-	while not current_node:type():match("heading%d") do
+	while not current_node:type():match("^heading%d$") do
 		current_node = current_node:parent()
 	end
 
@@ -154,8 +154,7 @@ function M.get_nearest_heading_sub_level_node()
 
 	local sub_level_node = {}
 	for node in nearest_heading_node:iter_children() do
-		print(node:type())
-		if node:type():match("heading" .. sub_level) then
+		if node:type():match("^heading" .. sub_level .. "$") then
 			sub_level_node[#sub_level_node + 1] = node
 		end
 	end
@@ -164,43 +163,84 @@ end
 
 --------------------
 
-if true then
-	-- -- Lang tree
-	-- local lang_tree = vim.treesitter.get_parser(0, "norg")
-	-- print("Lang tree: ", lang_tree)
-	-- print("Lang tree type: ", type(lang_tree))
-	--
-	-- -- Lang tree -> TS tree table
-	-- local ts_tree_table = lang_tree:parse()
-	-- print("Lang tree table: ", ts_tree_table)
-	-- print("Lang tree table type: ", type(ts_tree_table))
-	--
-	-- -- TS tree table -> TS tree
-	-- local first_ts_tree = ts_tree_table[1]
-	-- print("First TS tree: ", first_ts_tree)
-	-- print("First TS tree type: ", type(first_ts_tree))
-	-- -- local second_ts_tree = ts_tree_table[2]
-	-- -- print("Second TS tree: ", second_ts_tree)
-	-- -- print("Second TS tree type: ", type(second_ts_tree))
-	--
-	-- -- TS tree -> TS node
-	-- local root_node = first_ts_tree:root()
-	-- print("Root node: ", root_node)
-	-- print("Root node type: ", type(root_node))
-	--
-	-- -- TS node -> Children node
-	-- local children = root_node:iter_children()
-	-- for child in children do
-	-- end
+if false then
+	-- Lang tree
+	local lang_tree = vim.treesitter.get_parser(0, "norg")
+	print("Lang tree: ", lang_tree)
+	print("Lang tree type: ", type(lang_tree))
 
-	local heading_node = M.get_nearest_heading_node()
-	-- print(M.get_node_title(heading_node))
-	-- print(M.get_nearest_heading_level())
+	-- Lang tree -> TS tree table
+	local ts_tree_table = lang_tree:parse()
+	print("Lang tree table: ", ts_tree_table)
+	print("Lang tree table type: ", type(ts_tree_table))
 
-	local sub_level_node = M.get_nearest_heading_sub_level_node()
-	for _, node in ipairs(sub_level_node) do
-		print(M.get_node_title(node))
+	-- TS tree table -> TS tree
+	local first_ts_tree = ts_tree_table[1]
+	print("First TS tree: ", first_ts_tree)
+	print("First TS tree type: ", type(first_ts_tree))
+	-- local second_ts_tree = ts_tree_table[2]
+	-- print("Second TS tree: ", second_ts_tree)
+	-- print("Second TS tree type: ", type(second_ts_tree))
+
+	-- TS tree -> TS node
+	local root_node = first_ts_tree:root()
+	print("Root node: ", root_node)
+	print("Root node type: ", type(root_node))
+
+	-- TS node -> Children node
+	local children = root_node:iter_children()
+	for child in children do
+		print("  " .. child:type())
+		if child:type() == "heading1" then
+			for cc in child:iter_children() do
+				print("    " .. cc:type())
+			end
+		end
 	end
+end
+
+if false then
+	M.get_nearest_heading_sub_level_node()
+end
+
+if true then
+	local function get_nearest_heading_id()
+		local heading_query = [[
+      (heading1
+        title: (paragraph_segment) @title
+        content: (_) @content
+      )
+    ]]
+
+		local root_node = M.get_neorg_doc_root()
+
+		local matched_query = neorg.utils.ts_parse_query("norg", heading_query)
+		for id, node in matched_query:iter_captures(root_node, 0) do
+			local capture_name = matched_query.captures[id]
+			if capture_name == "title" then
+				local title = vim.treesitter.query.get_node_text(node, 0)
+
+				local mn_id = string.match(title, "%d%d%d%d%d%d%d%d%d%d%d%d%d")
+				if not mn_id then
+					mn_id = string.format("%s%d", os.time(), math.random(0000, 9999))
+					local start_row, start_col, end_row, end_col = node:range()
+					vim.api.nvim_buf_set_text(
+						0,
+						start_row,
+						start_col,
+						end_row,
+						end_col,
+						{ title .. " %" .. mn_id .. "%" }
+					)
+				end
+
+				-- return mn_id
+				print(title .. " ID: " .. mn_id)
+			end
+		end
+	end
+
+	get_nearest_heading_id()
 end
 
 return M
