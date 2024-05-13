@@ -1,5 +1,3 @@
-local misc = require("mindmap.misc")
-
 local M = {}
 
 --------------------
@@ -7,14 +5,14 @@ local M = {}
 --------------------
 
 ---@class Card
----@field type string Type of the card.
+---@field card_type string Type of the card.
 ---@field created_at string Time when the card was created.
 ---@field updated_at string Time when the card was last updated.
 ---@field due_at string Time when the card is due.
 ---@field ease number Ease of the card.
 ---@field interval number Interval of the card.
 M.Card = {
-	type = "",
+	card_type = "",
 	created_at = "",
 	updated_at = "",
 	due_at = "",
@@ -30,7 +28,7 @@ M.Card = {
 ---@return table
 function M.Card:new(obj)
 	obj = obj or {}
-	obj.type = obj.type or self.type
+	obj.card_type = obj.card_type or self.card_type
 	obj.created_at = obj.created_at or self.created_at
 	obj.updated_at = obj.updated_at or self.updated_at
 	obj.due_at = obj.due_at or self.due_at
@@ -47,7 +45,7 @@ end
 ---@return boolean
 function M.Card:check_health()
 	if
-		self.type == ""
+		self.card_type == ""
 		or self.created_at == ""
 		or self.updated_at == ""
 		or self.due_at == ""
@@ -65,7 +63,7 @@ end
 function M.Card:show_in_nvim_out_write()
 	local info = ""
 	info = info .. "===== Card Start =====" .. "\n"
-	info = info .. "Type: " .. self.type .. "\n"
+	info = info .. "Card type: " .. self.card_type .. "\n"
 	info = info .. "Created At: " .. self.created_at .. "\n"
 	info = info .. "Updated At: " .. self.updated_at .. "\n"
 	info = info .. "Due At: " .. self.due_at .. "\n"
