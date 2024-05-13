@@ -186,13 +186,14 @@ function M.get_nearest_heading_node_level()
 end
 
 ---Get the nearest heading node id at the cursor.
+---If the id is not found, then generate a new id.
 ---@return string
 function M.get_nearest_heading_node_id()
 	local nearest_heading_node = M.get_nearest_heading_node()
 	local nhn_title_node = M.get_title_and_content_node(nearest_heading_node)[1]
 	local nhn_title = M.get_node_text(nhn_title_node)
 
-	local nhn_id = string.match(nhn_title, "%d%d%d%d%d%d%d%d%d%d%d%d%d%d")
+	local nhn_id = string.match(nhn_title, "mm%d%d%d%d%d%d%d%d%d%d%d%d%d%d")
 	-- TODO: Warn user if multiple ids are found.
 	if not nhn_id then
 		nhn_id = get_unique_id()

@@ -46,7 +46,7 @@ function M.Excerpt:new(obj)
 	return obj
 end
 
---- Check health of an Excerpt.
+---Check health of an Excerpt.
 ---@return boolean
 function M.Excerpt:check_health()
 	if
@@ -64,7 +64,7 @@ function M.Excerpt:check_health()
 	end
 end
 
---- Show info of an Excerpt in nvim_out_write.
+---Show info of an Excerpt in nvim_out_write.
 ---@return nil
 function M.Excerpt:show_in_nvim_out_write()
 	local info = ""
@@ -84,7 +84,7 @@ end
 -- Class Method
 ----------
 
---- Create a new Excerpt using the latest visual selection.
+---Create a new Excerpt using the latest visual selection.
 ---@return Excerpt
 function M.Excerpt.create_using_latest_visual_selection()
 	local abs_file_path = vim.api.nvim_buf_get_name(0)
@@ -109,15 +109,15 @@ function M.Excerpt.create_using_latest_visual_selection()
 	})
 end
 
---- Save an Excerpt to a table.
---- Only save string, number, and boolean type fields recursively.
+---Save an Excerpt to a table.
+---Only save string, number, and boolean type fields recursively.
 ---@param excerpt Excerpt
 ---@return table
 function M.Excerpt.to_table(excerpt)
 	return misc.remove_table_field(excerpt)
 end
 
---- Create an ExcerptIte from a table.
+---Create an ExcerptIte from a table.
 ---@param tbl table
 ---@return Excerpt
 function M.Excerpt.from_table(tbl)

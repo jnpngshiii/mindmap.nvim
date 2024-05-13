@@ -43,7 +43,7 @@ function M.Card:new(obj)
 	return obj
 end
 
---- Check health of an Card.
+---Check health of an Card.
 ---@return boolean
 function M.Card:check_health()
 	if
@@ -60,7 +60,7 @@ function M.Card:check_health()
 	end
 end
 
---- Show info of an Card in nvim_out_write.
+---Show info of an Card in nvim_out_write.
 ---@return nil
 function M.Card:show_in_nvim_out_write()
 	local info = ""
