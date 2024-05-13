@@ -11,13 +11,13 @@ local M = {}
 --------------------
 
 ---@class Mindnode
----@field mnode_id string ID of the mindnode. Example: "mnode-01234567890-0123".
----@field excerpt_list Excerpt[] List of excerpts in the mindnode.
----@field card_list Card[] List of cards in the mindnode.
+---@field mindnode_id string ID of the mindnode. Example: "mnode-01234567890-0123".
+---@field excerpt_table table<string, Excerpt> Excerpts in the mindnode.
+---@field card_table table<string, Card> Cards in the mindnode.
 M.Mindnode = {
-	mnode_id = "",
-	excerpt_list = {},
-	card_list = {},
+	mindnode_id = "",
+	excerpt_table = {},
+	card_table = {},
 }
 
 ----------
@@ -28,9 +28,9 @@ M.Mindnode = {
 ---@return table
 function M.Mindnode:new(obj)
 	obj = obj or {}
-	obj.mnode_id = obj.mnode_id or self.mnode_id
-	obj.excerpt_list = obj.excerpt_list or self.excerpt_list
-	obj.card_list = obj.card_list or self.card_list
+	obj.mindnode_id = obj.mindnode_id or self.mindnode_id
+	obj.excerpt_table = obj.excerpt_table or self.excerpt_table
+	obj.card_table = obj.card_table or self.card_table
 
 	setmetatable(obj, self)
 	self.__index = self
