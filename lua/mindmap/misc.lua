@@ -219,6 +219,33 @@ function M.split_string(str, sep)
 	return parts
 end
 
+---@deprecated
+---Trigger a function on each item in the given table.
+---@param tbl table Table to trigger the function on.
+---@param func function|string Function to trigger.
+---@param ... any Arguments for the function.
+---@return any
+function M.trigger(tbl, func, ...)
+	-- TODO: Return the output of the function (may be nil) as a table.
+	local output = {}
+	if type(func) == "string" then
+		for _, item in pairs(tbl) do
+			if type(item[func]) == "function" then
+				item[func](item, ...)
+			else
+				print("Method '" .. func .. "' does not exist for item.\n")
+			end
+		end
+	elseif type(func) == "function" then
+		for _, item in pairs(tbl) do
+			func(item, ...)
+		end
+	else
+		print("Invalid argument type for 'func'\n.")
+	end
+	return output
+end
+
 --------------------
 
 return M
