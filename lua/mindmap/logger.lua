@@ -114,7 +114,7 @@ function M.Logger:clean_all()
 	self:clean()
 end
 
----Save the log cache to the log file.
+---Save a log to the log file.
 ---@return nil
 function M.Logger:save(msg)
 	local log_file, err = io.open(self.log_path, "a")
@@ -125,67 +125,6 @@ function M.Logger:save(msg)
 	log_file:seek("end")
 	log_file:write(msg)
 	log_file:close()
-end
-
---------------------
-
--- TODO: Interesting, but not useful.
-
---- Wrap a function with a wrapping function.
----@param wrapping_func function The function used to wrap.
----@param wrapped_func function The function to be wrapped.
----@return function
-function M.wrap_func(wrapping_func, wrapped_func)
-	return function(...)
-		wrapping_func(wrapped_func, ...)
-	end
-end
-
---- Wrap all functions in a table with a wrapping function recursively.
----@param wrapping_func function The function used to wrap.
----@param wrapped_tbl table The table to be wrapped.
----@return table
-function M.wrap_table(wrapping_func, wrapped_tbl)
-	for key, value in pairs(wrapped_tbl) do
-		-- print("Checking key: " .. key .. " type: " .. type(value))
-		if type(value) == "function" and key ~= "init" then
-			-- print("    Wraping function: " .. key)
-			wrapped_tbl[key] = M.wrap_func(wrapping_func, value)
-		elseif type(value) == "table" then
-			if key == "__index" then
-				-- print("    Skip __index")
-				wrapped_tbl[key] = value
-			else
-				wrapped_tbl[key] = M.wrap_table(wrapping_func, value)
-			end
-		end
-	end
-	return wrapped_tbl
-end
-
-if false then
-	local unwrapped_logger_instance = M.Logger:init({
-		log_path = "unwrapped_logger.log",
-	})
-
-	local function test_wrapping_func(func, ...)
-		print("Output from wrapping function")
-		func(...)
-	end
-	local wraped_logger = M.wrap_table(test_wrapping_func, M.Logger)
-	local wrapped_logger_instance = wraped_logger:init({
-		log_path = "wrapped_logger.log",
-	})
-
-	wrapped_logger_instance:clean_all()
-	wrapped_logger_instance:log("Hello, a!")
-	wrapped_logger_instance:log("Hello, s!")
-	wrapped_logger_instance:log("Hello, d!")
-	wrapped_logger_instance:log("Hello, f!")
-	wrapped_logger_instance:show()
-	wrapped_logger_instance:clean()
-	wrapped_logger_instance:log("Hello, World!")
-	wrapped_logger_instance:show_all()
 end
 
 --------------------
