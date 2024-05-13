@@ -55,6 +55,9 @@ function M.Logger:init(obj)
 	return obj
 end
 
+---Log a message.
+---@param msg string The message to log.
+---@param msg_level string The level of the message.
 ---@return nil
 function M.Logger:log(msg, msg_level)
 	if misc.check_table_index(msg_level, self.log_level_table) then
@@ -68,6 +71,7 @@ function M.Logger:log(msg, msg_level)
 	self:save(msg)
 end
 
+---Show all logs in the log cache.
 ---@return nil
 function M.Logger:show()
 	for _, msg in pairs(self.cache) do
@@ -75,6 +79,7 @@ function M.Logger:show()
 	end
 end
 
+---Show all logs in the log file.
 ---@return nil
 function M.Logger:show_all()
 	local log_file, err = io.open(self.log_path, "r")
@@ -90,11 +95,13 @@ function M.Logger:show_all()
 	log_file:close()
 end
 
+---Clean the log cache.
 ---@return nil
 function M.Logger:clean()
 	self.cache = {}
 end
 
+---Clean the log file.
 ---@return nil
 function M.Logger:clean_all()
 	local log_file, err = io.open(self.log_path, "w")
@@ -107,6 +114,7 @@ function M.Logger:clean_all()
 	self:clean()
 end
 
+---Save the log cache to the log file.
 ---@return nil
 function M.Logger:save(msg)
 	local log_file, err = io.open(self.log_path, "a")
