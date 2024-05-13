@@ -65,9 +65,9 @@ end
 ---@return string
 function M.get_nearest_heading_node_id()
 	local heading_query = [[
-      (heading1
+      (_
         title: (paragraph_segment) @title
-        content: (_) @content
+        content: (_)? @content
       )
     ]]
 
