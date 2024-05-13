@@ -63,18 +63,6 @@ function M.Mindmap:pop(id)
 	return poped_mindnode
 end
 
----@deprecated
----Pop the lastest mindnode from the mindmap.
----@return Mindnode|nil
-function M.Mindmap:pop_lastest()
-	local max_id = self:get_max_id()
-	if max_id == nil then
-		return
-	end
-
-	return self:pop(max_id)
-end
-
 ---Remove an mindnode from the mindmap.
 ---@param index number
 ---@return nil
