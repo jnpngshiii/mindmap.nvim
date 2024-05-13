@@ -25,7 +25,13 @@ M.Mindmap = {
 function M.Mindmap:new(obj)
 	obj = obj or {}
 	obj.mindmap_id = obj.mindmap_id or self.mindmap_id
+
 	obj.mindnode_tbl = obj.mindnode_tbl or self.mindnode_tbl
+	if obj.mindnode_tbl then
+		for k, v in pairs(obj.mindnode_tbl) do
+			obj.mindnode_tbl[k] = mindnode.Mindnode:new(v)
+		end
+	end
 
 	setmetatable(obj, self)
 	self.__index = self

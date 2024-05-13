@@ -29,8 +29,20 @@ M.Mindnode = {
 function M.Mindnode:new(obj)
 	obj = obj or {}
 	obj.mindnode_id = obj.mindnode_id or self.mindnode_id
+
 	obj.excerpt_tbl = obj.excerpt_tbl or self.excerpt_tbl
+	if obj.excerpt_tbl then
+		for k, v in pairs(obj.excerpt_tbl) do
+			obj.excerpt_tbl[k] = excerpt.Excerpt:new(v)
+		end
+	end
+
 	obj.card_tbl = obj.card_tbl or self.card_tbl
+	if obj.card_tbl then
+		for k, v in pairs(obj.card_tbl) do
+			obj.card_tbl[k] = card.Card:new(v)
+		end
+	end
 
 	setmetatable(obj, self)
 	self.__index = self

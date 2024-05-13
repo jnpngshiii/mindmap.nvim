@@ -23,7 +23,13 @@ M.Database = {
 ---@return table
 function M.Database:init(obj)
 	obj = obj or {}
+
 	obj.mindmap_tbl = obj.mindmap_tbl or self.mindmap_tbl
+	if obj.mindmap_tbl then
+		for k, v in pairs(obj.mindmap_tbl) do
+			obj.mindmap_tbl[k] = mindmap.Mindmap:new(v)
+		end
+	end
 
 	setmetatable(obj, self)
 	self.__index = self
@@ -99,7 +105,7 @@ end
 ---@param id string ID of the mindmap to be loaded.
 ---@return nil
 function M.Database:load(id)
-	local json_path = vim.fn.stdpath("data") .. "/mindmap" .. id .. ".json"
+	local json_path = vim.fn.stdpath("data") .. "/mindmap/" .. id .. ".json"
 	local json, err = io.open(json_path, "r")
 	if not json then
 		error("Could not open file: " .. err)
@@ -107,6 +113,8 @@ function M.Database:load(id)
 
 	local encoded_json_context = json:read("*a")
 	local json_context = vim.fn.json_decode(encoded_json_context)
+
+	self.mindmap_tbl[id] = mindmap.Mindmap:new(json_context)
 end
 
 ----------
