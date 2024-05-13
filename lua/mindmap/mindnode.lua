@@ -12,12 +12,12 @@ local M = {}
 
 ---@class Mindnode
 ---@field mindnode_id string ID of the mindnode. Example: "mnode-01234567890-0123".
----@field excerpt_table table<string, Excerpt> Excerpts in the mindnode.
----@field card_table table<string, Card> Cards in the mindnode.
+---@field excerpt_tbl table<string, Excerpt> Excerpts in the mindnode.
+---@field card_tbl table<string, Card> Cards in the mindnode.
 M.Mindnode = {
 	mindnode_id = "",
-	excerpt_table = {},
-	card_table = {},
+	excerpt_tbl = {},
+	card_tbl = {},
 }
 
 ----------
@@ -29,8 +29,8 @@ M.Mindnode = {
 function M.Mindnode:new(obj)
 	obj = obj or {}
 	obj.mindnode_id = obj.mindnode_id or self.mindnode_id
-	obj.excerpt_table = obj.excerpt_table or self.excerpt_table
-	obj.card_table = obj.card_table or self.card_table
+	obj.excerpt_tbl = obj.excerpt_tbl or self.excerpt_tbl
+	obj.card_tbl = obj.card_tbl or self.card_tbl
 
 	setmetatable(obj, self)
 	self.__index = self
