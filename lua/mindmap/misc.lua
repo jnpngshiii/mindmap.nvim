@@ -4,28 +4,28 @@ local M = {}
 -- Path
 --------------------
 
---- Return the directory of the current project.
---- This function is only available in a git repository.
+---Return the directory of the current project.
+---This function is only available in a git repository.
 ---@return string
 function M.get_current_proj_path()
 	return vim.fn.fnamemodify(vim.trim(vim.fn.system("git rev-parse --show-toplevel")), ":p")
 end
 
---- Return the directory of the current file.
---- Example: "/a/b/c.txt" -> "/a/b"
+---Return the directory of the current file.
+---Example: "/a/b/c.txt" -> "/a/b"
 ---@return string
 function M.get_current_file_dir()
 	return vim.fs.dirname(vim.api.nvim_buf_get_name(0))
 end
 
---- Return the name of the current file.
---- Example: "/a/b/c.txt" -> "c.txt"
+---Return the name of the current file.
+---Example: "/a/b/c.txt" -> "c.txt"
 ---@return string
 function M.get_current_file_name()
 	return vim.fs.basename(vim.api.nvim_buf_get_name(0))
 end
 
---- Split a path into path parts using "/".
+---Split a path into path parts using "/".
 ---@param path string
 ---@return string[]
 function M.split_path(path)
@@ -36,15 +36,15 @@ function M.split_path(path)
 	return path_parts
 end
 
---- Merge path parts into a path using "/".
+---Merge path parts into a path using "/".
 ---@param path_parts string[]
 ---@return string
 function M.merge_path(path_parts)
 	return table.concat(path_parts, "/")
 end
 
---- Convert relative path (target_path) to absolute path according to reference path (reference_path).
---- Example: get_abs_path("../a/b", "/c/d") -> "/c/a/b"
+---Convert relative path (target_path) to absolute path according to reference path (reference_path).
+---Example: get_abs_path("../a/b", "/c/d") -> "/c/a/b"
 ---@param target_path string A path to be converted to an absolute path.
 ---@param reference_path string A reference path.
 ---@return string
@@ -63,8 +63,8 @@ function M.get_abs_path(target_path, reference_path)
 	return M.merge_path(reference_path_parts)
 end
 
---- Convert absolute path (target_path) to relative path according to reference path (reference_path).
---- Example: get_rel_path("/a/b/c", "/a/b/d") -> "../c"
+---Convert absolute path (target_path) to relative path according to reference path (reference_path).
+---Example: get_rel_path("/a/b/c", "/a/b/d") -> "../c"
 ---@param target_path string A path to be converted to a relative path.
 ---@param reference_path string A reference path.
 ---@return string
@@ -88,8 +88,8 @@ function M.get_rel_path(target_path, reference_path)
 	return M.merge_path(rel_path)
 end
 
---- Get the extension of a file.
---- Example: "a/b/c.txt" -> "txt"
+---Get the extension of a file.
+---Example: "a/b/c.txt" -> "txt"
 ---@param path string
 ---@return string
 function M.get_ext(path)
@@ -104,7 +104,7 @@ end
 -- Read file
 --------------------
 
---- Parse current line.
+---Parse current line.
 ---@return string[]
 function M.parse_current_line()
 	local file_dir = M.get_current_file_dir()
@@ -115,7 +115,7 @@ function M.parse_current_line()
 	return { file_dir, file_name, row, col, context }
 end
 
---- Read lines from a file.
+---Read lines from a file.
 ---@param path string
 ---@return string[]
 function M.read_lines_from_file(path)
@@ -133,7 +133,7 @@ function M.read_lines_from_file(path)
 	return line_list
 end
 
---- Get the context defined by start position and end position.
+---Get the context defined by start position and end position.
 ---@return  string[]
 function M.get_context(file_path, start_row, start_col, end_row, end_col)
 	local line_list = M.read_lines_from_file(file_path)
@@ -154,7 +154,7 @@ end
 -- Helper
 --------------------
 
---- Check whether a index is in a table.
+---Check whether a index is in a table.
 ---@param index number|string
 ---@param tbl table
 ---@return boolean
@@ -168,8 +168,8 @@ function M.check_table_index(index, tbl)
 	return false
 end
 
---- Remove fields that are not string, number, or boolean in a table.
---- This function is recursive.
+---Remove fields that are not string, number, or boolean in a table.
+---This function is recursive.
 ---@param tbl table
 ---@return table
 function M.remove_table_field(tbl)
@@ -184,7 +184,7 @@ function M.remove_table_field(tbl)
 	return proccessed_tbl
 end
 
---- Match all patterns in the context.
+---Match all patterns in the context.
 ---@param context string|string[]
 ---@param pattern string
 ---@return string[]
@@ -207,15 +207,7 @@ function M.match_pattern(context, pattern)
 	return match_list
 end
 
--- local context = "aa bb cc dd"
--- local context = { context, context }
--- local pattern = "[^ ]+"
--- local output = M.match_pattern(context, pattern)
--- for _, s in ipairs(output) do
--- 	print(s)
--- end
-
---- Split a string using a separator.
+---Split a string using a separator.
 ---@param str string
 ---@param sep string
 ---@return table
@@ -226,13 +218,6 @@ function M.split_string(str, sep)
 	end
 	return parts
 end
-
--- local str = "a,b,c"
--- local sep = ","
--- local output = M.split_string(str, sep)
--- for _, s in ipairs(output) do
--- 	print(s)
--- end
 
 --------------------
 
