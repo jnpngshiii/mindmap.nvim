@@ -10,7 +10,7 @@ local M = {}
 ---Get an unique id.
 ---@return string
 local function get_unique_id()
-	return string.format("%s%d", os.time(), math.random(0000, 9999))
+	return string.format("%s-%d", os.time(), math.random(0000, 9999))
 end
 
 --------------------
@@ -59,15 +59,17 @@ function M.get_neorg_doc_root(bufnr)
 	return nil
 end
 
----Check if the given buffer is a mindmap.
+---Get the mindmap id of the given buffer.
+---If the id is not found and register_if_not is true, then generate, register and return a new id.
 ---@param bufnr integer? The buffer number.
----@return boolean
-function M.is_mindnode(bufnr)
+---@param register_if_not boolean? Register a new id if not found.
+---@return string|nil
+function M.get_buf_mindmap_id(bufnr, register_if_not)
 	bufnr = bufnr or 0
 
 	local meta_root = M.get_neorg_meta_root(bufnr)
 	if not meta_root then
-		return false
+		return nil
 	end
 
 	local query = vim.treesitter.query.parse(
@@ -76,19 +78,24 @@ function M.is_mindnode(bufnr)
       (pair
         (key) @key
         (#eq? @key "mindmap")
-        (value)
+        (value) @value
       )
     ]]
 	)
 
-	for _, node in query:iter_captures(meta_root, 0) do
-		local value = M.get_node_text(node)
-		if value == "true" then
-			return true
+	local id
+	for index, node in query:iter_captures(meta_root, 0) do
+		if query.captures[index] == "value" then
+			id = M.get_node_text(node)
 		end
 	end
 
-	return false
+	if not id and register_if_not then
+		id = "mmap-" .. get_unique_id()
+		vim.api.nvim_buf_set_var(bufnr, "mindmap_id", id)
+	end
+
+	return id
 end
 
 --------------------
@@ -186,17 +193,18 @@ function M.get_nearest_heading_node_level()
 end
 
 ---Get the nearest heading node id at the cursor.
----If the id is not found, then generate a new id.
----@return string
-function M.get_nearest_heading_node_id()
+---If the id is not found and register_if_not is true, then generate, register and return a new id.
+---@param register_if_not boolean? Register a new id if not found.
+---@return string|nil
+function M.get_nearest_heading_node_id(register_if_not)
 	local nearest_heading_node = M.get_nearest_heading_node()
 	local nhn_title_node = M.get_title_and_content_node(nearest_heading_node)[1]
 	local nhn_title = M.get_node_text(nhn_title_node)
 
 	local nhn_id = string.match(nhn_title, "mnode-%d%d%d%d%d%d%d%d%d%d-%d%d%d%d")
 	-- TODO: Warn user if multiple ids are found.
-	if not nhn_id then
-		nhn_id = get_unique_id()
+	if not nhn_id and register_if_not then
+		nhn_id = "mnode-" .. get_unique_id()
 		M.replace_node_text(nhn_title .. " %" .. nhn_id .. "%", nhn_title_node)
 	end
 
@@ -226,6 +234,12 @@ if false then
 	-- 	local title = M.get_node_text(node)
 	-- end
 	print("-----")
+end
+
+if true then
+	print("-----Start")
+	M.get_buf_mindmap_id(0, true)
+  print("-----")
 end
 
 return M
