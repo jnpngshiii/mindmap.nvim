@@ -1,4 +1,5 @@
 local mindmap = require("mindmap.mindmap")
+local misc = require("mindmap.misc")
 
 ---@alias mindmap.Mindmap Mindmap
 
@@ -9,9 +10,9 @@ local M = {}
 --------------------
 
 ---@class Database
----@field mindmap_table table<string, Mindmap> Mindmaps in the database.
+---@field mindmap_tbl table<string, Mindmap> Mindmaps in the database.
 M.Database = {
-	mindmap_table = {},
+	mindmap_tbl = {},
 }
 
 ----------
@@ -22,7 +23,7 @@ M.Database = {
 ---@return table
 function M.Database:init(obj)
 	obj = obj or {}
-	obj.mindmap_table = obj.mindmap_table or self.mindmap_table
+	obj.mindmap_tbl = obj.mindmap_tbl or self.mindmap_tbl
 
 	setmetatable(obj, self)
 	self.__index = self
@@ -30,103 +31,82 @@ function M.Database:init(obj)
 	return obj
 end
 
----Add an database to the database.
----@param mnode Database
+---Add an mindmap to the database.
+---@param mmap Mindmap Mindmap to be added.
 ---@return nil
-function M.Database:add(mnode)
-	self.mnode_table[mnode.mnode_id] = mnode
+function M.Database:add(mmap)
+	if self.mindmap_tbl[mmap.mindmap_id] then
+		vim.api.nvim_out_write("Mindmap with ID " .. mmap.mindmap_id .. " already exists. Aborting add.\n")
+	end
+
+	self.mindmap_tbl[mmap.mindmap_id] = mmap
 end
 
----Pop an database from the database.
----@param id string ID of the database to pop.
----@return Database|nil
+---Pop an mindmap from the database.
+---@param id string ID of the mindmap to be popped.
+---@return Mindmap|nil
 function M.Database:pop(id)
-	local poped_database = self.mnode_table[id]
-	if poped_database == nil then
-		vim.api.nvim_out_write("No database found. Nothing to pop.\n")
+	local popped_mindmap = self.mindmap_tbl[id]
+	if popped_mindmap == nil then
+		vim.api.nvim_out_write("Mindmap with ID " .. id .. " not found. Aborting pop.\n")
 		return nil
 	end
 
-	-- vim.api.nvim_out_write("Pop an database from database.\n")
-	self.mnode_table[id] = nil
-	return poped_database
+	self.mindmap_tbl[id] = nil
+	return popped_mindmap
 end
 
 ---Remove an database from the database.
----@param index number
+---@param id string ID of the database to be removed.
 ---@return nil
-function M.Database:remove(index)
-	local remove_database = self.mnode_table[index]
-	if remove_database == nil then
-		vim.api.nvim_out_write("No database found. Nothing to remove.\n")
+function M.Database:remove(id)
+	local removed_mindmap = self.mindmap_tbl[id]
+	if removed_mindmap == nil then
+		vim.api.nvim_out_write("Mindmap with ID " .. id .. " not found. Aborting remove.\n")
+		return nil
 	end
 
-	-- vim.api.nvim_out_write("Remove an database from database.\n")
-	self.mnode_table[index] = nil
+	self.mindmap_tbl[id] = nil
 end
 
----Find database(s) in the database.
----@param timestamp string|string[]
----@return Database|Database[]
-function M.Database:find(timestamp)
-	if type(timestamp) ~= "table" then
-		if type(timestamp) == "string" then
-			return self.mnode_table[timestamp]
+---Save a given mindmap to a JSON file, or all mindmaps if no id is given.
+---@param id string? ID of the mindmap to be saved.
+---@return nil
+function M.Database:save(id)
+	-- TODO: Health check
+	for _, mmap in pairs(self.mindmap_tbl) do
+		if id and id ~= mmap.mindmap_id then
+			goto continue
 		end
-	end
 
-	local found_databases = {}
-	for _, v in pairs(timestamp) do
-		found_databases[v] = self:find(v)
+		local json_context = misc.remove_table_field(mmap)
+		local encoded_json_context = vim.fn.json_encode(json_context)
+
+		local json_path = vim.fn.stdpath("data") .. "/mindmap/" .. mmap.mindmap_id .. ".json"
+		local json, err = io.open(json_path, "w")
+		if not json then
+			error("Could not open file: " .. err)
+		end
+
+		json:write(encoded_json_context)
+		json:close()
+
+		::continue::
 	end
-	return found_databases
 end
 
----Save the database to a JSON file.
+---Load a given mindmap from a JSON file.
+---@param id string ID of the mindmap to be loaded.
 ---@return nil
-function M.Database:save()
-	local json_context = {}
-	for _, mnode in pairs(self.mnode_table) do
-		if mnode:check_health() then
-			json_context[#json_context + 1] = mnode.to_table(mnode)
-		else
-			self:log("[Database] Invalid database (" .. mnode.mnode_id .. "), skip saving.", "error")
-		end
-	end
-	json_context = vim.fn.json_encode(json_context)
-
-	local json, err = io.open(self.json_path, "w")
-	if not json then -- TODO:
-		self:log("[Database] Could not save database at: " .. self.json_path, "error")
+function M.Database:load(id)
+	local json_path = vim.fn.stdpath("data") .. "/mindmap" .. id .. ".json"
+	local json, err = io.open(json_path, "r")
+	if not json then
 		error("Could not open file: " .. err)
 	end
 
-	json:write(json_context)
-	json:close()
-end
-
----Load the database from a JSON file.
----@return nil
-function M.Database:load()
-	local json_context = {}
-	local json, _ = io.open(self.json_path, "r")
-	if not json then
-		-- Use save() to create a json file.
-		self:save()
-		self:log("[Database] Database not found at: " .. self.json_path .. ". Created a new one.", "info")
-		return
-	end
-	json_context = vim.fn.json_decode(json:read("*a"))
-
-	for _, table in pairs(json_context) do
-		if type(table) == "table" then
-			local mnode = M.Database.from_table(table)
-			self.mnode_table[mnode.timestamp] = mnode
-		end
-	end
-
-	self:log("[Database] Database loaded at: " .. self.json_path, "info")
-	json:close()
+	local encoded_json_context = json:read("*a")
+	local json_context = vim.fn.json_decode(encoded_json_context)
 end
 
 ----------

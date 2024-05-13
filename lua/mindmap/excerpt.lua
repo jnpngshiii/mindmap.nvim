@@ -109,22 +109,6 @@ function M.Excerpt.create_using_latest_visual_selection()
 	})
 end
 
----Save an Excerpt to a table.
----Only save string, number, and boolean type fields recursively.
----@param excerpt Excerpt
----@return table
-function M.Excerpt.to_table(excerpt)
-	return misc.remove_table_field(excerpt)
-end
-
----Create an ExcerptIte from a table.
----@param tbl table
----@return Excerpt
-function M.Excerpt.from_table(tbl)
-	-- TODO: Check health?
-	return M.Excerpt:new(tbl)
-end
-
 --------------------
 
 return M
