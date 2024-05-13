@@ -92,7 +92,8 @@ function M.get_buf_mindmap_id(bufnr, register_if_not)
 
 	if not id and register_if_not then
 		id = "mmap-" .. get_unique_id()
-		vim.api.nvim_buf_set_var(bufnr, "mindmap_id", id)
+		local _, _, end_row, _ = meta_root:range()
+		vim.api.nvim_buf_set_lines(bufnr, end_row, end_row + 1, false, { "mindmap: " .. id, "@end" })
 	end
 
 	return id
@@ -236,10 +237,11 @@ if false then
 	print("-----")
 end
 
-if true then
+if false then
 	print("-----Start")
-	M.get_buf_mindmap_id(0, true)
-  print("-----")
+	local id = M.get_buf_mindmap_id(0, true)
+	print(id)
+	print("-----")
 end
 
 return M
