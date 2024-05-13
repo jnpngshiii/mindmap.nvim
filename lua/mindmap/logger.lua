@@ -29,10 +29,6 @@ M.Logger = {
 }
 
 ----------
--- Class Method
-----------
-
-----------
 -- Instance Method
 ----------
 
@@ -126,6 +122,10 @@ function M.Logger:save(msg)
 	log_file:write(msg)
 	log_file:close()
 end
+
+----------
+-- Class Method
+----------
 
 --------------------
 
