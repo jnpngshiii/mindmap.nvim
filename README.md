@@ -1,1 +1,3 @@
-# excerpt.nvim
+# mindmap.nvim
+
+In progress.

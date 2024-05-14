@@ -65,6 +65,10 @@ function M.Logger:log(msg, msg_level)
 
 	self.cache[#self.cache + 1] = msg
 	self:save(msg)
+
+	if true then
+		vim.api.nvim_out_write(msg)
+	end
 end
 
 ---Show all logs in the log cache.
