@@ -246,6 +246,12 @@ function M.trigger(tbl, func, ...)
 	return output
 end
 
+---Get an unique id.
+---@return string
+function M.get_unique_id()
+	return string.format("%s-%d", os.time(), math.random(0000, 9999))
+end
+
 --------------------
 
 return M

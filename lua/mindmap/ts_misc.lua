@@ -1,17 +1,12 @@
+-- local neorg = require("neorg.core")
 local ts_utils = require("nvim-treesitter.ts_utils")
 
--- local neorg = require("neorg.core")
+local misc = require("mindmap.misc")
 
 ---@alias ts_node any|userdata
 ---@alias ts_tree any|userdata
 
 local M = {}
-
----Get an unique id.
----@return string
-local function get_unique_id()
-	return string.format("%s-%d", os.time(), math.random(0000, 9999))
-end
 
 --------------------
 -- Tree
@@ -91,7 +86,7 @@ function M.get_buf_mindmap_id(bufnr, register_if_not)
 	end
 
 	if not id and register_if_not then
-		id = "mmap-" .. get_unique_id()
+		id = "mmap-" .. misc.get_unique_id()
 		local _, _, end_row, _ = meta_root:range()
 		vim.api.nvim_buf_set_lines(bufnr, end_row, end_row + 1, false, { "mindmap: " .. id, "@end" })
 	end
@@ -205,7 +200,7 @@ function M.get_nearest_heading_node_id(register_if_not)
 	local nhn_id = string.match(nhn_title, "mnode-%d%d%d%d%d%d%d%d%d%d-%d%d%d%d")
 	-- TODO: Warn user if multiple ids are found.
 	if not nhn_id and register_if_not then
-		nhn_id = "mnode-" .. get_unique_id()
+		nhn_id = "mnode-" .. misc.get_unique_id()
 		M.replace_node_text(nhn_title .. " %" .. nhn_id .. "%", nhn_title_node)
 	end
 
