@@ -1,3 +1,5 @@
+local misc = require("mindmap.misc")
+
 local M = {}
 
 --------------------
@@ -30,7 +32,9 @@ M.Card = {
 ---@return table
 function M.Card:new(obj)
 	obj = obj or {}
-	obj.card_id = obj.card_id or self.card_id
+
+	local card_id = "crd-" .. misc.get_unique_id()
+	obj.card_id = obj.card_id or card_id or self.card_id
 	obj.card_type = obj.card_type or self.card_type
 	obj.created_at = obj.created_at or self.created_at
 	obj.updated_at = obj.updated_at or self.updated_at

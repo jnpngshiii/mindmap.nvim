@@ -34,7 +34,9 @@ M.Excerpt = {
 ---@return table
 function M.Excerpt:new(obj)
 	obj = obj or {}
-	obj.excerpt_id = obj.excerpt_id or self.excerpt_id
+
+	local excerpt_id = "xpt-" .. misc.get_unique_id()
+	obj.excerpt_id = obj.excerpt_id or excerpt_id or self.excerpt_id
 	obj.rel_file_path = obj.rel_file_path or self.rel_file_path
 	obj.file_name = obj.file_name or self.file_name
 	obj.start_row = obj.start_row or self.start_row
@@ -95,7 +97,6 @@ function M.Excerpt.create_using_latest_visual_selection()
 	local abs_file_path = vim.api.nvim_buf_get_name(0)
 	local abs_proj_path = misc.get_current_proj_path()
 
-	local excerpt_id = "xpt-" .. misc.get_unique_id()
 	local rel_file_path = misc.get_rel_file_path(abs_file_path, abs_proj_path)
 	local file_name = misc.get_current_file_name()
 	local start_row = vim.api.nvim_buf_get_mark(0, "<")[1]
@@ -105,7 +106,6 @@ function M.Excerpt.create_using_latest_visual_selection()
 	local content = misc.get_content(abs_file_path, start_row, start_col, end_row, end_col)
 
 	return M.Excerpt:new({
-    excerpt_id = excerpt_id,
 		rel_file_path = rel_file_path,
 		file_name = file_name,
 		start_row = start_row,

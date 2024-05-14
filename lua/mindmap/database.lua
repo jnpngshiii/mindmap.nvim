@@ -117,6 +117,20 @@ function M.Database:load(id)
 	self.mindmap_tbl[id] = mindmap.Mindmap:new(json_context)
 end
 
+---Find a mindmap in the database.
+---If the mindmap is not found and register_if_not is true, then generate, register and return a new mindmap.
+---@param id string ID of the mindmap to be found.
+---@param register_if_not boolean Register a new mindmap if not found.
+---@return Mindmap|nil
+function M.Database:find_mindmap(id, register_if_not)
+	local found_mmap = self.mindmap_tbl[id]
+	if not found_mmap and register_if_not then
+		found_mmap = mindmap.Mindmap:new({ mindmap_id = id })
+		self:add(found_mmap)
+	end
+	return found_mmap
+end
+
 ----------
 -- Class Method
 ----------
