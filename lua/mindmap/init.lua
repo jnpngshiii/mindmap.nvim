@@ -22,16 +22,31 @@ local M = {}
 local lggr = logger.Logger:init({
 	log_path = vim.fn.stdpath("data") .. "/mindmap.log",
 })
-lggr:log("[Database] Init mindmap logger.", "info")
+lggr:log("[Logger] Init mindmap logger.", "info")
 
 local db = database.Database:init()
 lggr:log("[Database] Init mindmap database.", "info")
+
+M.card_cache = {}
+M.excerpt_cache = {}
+lggr:log("[Database] Init mindmap cache.", "info")
 
 --------------------
 -- Excerpt Functions
 --------------------
 
 function M.create_excerpt_using_latest_visual_selection()
+	local xpt = excerpt.Excerpt.create_using_latest_visual_selection()
+	M.excerpt_cache[#M.excerpt_cache + 1] = xpt
+
+	lggr:log("[Function] Create excerpt using latest visual selection.", "info")
+end
+
+--------------------
+-- Mindnode Functions
+--------------------
+
+function M.add_excerpt_to_nearest_mindnode_using_latest_cache()
 	-- Get mindmap
 	local mindmap_id = ts_misc.get_buf_mindmap_id(0, true)
 	local mmap = db:find_mindmap(mindmap_id, true)
@@ -39,10 +54,10 @@ function M.create_excerpt_using_latest_visual_selection()
 	local mindnode_id = ts_misc.get_nearest_heading_node_id(true)
 	local mnode = mmap:find_mindnode(mindnode_id, true)
 	-- Add excerpt
-	local xpt = excerpt.Excerpt.create_using_latest_visual_selection()
-	mnode:add_excerpt(xpt)
+	mnode:add_excerpt(M.excerpt_cache[#M.excerpt_cache])
+	M.excerpt_cache[#M.excerpt_cache] = nil
 
-	lggr:log("[Function] Create excerpt using latest visual selection.", "info")
+	lggr:log("[Function] Add excerpt to nearest mindnode using latest excerpt cache.", "info")
 end
 
 --------------------
@@ -59,6 +74,16 @@ function M.save_mindmap_in_current_buf()
 	end
 	-- db:save()
 	-- lggr:log("[Function] Save all mindmaps.", "info")
+end
+
+function M.load_mindmap_in_current_buf()
+	local mindmap_id = ts_misc.get_buf_mindmap_id(0, false)
+	if mindmap_id then
+		db:load(mindmap_id)
+		lggr:log("[Function] Load mindmap <" .. mindmap_id .. ">.", "info")
+	else
+		lggr:log("[Function] Current buffer is not a mindmap buffer. Abort loading.", "warn")
+	end
 end
 
 --------------------
