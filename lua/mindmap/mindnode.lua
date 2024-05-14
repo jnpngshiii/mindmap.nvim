@@ -50,6 +50,20 @@ function M.Mindnode:new(obj)
 	return obj
 end
 
+---Add an excerpt to the mindnode.
+---@param xpt Excerpt Excerpt to be added.
+---@return nil
+function M.Mindnode:add_excerpt(xpt)
+	self.excerpt_tbl[xpt.excerpt_id] = xpt
+end
+
+---Add a card to the mindnode.
+---@param crd Card Card to be added.
+---@return nil
+function M.Mindnode:add_card(crd)
+	self.card_tbl[crd.card_id] = crd
+end
+
 ----------
 -- Class Method
 ----------

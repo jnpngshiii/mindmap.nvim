@@ -39,6 +39,13 @@ function M.Mindmap:new(obj)
 	return obj
 end
 
+---Add a mindnode to the mindmap.
+---@param mnode Mindnode to be added.
+---@return nil
+function M.Mindmap:add_mindnode(mnode)
+	self.mindnode_tbl[mnode.mindnode_id] = mnode
+end
+
 ----------
 -- Class Method
 ----------
