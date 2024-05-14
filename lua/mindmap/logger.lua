@@ -1,4 +1,4 @@
-local misc = require("excerpt.misc")
+local misc = require("mindmap.misc")
 
 local M = {}
 

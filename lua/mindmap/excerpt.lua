@@ -97,7 +97,7 @@ function M.Excerpt.create_using_latest_visual_selection()
 	local abs_file_path = vim.api.nvim_buf_get_name(0)
 	local abs_proj_path = misc.get_current_proj_path()
 
-	local rel_file_path = misc.get_rel_file_path(abs_file_path, abs_proj_path)
+	local rel_file_path = misc.get_rel_path(abs_file_path, abs_proj_path)
 	local file_name = misc.get_current_file_name()
 	local start_row = vim.api.nvim_buf_get_mark(0, "<")[1]
 	local start_col = vim.api.nvim_buf_get_mark(0, "<")[2]

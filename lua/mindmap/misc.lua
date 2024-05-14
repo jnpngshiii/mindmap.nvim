@@ -111,8 +111,8 @@ function M.parse_current_line()
 	local file_name = M.get_current_file_name()
 	local row = vim.api.nvim_win_get_cursor(0)[1]
 	local col = vim.api.nvim_win_get_cursor(0)[2]
-	local context = vim.api.nvim_buf_get_lines(0, row - 1, row, false)[1]
-	return { file_dir, file_name, row, col, context }
+	local content = vim.api.nvim_buf_get_lines(0, row - 1, row, false)[1]
+	return { file_dir, file_name, row, col, content }
 end
 
 ---Read lines from a file.
@@ -133,21 +133,21 @@ function M.read_lines_from_file(path)
 	return line_list
 end
 
----Get the context defined by start position and end position.
+---Get the content defined by start position and end position.
 ---@return  string[]
-function M.get_context(file_path, start_row, start_col, end_row, end_col)
+function M.get_content(file_path, start_row, start_col, end_row, end_col)
 	local line_list = M.read_lines_from_file(file_path)
-	local context_list = {}
+	local content_list = {}
 	for i = start_row, end_row do
 		if i == start_row then
-			table.insert(context_list, line_list[i]:sub(start_col + 1))
+			table.insert(content_list, line_list[i]:sub(start_col + 1))
 		elseif i == end_row then
-			table.insert(context_list, line_list[i]:sub(1, end_col))
+			table.insert(content_list, line_list[i]:sub(1, end_col))
 		else
-			table.insert(context_list, line_list[i])
+			table.insert(content_list, line_list[i])
 		end
 	end
-	return context_list
+	return content_list
 end
 
 --------------------
@@ -184,22 +184,22 @@ function M.remove_table_field(tbl)
 	return proccessed_tbl
 end
 
----Match all patterns in the context.
----@param context string|string[]
+---Match all patterns in the content.
+---@param content string|string[]
 ---@param pattern string
 ---@return string[]
-function M.match_pattern(context, pattern)
+function M.match_pattern(content, pattern)
 	local match_list = {}
 
-	if type(context) == "table" then
-		for _, c in ipairs(context) do
+	if type(content) == "table" then
+		for _, c in ipairs(content) do
 			local sub_match_list = M.match_pattern(c, pattern)
 			for _, sub_match in ipairs(sub_match_list) do
 				table.insert(match_list, sub_match)
 			end
 		end
 	else
-		for part in string.gmatch(context, pattern) do
+		for part in string.gmatch(content, pattern) do
 			table.insert(match_list, part)
 		end
 	end

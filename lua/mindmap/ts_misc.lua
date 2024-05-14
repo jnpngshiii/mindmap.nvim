@@ -89,6 +89,7 @@ function M.get_buf_mindmap_id(bufnr, register_if_not)
 		id = "mmap-" .. misc.get_unique_id()
 		local _, _, end_row, _ = meta_root:range()
 		vim.api.nvim_buf_set_lines(bufnr, end_row, end_row + 1, false, { "mindmap: " .. id, "@end" })
+		-- FIXME: 如何光标恰好在 end_row + 1, 会导致插入异常
 	end
 
 	return id

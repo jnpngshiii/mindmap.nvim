@@ -11,8 +11,10 @@ local M = {}
 
 ---@class Database
 ---@field mindmap_tbl table<string, Mindmap> Mindmaps in the database.
+---@field database_path string Path to the database.
 M.Database = {
 	mindmap_tbl = {},
+	database_path = "",
 }
 
 ----------
@@ -30,6 +32,10 @@ function M.Database:init(obj)
 			obj.mindmap_tbl[k] = mindmap.Mindmap:new(v)
 		end
 	end
+
+	local database_path = misc.get_current_proj_path() .. ".mindmap"
+	obj.database_path = obj.database_path or database_path or self.database_path
+	vim.fn.system("mkdir -p " .. obj.database_path)
 
 	setmetatable(obj, self)
 	self.__index = self
@@ -85,16 +91,16 @@ function M.Database:save(id)
 			goto continue
 		end
 
-		local json_context = misc.remove_table_field(mmap)
-		local encoded_json_context = vim.fn.json_encode(json_context)
+		local json_content = misc.remove_table_field(mmap)
+		local encoded_json_content = vim.fn.json_encode(json_content)
 
-		local json_path = vim.fn.stdpath("data") .. "/mindmap/" .. mmap.mindmap_id .. ".json"
+		local json_path = self.database_path .. "/" .. id .. ".json"
 		local json, err = io.open(json_path, "w")
 		if not json then
 			error("Could not open file: " .. err)
 		end
 
-		json:write(encoded_json_context)
+		json:write(encoded_json_content)
 		json:close()
 
 		::continue::
@@ -105,16 +111,16 @@ end
 ---@param id string ID of the mindmap to be loaded.
 ---@return nil
 function M.Database:load(id)
-	local json_path = vim.fn.stdpath("data") .. "/mindmap/" .. id .. ".json"
+	local json_path = self.database_path .. "/" .. id .. ".json"
 	local json, err = io.open(json_path, "r")
 	if not json then
 		error("Could not open file: " .. err)
 	end
 
-	local encoded_json_context = json:read("*a")
-	local json_context = vim.fn.json_decode(encoded_json_context)
+	local encoded_json_content = json:read("*a")
+	local json_content = vim.fn.json_decode(encoded_json_content)
 
-	self.mindmap_tbl[id] = mindmap.Mindmap:new(json_context)
+	self.mindmap_tbl[id] = mindmap.Mindmap:new(json_content)
 end
 
 ---Find a mindmap in the database.
