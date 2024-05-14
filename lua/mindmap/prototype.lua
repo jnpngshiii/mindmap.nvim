@@ -2,8 +2,6 @@ local misc = require("mindmap.misc")
 
 local M = {}
 
----@alias Object table
-
 --------------------
 -- Class SimpleItem
 --------------------
@@ -24,8 +22,8 @@ M.SimpleItem = {
 -- Instance Method
 ----------
 
----@param obj Object?
----@return Object
+---@param obj table?
+---@return table
 function M.SimpleItem:new(obj)
 	obj = obj or {}
 
@@ -61,8 +59,8 @@ M.SimpleDatbase = {
 -- Instance Method
 ----------
 
----@param obj Object?
----@return Object
+---@param obj table?
+---@return table
 function M.SimpleDatbase:new(obj)
 	obj = obj or {}
 

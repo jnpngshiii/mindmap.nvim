@@ -64,7 +64,7 @@ end
 ---@param crd Card Card to be added.
 ---@return nil
 function M.Mindnode:add_card(crd)
-	self.card_tbl[crd.card_id] = crd
+	self.card_tbl[crd.id] = crd
 end
 
 ---Find an excerpt in the mindnode.
