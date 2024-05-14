@@ -5,6 +5,7 @@ local M = {}
 --------------------
 
 ---@class Card
+---@field card_id string ID of the card.
 ---@field card_type string Type of the card.
 ---@field created_at string Time when the card was created.
 ---@field updated_at string Time when the card was last updated.
@@ -12,6 +13,7 @@ local M = {}
 ---@field ease number Ease of the card.
 ---@field interval number Interval of the card.
 M.Card = {
+	card_id = "",
 	card_type = "",
 	created_at = "",
 	updated_at = "",
@@ -28,6 +30,7 @@ M.Card = {
 ---@return table
 function M.Card:new(obj)
 	obj = obj or {}
+	obj.card_id = obj.card_id or self.card_id
 	obj.card_type = obj.card_type or self.card_type
 	obj.created_at = obj.created_at or self.created_at
 	obj.updated_at = obj.updated_at or self.updated_at
@@ -45,7 +48,8 @@ end
 ---@return boolean
 function M.Card:check_health()
 	if
-		self.card_type == ""
+		self.card_id == ""
+		or self.card_type == ""
 		or self.created_at == ""
 		or self.updated_at == ""
 		or self.due_at == ""
@@ -63,6 +67,7 @@ end
 function M.Card:show_in_nvim_out_write()
 	local info = ""
 	info = info .. "===== Card Start =====" .. "\n"
+	info = info .. "Card ID: " .. self.card_id .. "\n"
 	info = info .. "Card type: " .. self.card_type .. "\n"
 	info = info .. "Created At: " .. self.created_at .. "\n"
 	info = info .. "Updated At: " .. self.updated_at .. "\n"

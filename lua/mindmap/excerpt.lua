@@ -7,6 +7,7 @@ local M = {}
 --------------------
 
 ---@class Excerpt
+---@field excerpt_id string ID of the excerpt.
 ---@field rel_file_path string Relative path to the project root of the file where the excerpt is from.
 ---@field file_name string Name of the file where the excerpt is from.
 ---@field start_row number Start row of the excerpt.
@@ -15,6 +16,7 @@ local M = {}
 ---@field end_col number End column of the excerpt.
 ---@field content string[] Content of the excerpt.
 M.Excerpt = {
+	excerpt_id = "",
 	rel_file_path = "",
 	file_name = "",
 	start_row = -1,
@@ -32,6 +34,7 @@ M.Excerpt = {
 ---@return table
 function M.Excerpt:new(obj)
 	obj = obj or {}
+	obj.excerpt_id = obj.excerpt_id or self.excerpt_id
 	obj.rel_file_path = obj.rel_file_path or self.rel_file_path
 	obj.file_name = obj.file_name or self.file_name
 	obj.start_row = obj.start_row or self.start_row
@@ -50,7 +53,8 @@ end
 ---@return boolean
 function M.Excerpt:check_health()
 	if
-		self.rel_file_path == ""
+		self.excerpt_id == ""
+		or self.rel_file_path == ""
 		or self.file_name == ""
 		or self.start_row == -1
 		or self.start_col == -1
@@ -69,6 +73,7 @@ end
 function M.Excerpt:show_in_nvim_out_write()
 	local info = ""
 	info = info .. "===== Excerpt Start =====" .. "\n"
+	info = info .. "excerpt_id: " .. self.excerpt_id .. "\n"
 	info = info .. "rel_file_path: " .. self.rel_file_path .. "\n"
 	info = info .. "file_name: " .. self.file_name .. "\n"
 	info = info .. "start_row: " .. self.start_row .. "\n"
@@ -90,6 +95,7 @@ function M.Excerpt.create_using_latest_visual_selection()
 	local abs_file_path = vim.api.nvim_buf_get_name(0)
 	local abs_proj_path = misc.get_current_proj_path()
 
+	local excerpt_id = "xpt-" .. misc.get_unique_id()
 	local rel_file_path = misc.get_rel_file_path(abs_file_path, abs_proj_path)
 	local file_name = misc.get_current_file_name()
 	local start_row = vim.api.nvim_buf_get_mark(0, "<")[1]
@@ -99,6 +105,7 @@ function M.Excerpt.create_using_latest_visual_selection()
 	local content = misc.get_content(abs_file_path, start_row, start_col, end_row, end_col)
 
 	return M.Excerpt:new({
+    excerpt_id = excerpt_id,
 		rel_file_path = rel_file_path,
 		file_name = file_name,
 		start_row = start_row,
