@@ -1,0 +1,15 @@
+@document.meta
+title: test
+description:
+authors: jpshi
+categories:
+created: 2024-05-14T10:50:09
+updated: 2024-05-14T11:03:36
+version: 1.1.1
+mindmap: mmap-1715655811-2688
+@end
+
+* First
+* Second
+** 2.1 foo %mnode-1715655811-5014%
+** 2.2 bar
