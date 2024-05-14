@@ -29,9 +29,9 @@ M.SimpleItem = {
 function M.SimpleItem:new(obj)
 	obj = obj or {}
 
-	obj.id = "SimpleItem-" .. misc.get_unique_id()
-	obj.created_at = tonumber(os.date())
-	obj.updated_at = tonumber(os.date())
+	obj.id = "simpleitem-" .. misc.get_unique_id()
+	obj.created_at = tonumber(os.time())
+	obj.updated_at = tonumber(os.time())
 
 	setmetatable(obj, self)
 	self.__index = self
