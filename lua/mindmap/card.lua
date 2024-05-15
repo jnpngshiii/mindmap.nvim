@@ -11,11 +11,11 @@ local M = {}
 ---@field due_at integer Due time of the card.
 ---@field ease integer Ease of the card.
 ---@field interval integer Interval of the card.
-M.Card = {
+M.Card = prototype.SimpleItem:new({
 	due_at = -1,
 	ease = -1,
 	interval = -1,
-}
+})
 
 ----------
 -- Instance Method

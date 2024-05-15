@@ -47,10 +47,6 @@ end
 
 ---@class SimpleDatbase
 ---@field item_table table<string, SimpleItem> Items in the database.
----@field add function Add a new item.
----@field remove function Remove an item.
----@field pop function Remove and return the last item.
----@field find function Find an item by ID.
 M.SimpleDatbase = {
 	item_table = {},
 }
@@ -70,12 +66,39 @@ function M.SimpleDatbase:new(obj)
 	return obj
 end
 
+---Add an item to the database.
+---Key is the ID of the item.
+---@param item SimpleItem Item to be added.
+---@return nil
 function M.SimpleDatbase:add(item)
 	self.item_table[item.id] = item
 end
 
+---Remove an item from the database.
+---@param id string Item ID to be removed.
+---@return nil
 function M.SimpleDatbase:remove(id)
 	self.item_table[id] = nil
+end
+
+---@deprecated
+---Pop an item from the database and return it.
+function M.SimpleDatbase:pop(id)
+	error("Not implemented")
+end
+
+---@deprecated
+---Find an item from the database.
+---If the item is not found and created_if_not_found = true,
+---then create and return a new item.
+function M.SimpleDatbase:find(id, created_if_not_found)
+	error("Not implemented")
+end
+
+---@deprecated
+---Decorate each item in the database.
+function M.SimpleDatbase:decorate()
+	error("Not implemented")
 end
 
 ----------
