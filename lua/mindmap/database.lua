@@ -47,11 +47,11 @@ end
 ---@param mmap Mindmap Mindmap to be added.
 ---@return nil
 function M.Database:add(mmap)
-	if self.mindmap_tbl[mmap.mindmap_id] then
-		vim.api.nvim_out_write("Mindmap with ID " .. mmap.mindmap_id .. " already exists. Aborting add.\n")
+	if self.mindmap_tbl[mmap.id] then
+		vim.api.nvim_out_write("Mindmap with ID " .. mmap.id .. " already exists. Aborting add.\n")
 	end
 
-	self.mindmap_tbl[mmap.mindmap_id] = mmap
+	self.mindmap_tbl[mmap.id] = mmap
 end
 
 ---Pop an mindmap from the database.
@@ -87,7 +87,7 @@ end
 function M.Database:save(id)
 	-- TODO: Health check
 	for _, mmap in pairs(self.mindmap_tbl) do
-		if id and id ~= mmap.mindmap_id then
+		if id and id ~= mmap.id then
 			goto continue
 		end
 
