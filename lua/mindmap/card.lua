@@ -30,6 +30,9 @@ function M.Card:new(obj)
 	obj.type = obj.type or "crd"
 	obj.created_at = obj.created_at or tonumber(os.time())
 	obj.updated_at = obj.updated_at or tonumber(os.time())
+  obj.due_at = obj.due_at or self.due_at
+  obj.ease = obj.ease or self.ease
+  obj.interval = obj.interval or self.interval
 
 	setmetatable(obj, self)
 	self.__index = self

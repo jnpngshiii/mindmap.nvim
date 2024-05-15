@@ -33,9 +33,15 @@ function M.Excerpt:new(obj)
 	obj = obj or {}
 
 	obj.id = obj.id or ("xpt-" .. misc.get_unique_id())
-  obj.type = obj.type or "xpt"
+	obj.type = obj.type or "xpt"
 	obj.created_at = obj.created_at or tonumber(os.time())
 	obj.updated_at = obj.updated_at or tonumber(os.time())
+	obj.rel_file_path = obj.rel_file_path or self.rel_file_path
+	obj.file_name = obj.file_name or self.file_name
+	obj.start_row = obj.start_row or self.start_row
+	obj.start_col = obj.start_col or self.start_col
+	obj.end_row = obj.end_row or self.end_row
+	obj.end_col = obj.end_col or self.end_col
 
 	setmetatable(obj, self)
 	self.__index = self

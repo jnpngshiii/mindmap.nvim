@@ -16,9 +16,9 @@ local M = {}
 
 ---@class Mindmap : SimpleItem
 ---@field mindnodes SimpleDatabase Mindnodes in the mindmap.
-M.Mindmap = {
+M.Mindmap = prototype.SimpleItem:new({
 	mindnodes = prototype.SimpleDatabase:new(),
-}
+})
 
 ----------
 -- Instance Method
@@ -34,6 +34,7 @@ function M.Mindmap:new(obj)
 	obj.created_at = obj.created_at or tonumber(os.time())
 	obj.updated_at = obj.updated_at or tonumber(os.time())
 
+  obj.mindnodes = obj.mindnodes or self.mindnodes
 	if obj.mindnodes then
 		for k, v in pairs(obj.mindnodes) do
 			obj.mindnodes[k] = mindnode.Mindnode:new(v)

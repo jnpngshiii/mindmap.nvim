@@ -16,10 +16,10 @@ local M = {}
 ---@class Mindnode : SimpleItem
 ---@field excerpts SimpleDatabase Excerpts in the mindnode.
 ---@field cards SimpleDatabase Cards in the mindnode.
-M.Mindnode = {
+M.Mindnode = prototype.SimpleItem:new({
 	excerpts = prototype.SimpleDatabase:new(),
 	cards = prototype.SimpleDatabase:new(),
-}
+})
 
 ----------
 -- Instance Method
@@ -35,12 +35,14 @@ function M.Mindnode:new(obj)
 	obj.created_at = obj.created_at or tonumber(os.time())
 	obj.updated_at = obj.updated_at or tonumber(os.time())
 
+  obj.excerpts = obj.excerpts or self.excerpts
 	if obj.excerpts then
 		for k, v in pairs(obj.excerpts) do
 			obj.excerpts[k] = excerpt.Excerpt:new(v)
 		end
 	end
 
+  obj.cards = obj.cards or self.cards
 	if obj.cards then
 		for k, v in pairs(obj.cards) do
 			obj.cards[k] = card.Card:new(v)
