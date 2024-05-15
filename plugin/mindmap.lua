@@ -6,6 +6,10 @@ vim.api.nvim_create_user_command("MindmapCreateExcerptUsingVisualSelection", fun
 	require("mindmap").create_excerpt_using_latest_visual_selection()
 end, {})
 
+vim.api.nvim_create_user_command("MindmapShowUnusedExcerptIds", function()
+	require("mindmap").show_unused_excerpt_ids()
+end, {})
+
 --------------------
 -- Mindnode Functions
 --------------------

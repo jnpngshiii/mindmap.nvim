@@ -38,14 +38,18 @@ function M.Mindnode:new(obj)
 	obj.excerpts = obj.excerpts or self.excerpts
 	if obj.excerpts then
 		for k, v in pairs(obj.excerpts) do
-			obj.excerpts[k] = excerpt.Excerpt:new(v)
+			if type(k) == "string" and type(v) == "table" then
+				obj.excerpts[k] = excerpt.Excerpt:new(v)
+			end
 		end
 	end
 
 	obj.cards = obj.cards or self.cards
 	if obj.cards then
 		for k, v in pairs(obj.cards) do
-			obj.cards[k] = card.Card:new(v)
+			if type(k) == "string" and type(v) == "table" then
+				obj.cards[k] = card.Card:new(v)
+			end
 		end
 	end
 

@@ -45,6 +45,16 @@ function M.SimpleItem:is_healthy()
 	error("Not implemented")
 end
 
+---@deprecated
+---This is a test function.
+function M.SimpleItem:show_id()
+	if vim.api then
+		vim.api.nvim_out_write(self.id .. "\n")
+	else
+		print(self.id)
+	end
+end
+
 ----------
 -- Class Method
 ----------
@@ -77,10 +87,10 @@ end
 ---@class SimpleDatabase : SimpleItem
 ---@field db_path string Path to load and save the database. Default: {current_project_path}/{id}.json
 ---@field items table<string, SimpleItem> Items in the database.
-M.SimpleDatabase = {
+M.SimpleDatabase = M.SimpleItem:new({
 	db_path = "",
 	items = {},
-}
+})
 
 ----------
 -- Instance Method
@@ -146,11 +156,31 @@ function M.SimpleDatabase:is_healthy()
 	error("Not implemented")
 end
 
----@deprecated
----Decorate each item in the database.
----@return nil
-function M.SimpleDatabase:decorate()
-	error("Not implemented")
+---Trigger a function on each item in the database.
+---@param func function|string Function to trigger.
+---If string, the function should be a method of the item. If function,
+---the function should be a function that takes an item as the first argument.
+---@param ... any Arguments for the function.
+---@return any
+function M.SimpleDatabase:trigger(func, ...)
+	-- TODO: Return the output of the function (may be nil) as a table.
+	local output = {}
+	if type(func) == "string" then
+		for _, item in pairs(self.items) do
+			if type(item[func]) == "function" then
+				item[func](item, ...)
+			else
+				print("Method '" .. func .. "' does not exist for item.\n")
+			end
+		end
+	elseif type(func) == "function" then
+		for _, item in pairs(self.items) do
+			func(item, ...)
+		end
+	else
+		print("Invalid argument type for 'func'\n.")
+	end
+	return output
 end
 
 -- TODO: Maybe save / load the whole database as a JSON file?
@@ -182,8 +212,10 @@ function M.SimpleDatabase:load()
 
 	local json_content = vim.fn.json_decode(json:read("*a"))
 
-	for k, v in pairs(json_content) do
-		self.items[k] = self:new(v)
+	if type(json_content) == "table" then
+		for k, v in pairs(json_content) do
+			self.items[k] = self:new(v)
+		end
 	end
 end
 

@@ -34,10 +34,12 @@ function M.Mindmap:new(obj)
 	obj.created_at = obj.created_at or tonumber(os.time())
 	obj.updated_at = obj.updated_at or tonumber(os.time())
 
-  obj.mindnodes = obj.mindnodes or self.mindnodes
+	obj.mindnodes = obj.mindnodes or self.mindnodes
 	if obj.mindnodes then
 		for k, v in pairs(obj.mindnodes) do
-			obj.mindnodes[k] = mindnode.Mindnode:new(v)
+			if type(k) == "string" and type(v) == "table" then
+				obj.mindnodes[k] = mindnode.Mindnode:new(v)
+			end
 		end
 	end
 

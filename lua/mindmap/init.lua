@@ -56,6 +56,12 @@ function M.create_excerpt_using_latest_visual_selection()
 	lggr:log("[Function] Create excerpt using latest visual selection.", "info")
 end
 
+function M.show_unused_excerpt_ids()
+	unused_excerpts_db.excerpts:trigger("show_id")
+
+	lggr:log("[Function] Show unused excerpt IDs.", "info")
+end
+
 --------------------
 -- Mindnode Functions
 --------------------
@@ -63,10 +69,10 @@ end
 function M.add_last_created_excerpt_to_nearest_mindnode()
 	-- Get mindmap
 	local mindmap_id = ts_misc.get_buf_mindmap_id(0, true)
-	local mmp = mindmap_db:find_mindmap(mindmap_id, true)
+	local mmp = mindmap_db.mindmaps:find(mindmap_id, true)
 	-- Get mindnode
 	local mindnode_id = ts_misc.get_nearest_heading_node_id(true)
-	local mnd = mmp:find_mindnode(mindnode_id, true)
+	local mnd = mmp.mindnodes:find(mindnode_id, true)
 	-- Add excerpt
 	-- TODO: Use pop function.
 	mnd.excerpts:add(unused_excerpts_db.excerpts[#unused_excerpts_db.excerpts])
@@ -92,6 +98,9 @@ end
 function M.load_mindmap_in_current_buf()
 	local mindmap_id = ts_misc.get_buf_mindmap_id(0, false)
 	if mindmap_id then
+		mindmap_db.mindmaps[mindmap_id] = prototype.SimpleDatabase:new({
+			db_path = misc.get_current_proj_path() .. "/" .. ".mindmap",
+		})
 		mindmap_db.mindmaps[mindmap_id]:load()
 		lggr:log("[Function] Load mindmap <" .. mindmap_id .. ">.", "info")
 	else
