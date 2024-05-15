@@ -1,11 +1,9 @@
--- Items in mindnode
+-- Item
+local prototype = require("mindmap.prototype")
 local card = require("mindmap.card")
 local excerpt = require("mindmap.excerpt")
--- Items in mindmap
 local mindnode = require("mindmap.mindnode")
--- Items in database
 local mindmap = require("mindmap.mindmap")
--- Database
 local database = require("mindmap.database")
 -- Logger
 local logger = require("mindmap.logger")
@@ -22,14 +20,30 @@ local M = {}
 local lggr = logger.Logger:init({
 	log_path = vim.fn.stdpath("data") .. "/mindmap.log",
 })
+
 lggr:log("[Logger] Init mindmap logger.", "info")
 
-local db = database.Database:init()
+-- There is no need to load all mindmaps into memory here,
+-- load them on demand.
+local mindmap_db = database.Database:new()
+
 lggr:log("[Database] Init mindmap database.", "info")
 
-M.card_cache = {}
-M.excerpt_cache = {}
-lggr:log("[Database] Init mindmap cache.", "info")
+-- Excerpt may not be connected to a mindnode immediately after it is created,
+-- so we need to manage it.
+-- For the sake of simplicity, there is no need to define a new class here,
+-- just use the mindnode class that can manage excerpts.
+local unused_excerpts_db = mindnode.Mindnode:new({
+	id = "unused_xpt",
+	type = "unused_xpt",
+	excerpts = prototype.SimpleDatabase:new({
+		db_path = misc.get_current_proj_path() .. "/" .. ".mindmap",
+	}),
+})
+-- TODO: Optimize the following behavior.
+unused_excerpts_db.excerpts:load()
+
+lggr:log("[Database] Init unused excerpt database.", "info")
 
 --------------------
 -- Excerpt Functions
@@ -37,7 +51,7 @@ lggr:log("[Database] Init mindmap cache.", "info")
 
 function M.create_excerpt_using_latest_visual_selection()
 	local xpt = excerpt.Excerpt.create_using_latest_visual_selection()
-	M.excerpt_cache[#M.excerpt_cache + 1] = xpt
+	unused_excerpts_db.excerpts[#unused_excerpts_db.excerpts + 1] = xpt
 
 	lggr:log("[Function] Create excerpt using latest visual selection.", "info")
 end
@@ -46,18 +60,19 @@ end
 -- Mindnode Functions
 --------------------
 
-function M.add_excerpt_to_nearest_mindnode_using_latest_cache()
+function M.add_last_created_excerpt_to_nearest_mindnode()
 	-- Get mindmap
 	local mindmap_id = ts_misc.get_buf_mindmap_id(0, true)
-	local mmap = db:find_mindmap(mindmap_id, true)
+	local mmp = mindmap_db:find_mindmap(mindmap_id, true)
 	-- Get mindnode
 	local mindnode_id = ts_misc.get_nearest_heading_node_id(true)
-	local mnode = mmap:find_mindnode(mindnode_id, true)
+	local mnd = mmp:find_mindnode(mindnode_id, true)
 	-- Add excerpt
-	mnode.excerpts:add(M.excerpt_cache[#M.excerpt_cache])
-	M.excerpt_cache[#M.excerpt_cache] = nil
+	-- TODO: Use pop function.
+	mnd.excerpts:add(unused_excerpts_db.excerpts[#unused_excerpts_db.excerpts])
+	unused_excerpts_db.excerpts[#unused_excerpts_db.excerpts] = nil
 
-	lggr:log("[Function] Add excerpt to nearest mindnode using latest excerpt cache.", "info")
+	lggr:log("[Function] Add last created excerpt to nearest mindnode.", "info")
 end
 
 --------------------
@@ -67,19 +82,17 @@ end
 function M.save_mindmap_in_current_buf()
 	local mindmap_id = ts_misc.get_buf_mindmap_id(0, false)
 	if mindmap_id then
-		db:save(mindmap_id)
+		mindmap_db.mindmaps[mindmap_id]:save()
 		lggr:log("[Function] Save mindmap <" .. mindmap_id .. ">.", "info")
 	else
 		lggr:log("[Function] Current buffer is not a mindmap buffer. Abort saving.", "warn")
 	end
-	-- db:save()
-	-- lggr:log("[Function] Save all mindmaps.", "info")
 end
 
 function M.load_mindmap_in_current_buf()
 	local mindmap_id = ts_misc.get_buf_mindmap_id(0, false)
 	if mindmap_id then
-		db:load(mindmap_id)
+		mindmap_db.mindmaps[mindmap_id]:load()
 		lggr:log("[Function] Load mindmap <" .. mindmap_id .. ">.", "info")
 	else
 		lggr:log("[Function] Current buffer is not a mindmap buffer. Abort loading.", "warn")

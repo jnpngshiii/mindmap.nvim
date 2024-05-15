@@ -5,10 +5,11 @@ local M = {}
 --------------------
 
 ---Return the directory of the current project.
+---The returned string does not have a "/" at the end.
 ---This function is only available in a git repository.
 ---@return string
 function M.get_current_proj_path()
-	return vim.fn.fnamemodify(vim.trim(vim.fn.system("git rev-parse --show-toplevel")), ":p")
+	return string.sub(vim.fn.fnamemodify(vim.trim(vim.fn.system("git rev-parse --show-toplevel")), ":p"), 1, -2)
 end
 
 ---Return the directory of the current file.

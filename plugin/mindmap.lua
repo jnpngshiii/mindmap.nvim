@@ -10,8 +10,8 @@ end, {})
 -- Mindnode Functions
 --------------------
 
-vim.api.nvim_create_user_command("MindmapAddExcerptToNearestMindnodeUsingCache", function()
-	require("mindmap").add_excerpt_to_nearest_mindnode_using_latest_cache()
+vim.api.nvim_create_user_command("MindmapAddLastCreatedExcerptToNearestMindnode", function()
+	require("mindmap").add_last_created_excerpt_to_nearest_mindnode()
 end, {})
 
 --------------------
