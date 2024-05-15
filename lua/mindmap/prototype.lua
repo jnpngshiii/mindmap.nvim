@@ -28,7 +28,7 @@ function M.SimpleItem:new(obj)
 	obj = obj or {}
 
 	obj.id = obj.id or ("simpleitem-" .. misc.get_unique_id())
-  obj.type = obj.type or "simpleitem"
+	obj.type = obj.type or "simpleitem"
 	obj.created_at = obj.created_at or tonumber(os.time())
 	obj.updated_at = obj.updated_at or tonumber(os.time())
 
@@ -36,6 +36,13 @@ function M.SimpleItem:new(obj)
 	self.__index = self
 
 	return obj
+end
+
+---@deprecated
+---Check if the item is healthy.
+---@return boolean
+function M.SimpleItem:is_healthy()
+	error("Not implemented")
 end
 
 ----------
@@ -46,12 +53,33 @@ end
 -- Class SimpleDatabase
 --------------------
 
----@class SimpleDatabase
+-- SimpleDatabase is a simple database that stores items.
+-- It is uesd in SimpleItem as a field in this repository.
+--
+-- Example:
+-- ---@class Card : SimpleItem
+--
+-- ---@class Excerpt : SimpleItem
+--
+-- ---@class Mindnode : SimpleItem
+-- ---@field cards SimpleDatabase Cards in the mindnode.
+-- ---@field excerpts SimpleDatabase Excerpts in the mindnode.
+--
+-- ---@class Mindmap : SimpleItem
+-- ---@field mindnodes SimpleDatabase Mindnodes in the mindmap.
+--
+-- ---@class Database : SimpleDatabase
+-- ---@field mindmaps SimpleDatabase Mindmaps in the database.
+--
+-- NOTE: For convenience, the ID of a SimpleDatabase should be the same as the ID of the SimpleItem in which it belongs.
+-- TODO: Maybe a better way to implement this?
+
+---@class SimpleDatabase : SimpleItem
+---@field db_path string Path to load and save the database. Default: {current_project_path}/{id}.json
 ---@field items table<string, SimpleItem> Items in the database.
----@field db_path string Path to load and save the database.
 M.SimpleDatabase = {
-	items = {},
 	db_path = "",
+	items = {},
 }
 
 ----------
@@ -62,6 +90,9 @@ M.SimpleDatabase = {
 ---@return table
 function M.SimpleDatabase:new(obj)
 	obj = obj or {}
+
+	obj.db_path = obj.db_path or misc.get_current_proj_path()
+	vim.fn.system("mkdir -p " .. obj.db_path)
 
 	setmetatable(obj, self)
 	self.__index = self
@@ -86,64 +117,73 @@ end
 
 ---@deprecated
 ---Pop an item from the database and return it.
+---@param id string Item ID to be popped.
+---@return SimpleItem|nil
 function M.SimpleDatabase:pop(id)
 	error("Not implemented")
 end
 
----@deprecated
 ---Find an item from the database.
 ---If the item is not found and created_if_not_found = true,
 ---then create and return a new item.
+---@param id string Item ID to be found.
+---@param created_if_not_found boolean Create a new item if not found.
+---@return SimpleItem
 function M.SimpleDatabase:find(id, created_if_not_found)
+	local found_item = self.items[id]
+	if not found_item and created_if_not_found then
+		found_item = self:new({ id = id })
+		self:add(found_item)
+	end
+	return found_item
+end
+
+---@deprecated
+---@overload M.SimpleItem:is_healthy(): boolean
+---Check if the database is healthy.
+---@return boolean
+function M.SimpleDatabase:is_healthy()
 	error("Not implemented")
 end
 
 ---@deprecated
 ---Decorate each item in the database.
+---@return nil
 function M.SimpleDatabase:decorate()
 	error("Not implemented")
 end
 
----Save the database to a JSON file.
----@param id string? ID of the mindmap to be saved.
+-- TODO: Maybe save / load the whole database as a JSON file?
+
+---Save the fields of items in the database to a JSON file.
 ---@return nil
-function M.Database:save(id)
-	-- TODO: Health check
-	for _, mmap in pairs(self.mindmap_tbl) do
-		if id and id ~= mmap.id then
-			goto continue
-		end
+function M.SimpleDatabase:save()
+	local json_content = vim.fn.json_encode(misc.remove_table_field(self.items))
 
-		local json_content = misc.remove_table_field(mmap)
-		local encoded_json_content = vim.fn.json_encode(json_content)
-
-		local json_path = self.database_path .. "/" .. id .. ".json"
-		local json, err = io.open(json_path, "w")
-		if not json then
-			error("Could not open file: " .. err)
-		end
-
-		json:write(encoded_json_content)
-		json:close()
-
-		::continue::
+	local json_path = self.db_path .. "/" .. self.id .. ".json"
+	local json, err = io.open(json_path, "w")
+	if not json then
+		error("Could not open file: " .. err)
 	end
+
+	json:write(json_content)
+	json:close()
 end
 
----Load a given mindmap from a JSON file.
----@param id string ID of the mindmap to be loaded.
+---Load the fields of items in the database from a JSON file.
 ---@return nil
-function M.Database:load(id)
-	local json_path = self.database_path .. "/" .. id .. ".json"
+function M.SimpleDatabase:load()
+	local json_path = self.db_path .. "/" .. self.id .. ".json"
 	local json, err = io.open(json_path, "r")
 	if not json then
 		error("Could not open file: " .. err)
 	end
 
-	local encoded_json_content = json:read("*a")
-	local json_content = vim.fn.json_decode(encoded_json_content)
+	local json_content = vim.fn.json_decode(json:read("*a"))
 
-	self.mindmap_tbl[id] = mindmap.Mindmap:new(json_content)
+	for k, v in pairs(json_content) do
+		self.items[k] = self:new(v)
+	end
 end
 
 ----------
