@@ -7,11 +7,11 @@ local M = {}
 -- Class Card
 --------------------
 
----@class Card : SimpleItem
+---@class Card : SimpleDatabase
 ---@field due_at integer Due time of the card.
 ---@field ease integer Ease of the card.
 ---@field interval integer Interval of the card.
-M.Card = prototype.SimpleItem:new({
+M.Card = prototype.SimpleDatabase:new({
 	due_at = -1,
 	ease = -1,
 	interval = -1,
@@ -30,9 +30,9 @@ function M.Card:new(obj)
 	obj.type = obj.type or "crd"
 	obj.created_at = obj.created_at or tonumber(os.time())
 	obj.updated_at = obj.updated_at or tonumber(os.time())
-  obj.due_at = obj.due_at or self.due_at
-  obj.ease = obj.ease or self.ease
-  obj.interval = obj.interval or self.interval
+	obj.due_at = obj.due_at or self.due_at
+	obj.ease = obj.ease or self.ease
+	obj.interval = obj.interval or self.interval
 
 	setmetatable(obj, self)
 	self.__index = self

@@ -13,10 +13,10 @@ local M = {}
 -- Class Mindnode
 --------------------
 
----@class Mindnode : SimpleItem
+---@class Mindnode : SimpleDatabase
 ---@field excerpts SimpleDatabase Excerpts in the mindnode.
 ---@field cards SimpleDatabase Cards in the mindnode.
-M.Mindnode = prototype.SimpleItem:new({
+M.Mindnode = prototype.SimpleDatabase:new({
 	excerpts = prototype.SimpleDatabase:new(),
 	cards = prototype.SimpleDatabase:new(),
 })

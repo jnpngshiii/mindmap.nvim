@@ -9,10 +9,10 @@ local M = {}
 -- Class Dababase
 --------------------
 
----@class Database : SimpleItem
+---@class Database : SimpleDatabase
 ---@field mindmaps SimpleDatabase All mindmaps.
 ---@field unused_excerpts SimpleDatabase Used excerpts.
-M.Database = prototype.SimpleItem:new({
+M.Database = prototype.SimpleDatabase:new({
 	mindmaps = prototype.SimpleDatabase:new(),
 	unused_excerpts = prototype.SimpleDatabase:new(),
 })

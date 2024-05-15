@@ -7,14 +7,14 @@ local M = {}
 -- Class Excerpt
 --------------------
 
----@class Excerpt : SimpleItem
+---@class Excerpt : SimpleDatabase
 ---@field rel_file_path string Relative path to the project root of the file where the excerpt is from.
 ---@field file_name string Name of the file where the excerpt is from.
 ---@field start_row number Start row of the excerpt.
 ---@field start_col number Start column of the excerpt.
 ---@field end_row number End row of the excerpt.
 ---@field end_col number End column of the excerpt.
-M.Excerpt = prototype.SimpleItem:new({
+M.Excerpt = prototype.SimpleDatabase:new({
 	rel_file_path = "",
 	file_name = "",
 	start_row = -1,

@@ -143,6 +143,7 @@ function M.SimpleDatabase:find(id, created_if_not_found)
 	local found_item = self.items[id]
 	if not found_item and created_if_not_found then
 		found_item = self:new({ id = id })
+		print(found_item.type)
 		self:add(found_item)
 	end
 	return found_item

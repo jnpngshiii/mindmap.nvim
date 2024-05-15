@@ -14,9 +14,9 @@ local M = {}
 -- Class Mindmap
 --------------------
 
----@class Mindmap : SimpleItem
+---@class Mindmap : SimpleDatabase
 ---@field mindnodes SimpleDatabase Mindnodes in the mindmap.
-M.Mindmap = prototype.SimpleItem:new({
+M.Mindmap = prototype.SimpleDatabase:new({
 	mindnodes = prototype.SimpleDatabase:new(),
 })
 
@@ -54,5 +54,9 @@ end
 ----------
 
 --------------------
+
+local mindmap = M.Mindmap:new({
+	db_path = misc.get_current_proj_path() .. "/" .. ".mindmap",
+})
 
 return M

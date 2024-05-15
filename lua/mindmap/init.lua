@@ -69,10 +69,10 @@ end
 function M.add_last_created_excerpt_to_nearest_mindnode()
 	-- Get mindmap
 	local mindmap_id = ts_misc.get_buf_mindmap_id(0, true)
-	local mmp = mindmap_db.mindmaps:find(mindmap_id, true)
+	local mmp = mindmap_db.mindmaps.find(mindmap.Mindmap, mindmap_id, true)
 	-- Get mindnode
 	local mindnode_id = ts_misc.get_nearest_heading_node_id(true)
-	local mnd = mmp.mindnodes:find(mindnode_id, true)
+	local mnd = mmp.mindnodes.find(mindnode.Mindnode, mindnode_id, true)
 	-- Add excerpt
 	-- TODO: Use pop function.
 	mnd.excerpts:add(unused_excerpts_db.excerpts[#unused_excerpts_db.excerpts])
@@ -87,6 +87,7 @@ end
 
 function M.save_mindmap_in_current_buf()
 	local mindmap_id = ts_misc.get_buf_mindmap_id(0, false)
+  print(mindmap_id)
 	if mindmap_id then
 		mindmap_db.mindmaps[mindmap_id]:save()
 		lggr:log("[Function] Save mindmap <" .. mindmap_id .. ">.", "info")
