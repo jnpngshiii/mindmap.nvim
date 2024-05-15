@@ -3,9 +3,9 @@ local card = require("mindmap.card")
 local excerpt = require("mindmap.excerpt")
 local misc = require("mindmap.misc")
 
----@alias prototype.SimpleDatabase SimpleDatabase
----@alias card.Card Card
----@alias excerpt.Excerpt Excerpt
+-- ---@alias prototype.SimpleDatabase SimpleDatabase
+-- ---@alias card.Card Card
+-- ---@alias excerpt.Excerpt Excerpt
 
 local M = {}
 

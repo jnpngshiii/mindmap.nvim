@@ -6,36 +6,119 @@ local M = {}
 -- Class SimpleItem
 --------------------
 
+-- SimpleItem can be used as a simple item, or a simple database that manages sub items.
+--
+-- Example:
+-- ---@class Card : SimpleItem
+--
+-- ---@class Mindnode : SimpleItem
+-- ---@field sub_items Card Cards in the mindnode.
+--
+-- ---@class Mindmap : SimpleItem
+-- ---@field sub_items Mindnode Mindnodes in the mindmap.
+--
+-- ---@class Database : SimpleItem
+-- ---@field sub_items Mindmap Mindmaps in the database.
+
 ---@class SimpleItem
----@field id string Id of the item.
 ---@field type string Type of the item.
+---@field id string Id of the item.
 ---@field created_at integer Created time of the item.
 ---@field updated_at integer Updated time of the item.
-M.SimpleItem = {
-	id = "",
-	type = "",
-	created_at = -1,
-	updated_at = -1,
-}
+---@field save_path string Path to load and save the item.
+---Default: {current_project_path}/.mindmap/{id}.json
+---Please make sure the path does not contain a "/" at the end.
+---@field sub_items table<string, SimpleItem> Sub items in the item.
+M.SimpleItem = {}
 
 ----------
 -- Instance Method
 ----------
 
----@param obj table?
+---@param tbl? table Table used to create the item.
+---@param sub_item_class? SimpleItem Class of the sub items.
+---@param load? boolean Whether to load sub items from a JSON file.
 ---@return table
-function M.SimpleItem:new(obj)
-	obj = obj or {}
+function M.SimpleItem:new(tbl, sub_item_class, load)
+	tbl = tbl or {}
 
-	obj.id = obj.id or ("simpleitem-" .. misc.get_unique_id())
-	obj.type = obj.type or "simpleitem"
-	obj.created_at = obj.created_at or tonumber(os.time())
-	obj.updated_at = obj.updated_at or tonumber(os.time())
+	tbl.type = tbl.type or "simpleitem"
+	tbl.id = tbl.id or (tbl.type .. misc.get_unique_id())
+	tbl.created_at = tbl.created_at or tonumber(os.time())
+	tbl.updated_at = tbl.updated_at or tonumber(os.time())
 
-	setmetatable(obj, self)
+	tbl.save_path = tbl.save_path or misc.get_current_proj_path() .. "/.mindmap"
+	vim.fn.system("mkdir -p " .. tbl.save_path)
+
+	tbl.sub_items = tbl.sub_items or {}
+	-- If sub_item_class is provided and has function `new`, use this function to create sub items.
+	if sub_item_class and sub_item_class.new then
+		-- If `load = true`, load sub items from a JSON file.
+		if load then
+			local json_path = self.save_path .. "/" .. self.id .. ".json"
+			local json, _ = io.open(json_path, "r")
+			if json then
+				local json_content = vim.fn.json_decode(json:read("*a"))
+				for k, v in pairs(json_content) do
+					if type(k) == "string" and type(v) == "table" and not v.new then
+						-- Make sure v is just a table.
+						tbl.sub_items[k] = v
+					end
+				end
+			end
+		end
+		-- Create sub items using the provided function `new`.
+		if not #tbl.sub_items then
+			for k, v in pairs(tbl.sub_items) do
+				tbl.sub_items[k] = sub_item_class:new(v)
+			end
+		end
+	end
+
+	-- TODO: Check the health of sub items.
+
+	setmetatable(tbl, self)
 	self.__index = self
 
-	return obj
+	return tbl
+end
+
+---Add a sub item to the item.
+---@param item SimpleItem Sub item to be added.
+---@return nil
+function M.SimpleItem:add(item)
+	self.sub_items[item.id] = item
+end
+
+---Remove a sub item from the item.
+---@param id string Sub item ID to be removed.
+---@return nil
+function M.SimpleItem:remove(id)
+	self.sub_items[id] = nil
+end
+
+---@deprecated
+---Pop a sub item from the item and return it.
+---@param id string Sub item ID to be popped.
+---@return SimpleItem
+function M.SimpleItem:pop(id)
+	error("Not implemented")
+end
+
+---@deprecated
+---Find a sub item in the item and return it.
+---If the item is not found and created_if_not_found = true,
+---then create and return a new item.
+---@param id string Sub item ID to be found.
+---@param created_if_not_found boolean Create a new item if not found.
+---@return SimpleItem
+function M.SimpleItem:find(id, created_if_not_found)
+	local found_item = self.sub_items[id]
+	if not found_item and created_if_not_found then
+		found_item = self:new({ id = id })
+		self:add(found_item)
+	end
+	return found_item
 end
 
 ---@deprecated
@@ -55,119 +138,17 @@ function M.SimpleItem:show_id()
 	end
 end
 
-----------
--- Class Method
-----------
-
---------------------
--- Class SimpleDatabase
---------------------
-
--- SimpleDatabase is a simple database that stores items.
--- It is uesd in SimpleItem as a field in this repository.
---
--- Example:
--- ---@class Card : SimpleItem
---
--- ---@class Excerpt : SimpleItem
---
--- ---@class Mindnode : SimpleItem
--- ---@field cards SimpleDatabase Cards in the mindnode.
--- ---@field excerpts SimpleDatabase Excerpts in the mindnode.
---
--- ---@class Mindmap : SimpleItem
--- ---@field mindnodes SimpleDatabase Mindnodes in the mindmap.
---
--- ---@class Database : SimpleDatabase
--- ---@field mindmaps SimpleDatabase Mindmaps in the database.
---
--- NOTE: For convenience, the ID of a SimpleDatabase should be the same as the ID of the SimpleItem in which it belongs.
--- TODO: Maybe a better way to implement this?
-
----@class SimpleDatabase : SimpleItem
----@field db_path string Path to load and save the database. Default: {current_project_path}/{id}.json
----@field items table<string, SimpleItem> Items in the database.
-M.SimpleDatabase = M.SimpleItem:new({
-	db_path = "",
-	items = {},
-})
-
-----------
--- Instance Method
-----------
-
----@param obj table?
----@return table
-function M.SimpleDatabase:new(obj)
-	obj = obj or {}
-
-	obj.db_path = obj.db_path or misc.get_current_proj_path()
-	vim.fn.system("mkdir -p " .. obj.db_path)
-
-	setmetatable(obj, self)
-	self.__index = self
-
-	return obj
-end
-
----Add an item to the database.
----Key is the ID of the item.
----@param item SimpleItem Item to be added.
----@return nil
-function M.SimpleDatabase:add(item)
-	self.items[item.id] = item
-end
-
----Remove an item from the database.
----@param id string Item ID to be removed.
----@return nil
-function M.SimpleDatabase:remove(id)
-	self.items[id] = nil
-end
-
----@deprecated
----Pop an item from the database and return it.
----@param id string Item ID to be popped.
----@return SimpleItem|nil
-function M.SimpleDatabase:pop(id)
-	error("Not implemented")
-end
-
----Find an item from the database.
----If the item is not found and created_if_not_found = true,
----then create and return a new item.
----@param id string Item ID to be found.
----@param created_if_not_found boolean Create a new item if not found.
----@return SimpleItem
-function M.SimpleDatabase:find(id, created_if_not_found)
-	local found_item = self.items[id]
-	if not found_item and created_if_not_found then
-		found_item = self:new({ id = id })
-		print(found_item.type)
-		self:add(found_item)
-	end
-	return found_item
-end
-
----@deprecated
----@overload M.SimpleItem:is_healthy(): boolean
----Check if the database is healthy.
----@return boolean
-function M.SimpleDatabase:is_healthy()
-	error("Not implemented")
-end
-
----Trigger a function on each item in the database.
+---Trigger a function on each sub item in the item.
 ---@param func function|string Function to trigger.
----If string, the function should be a method of the item. If function,
----the function should be a function that takes an item as the first argument.
----@param ... any Arguments for the function.
+---If string, the function should be a method of the sub item.
+---If function, the function should be a function that takes an sub item as the first argument.
+---@param ... any Function arguments to be passed.
 ---@return any
-function M.SimpleDatabase:trigger(func, ...)
+function M.SimpleItem:trigger(func, ...)
 	-- TODO: Return the output of the function (may be nil) as a table.
 	local output = {}
 	if type(func) == "string" then
-		for _, item in pairs(self.items) do
+		for _, item in pairs(self.sub_items) do
 			if type(item[func]) == "function" then
 				item[func](item, ...)
 			else
@@ -175,7 +156,7 @@ function M.SimpleDatabase:trigger(func, ...)
 			end
 		end
 	elseif type(func) == "function" then
-		for _, item in pairs(self.items) do
+		for _, item in pairs(self.sub_items) do
 			func(item, ...)
 		end
 	else
@@ -184,14 +165,17 @@ function M.SimpleDatabase:trigger(func, ...)
 	return output
 end
 
--- TODO: Maybe save / load the whole database as a JSON file?
+----------
+-- Class Method
+----------
 
----Save the fields of items in the database to a JSON file.
+---Save an item to a JSON file.
+---@param item SimpleItem Item to be saved.
 ---@return nil
-function M.SimpleDatabase:save()
-	local json_content = vim.fn.json_encode(misc.remove_table_field(self.items))
+function M.SimpleItem.save(item)
+	local json_content = vim.fn.json_encode(misc.remove_table_field(item))
 
-	local json_path = self.db_path .. "/" .. self.id .. ".json"
+	local json_path = item.save_path .. "/" .. item.id .. ".json"
 	local json, err = io.open(json_path, "w")
 	if not json then
 		error("Could not open file: " .. err)
@@ -201,29 +185,17 @@ function M.SimpleDatabase:save()
 	json:close()
 end
 
----Load the fields of items in the database from a JSON file.
----@return nil
-function M.SimpleDatabase:load()
-	local json_path = self.db_path .. "/" .. self.id .. ".json"
-	local json, err = io.open(json_path, "r")
-	if not json then
-		return
-		-- error("Could not open file: " .. err)
-	end
+----------
 
-	local json_content = vim.fn.json_decode(json:read("*a"))
+if true then
+	local a = M.SimpleItem:new()
+	print("a.id: " .. a.id)
+	print("a.type: " .. a.type)
+	print("a.created_at: " .. a.created_at)
+	print("a.updated_at: " .. a.updated_at)
+	print("a.save_path: " .. a.save_path)
 
-	if type(json_content) == "table" then
-		for k, v in pairs(json_content) do
-			self.items[k] = self:new(v)
-		end
-	end
+	a:save()
 end
-
-----------
--- Class Method
-----------
-
-----------
 
 return M
