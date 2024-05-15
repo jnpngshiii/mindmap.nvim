@@ -46,7 +46,7 @@ end
 ---@param mnode Mindnode to be added.
 ---@return nil
 function M.Mindmap:add_mindnode(mnode)
-	self.mindnode_tbl[mnode.mindnode_id] = mnode
+	self.mindnode_tbl[mnode.id] = mnode
 end
 
 ---Find a mindnode in the mindmap.

@@ -42,13 +42,13 @@ end
 ----------
 
 --------------------
--- Class SimpleDatbase
+-- Class SimpleDatabase
 --------------------
 
----@class SimpleDatbase
----@field item_table table<string, SimpleItem> Items in the database.
-M.SimpleDatbase = {
-	item_table = {},
+---@class SimpleDatabase
+---@field items table<string, SimpleItem> Items in the database.
+M.SimpleDatabase = {
+	items = {},
 }
 
 ----------
@@ -57,7 +57,7 @@ M.SimpleDatbase = {
 
 ---@param obj table?
 ---@return table
-function M.SimpleDatbase:new(obj)
+function M.SimpleDatabase:new(obj)
 	obj = obj or {}
 
 	setmetatable(obj, self)
@@ -70,20 +70,20 @@ end
 ---Key is the ID of the item.
 ---@param item SimpleItem Item to be added.
 ---@return nil
-function M.SimpleDatbase:add(item)
-	self.item_table[item.id] = item
+function M.SimpleDatabase:add(item)
+	self.items[item.id] = item
 end
 
 ---Remove an item from the database.
 ---@param id string Item ID to be removed.
 ---@return nil
-function M.SimpleDatbase:remove(id)
-	self.item_table[id] = nil
+function M.SimpleDatabase:remove(id)
+	self.items[id] = nil
 end
 
 ---@deprecated
 ---Pop an item from the database and return it.
-function M.SimpleDatbase:pop(id)
+function M.SimpleDatabase:pop(id)
 	error("Not implemented")
 end
 
@@ -91,13 +91,13 @@ end
 ---Find an item from the database.
 ---If the item is not found and created_if_not_found = true,
 ---then create and return a new item.
-function M.SimpleDatbase:find(id, created_if_not_found)
+function M.SimpleDatabase:find(id, created_if_not_found)
 	error("Not implemented")
 end
 
 ---@deprecated
 ---Decorate each item in the database.
-function M.SimpleDatbase:decorate()
+function M.SimpleDatabase:decorate()
 	error("Not implemented")
 end
 

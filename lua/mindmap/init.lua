@@ -54,7 +54,7 @@ function M.add_excerpt_to_nearest_mindnode_using_latest_cache()
 	local mindnode_id = ts_misc.get_nearest_heading_node_id(true)
 	local mnode = mmap:find_mindnode(mindnode_id, true)
 	-- Add excerpt
-	mnode:add_excerpt(M.excerpt_cache[#M.excerpt_cache])
+	mnode.excerpts:add(M.excerpt_cache[#M.excerpt_cache])
 	M.excerpt_cache[#M.excerpt_cache] = nil
 
 	lggr:log("[Function] Add excerpt to nearest mindnode using latest excerpt cache.", "info")
