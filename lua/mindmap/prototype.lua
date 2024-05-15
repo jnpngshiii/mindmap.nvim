@@ -176,7 +176,8 @@ function M.SimpleDatabase:load()
 	local json_path = self.db_path .. "/" .. self.id .. ".json"
 	local json, err = io.open(json_path, "r")
 	if not json then
-		error("Could not open file: " .. err)
+		return
+		-- error("Could not open file: " .. err)
 	end
 
 	local json_content = vim.fn.json_decode(json:read("*a"))
