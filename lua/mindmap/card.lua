@@ -7,42 +7,68 @@ local M = {}
 -- Class Card
 --------------------
 
----@class Card : SimpleDatabase
+---@class Card : SimpleItem
 ---@field due_at integer Due time of the card.
 ---@field ease integer Ease of the card.
 ---@field interval integer Interval of the card.
-M.Card = prototype.SimpleDatabase:new({
-	due_at = -1,
-	ease = -1,
-	interval = -1,
-})
+M.Card = prototype.SimpleItem:new()
 
 ----------
 -- Instance Method
 ----------
 
----@param obj table?
+---@param tbl table?
 ---@return table
-function M.Card:new(obj)
-	obj = obj or {}
+function M.Card:new(tbl, sub_item_class, load)
+	tbl = tbl or {}
+	tbl.type = "crd"
+	tbl = prototype.SimpleItem:new(tbl, sub_item_class, load)
 
-	obj.id = obj.id or ("crd-" .. misc.get_unique_id())
-	obj.type = obj.type or "crd"
-	obj.created_at = obj.created_at or tonumber(os.time())
-	obj.updated_at = obj.updated_at or tonumber(os.time())
-	obj.due_at = obj.due_at or self.due_at
-	obj.ease = obj.ease or self.ease
-	obj.interval = obj.interval or self.interval
+	tbl.created_at = tbl.created_at or tonumber(os.time())
+	tbl.updated_at = tbl.updated_at or tonumber(os.time())
+	tbl.due_at = tbl.due_at or 0
+	tbl.ease = tbl.ease or 250
+	tbl.interval = tbl.interval or 1 -- TODO: Needs investigation.
 
-	setmetatable(obj, self)
+	setmetatable(tbl, self)
 	self.__index = self
 
-	return obj
+	return tbl
+end
+
+function M.Card.ttt()
+	print("Hello")
 end
 
 ----------
 -- Class Method
 ----------
+
+if true then
+	local a = M.Card:new({
+		id = "0000",
+		created_at = 1,
+	})
+	-- print("a.id: " .. a.id)
+	-- print("a.type: " .. a.type)
+	-- print("a.created_at: " .. a.created_at)
+	-- print("a.updated_at: " .. a.updated_at)
+	-- print("a.save_path: " .. a.save_path)
+
+	a:ttt()
+
+	local b = M.Card:new({
+		created_at = 2,
+	})
+	a:add(b)
+
+	local c = M.Card:new({
+		created_at = 3,
+	})
+	b:add(c)
+
+	a:save()
+end
 
 --------------------
 

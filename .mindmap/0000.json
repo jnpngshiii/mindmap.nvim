@@ -1,0 +1,36 @@
+{
+  "id": "0000",
+  "save_path": "/Users/jpshi/Git/mindmap.nvim/.mindmap",
+  "created_at": 1,
+  "interval": 1,
+  "due_at": 0,
+  "updated_at": 1715821975,
+  "type": "crd",
+  "ease": 250,
+  "sub_items": {
+    "crd1715821975-9613": {
+      "id": "crd1715821975-9613",
+      "save_path": "/Users/jpshi/Git/mindmap.nvim/.mindmap",
+      "created_at": 2,
+      "interval": 1,
+      "due_at": 0,
+      "updated_at": 1715821975,
+      "type": "crd",
+      "ease": 250,
+      "sub_items": {
+        "crd1715821975-6280": {
+          "id": "crd1715821975-6280",
+          "save_path": "/Users/jpshi/Git/mindmap.nvim/.mindmap",
+          "created_at": 3,
+          "interval": 1,
+          "due_at": 0,
+          "updated_at": 1715821975,
+          "type": "crd",
+          "ease": 250,
+          "sub_items": []
+        }
+      }
+    }
+  }
+}
+

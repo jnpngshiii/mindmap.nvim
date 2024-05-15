@@ -187,7 +187,7 @@ end
 
 ----------
 
-if true then
+if false then
 	local a = M.SimpleItem:new()
 	print("a.id: " .. a.id)
 	print("a.type: " .. a.type)
