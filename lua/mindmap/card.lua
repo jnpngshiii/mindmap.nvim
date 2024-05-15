@@ -26,9 +26,10 @@ M.Card = prototype.SimpleItem:new({
 function M.Card:new(obj)
 	obj = obj or {}
 
-	obj.id = "crd-" .. misc.get_unique_id()
-	obj.created_at = tonumber(os.time())
-	obj.updated_at = tonumber(os.time())
+	obj.id = obj.id or ("crd-" .. misc.get_unique_id())
+	obj.type = obj.type or "crd"
+	obj.created_at = obj.created_at or tonumber(os.time())
+	obj.updated_at = obj.updated_at or tonumber(os.time())
 
 	setmetatable(obj, self)
 	self.__index = self

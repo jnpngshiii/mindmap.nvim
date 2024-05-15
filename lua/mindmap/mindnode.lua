@@ -30,9 +30,10 @@ M.Mindnode = {
 function M.Mindnode:new(obj)
 	obj = obj or {}
 
-	obj.id = "mnd-" .. misc.get_unique_id()
-	obj.created_at = tonumber(os.time())
-	obj.updated_at = tonumber(os.time())
+	obj.id = obj.id or ("mnd-" .. misc.get_unique_id())
+	obj.type = obj.type or "mnd"
+	obj.created_at = obj.created_at or tonumber(os.time())
+	obj.updated_at = obj.updated_at or tonumber(os.time())
 
 	if obj.excerpts then
 		for k, v in pairs(obj.excerpts) do

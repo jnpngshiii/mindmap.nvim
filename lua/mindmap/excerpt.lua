@@ -32,9 +32,10 @@ M.Excerpt = prototype.SimpleItem:new({
 function M.Excerpt:new(obj)
 	obj = obj or {}
 
-	obj.id = "xpt-" .. misc.get_unique_id()
-	obj.created_at = tonumber(os.time())
-	obj.updated_at = tonumber(os.time())
+	obj.id = obj.id or ("xpt-" .. misc.get_unique_id())
+  obj.type = obj.type or "xpt"
+	obj.created_at = obj.created_at or tonumber(os.time())
+	obj.updated_at = obj.updated_at or tonumber(os.time())
 
 	setmetatable(obj, self)
 	self.__index = self
