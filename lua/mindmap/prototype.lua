@@ -1,4 +1,3 @@
-local logger = require("mindmap.logger")
 local misc = require("mindmap.misc")
 
 local M = {}
@@ -43,7 +42,7 @@ function M.SimpleItem:new(tbl, sub_item_class)
 	tbl = tbl or {}
 
 	tbl.type = tbl.type or "simpleitem"
-	tbl.id = tbl.id or (tbl.type .. misc.get_unique_id())
+	tbl.id = tbl.id or (tbl.type .. "-" .. misc.get_unique_id())
 	tbl.created_at = tbl.created_at or tonumber(os.time())
 	tbl.updated_at = tbl.updated_at or tonumber(os.time())
 
@@ -53,7 +52,7 @@ function M.SimpleItem:new(tbl, sub_item_class)
 	tbl.sub_items = tbl.sub_items or {}
 	-- If sub_item_class is provided and has function `new`, use this function to create sub items.
 	if sub_item_class and sub_item_class.new then
-		local json_path = self.save_path .. "/" .. self.id .. ".json"
+		local json_path = tbl.save_path .. "/" .. tbl.id .. ".json"
 		local json, _ = io.open(json_path, "r")
 		if json then
 			local json_content = vim.fn.json_decode(json:read("*a"))
@@ -185,14 +184,17 @@ end
 ----------
 
 if false then
-	local a = M.SimpleItem:new()
+	local a = M.SimpleItem:new({
+		type = "simpleitem",
+		sub_class = M.SimpleItem,
+	})
 	print("a.id: " .. a.id)
 	print("a.type: " .. a.type)
 	print("a.created_at: " .. a.created_at)
 	print("a.updated_at: " .. a.updated_at)
 	print("a.save_path: " .. a.save_path)
 
-	a:save()
+	-- a:save()
 end
 
 return M
