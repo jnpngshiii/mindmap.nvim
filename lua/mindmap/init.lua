@@ -65,7 +65,7 @@ end
 function M.add_last_created_excerpt_to_nearest_mindnode()
 	-- Get mindmap
 	local mindmap_id = ts_misc.get_buf_mindmap_id(0, true)
-	local mmp = card_db.mindmaps.find(mindmap.Mindmap, mindmap_id, true)
+	local mmp = card_db.sub_items.find(mindmap.Mindmap, mindmap_id, true)
 	-- Get mindnode
 	local mindnode_id = ts_misc.get_nearest_heading_node_id(true)
 	local mnd = mmp.mindnodes.find(mindnode.Mindnode, mindnode_id, true)
@@ -83,9 +83,8 @@ end
 
 function M.save_mindmap_in_current_buf()
 	local mindmap_id = ts_misc.get_buf_mindmap_id(0, false)
-	print(mindmap_id)
 	if mindmap_id then
-		card_db.mindmaps[mindmap_id]:save()
+		card_db.sub_items[mindmap_id]:save()
 		lggr:info("function", " Save mindmap <" .. mindmap_id .. ">.")
 	else
 		lggr:warn("function", " Current buffer is not a mindmap buffer. Abort saving.")
@@ -95,10 +94,9 @@ end
 function M.load_mindmap_in_current_buf()
 	local mindmap_id = ts_misc.get_buf_mindmap_id(0, false)
 	if mindmap_id then
-		card_db.mindmaps[mindmap_id] = prototype.SimpleDatabase:new({
-			db_path = misc.get_current_proj_path() .. "/" .. ".mindmap",
-		})
-		card_db.mindmaps[mindmap_id]:load()
+		card_db:add(mindmap.Mindmap:new({
+			id = mindmap_id,
+		}))
 		lggr:info("function", " Load mindmap <" .. mindmap_id .. ">.")
 	else
 		lggr:warn("function", " Current buffer is not a mindmap buffer. Abort loading.")
