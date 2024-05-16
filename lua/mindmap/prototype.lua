@@ -1,3 +1,4 @@
+local logger = require("mindmap.logger")
 local misc = require("mindmap.misc")
 
 local M = {}

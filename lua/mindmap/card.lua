@@ -48,7 +48,7 @@ if true then
 	local a = M.Card:new({
 		id = "0000",
 		created_at = 1,
-	})
+	}, M.Card, true)
 	-- print("a.id: " .. a.id)
 	-- print("a.type: " .. a.type)
 	-- print("a.created_at: " .. a.created_at)

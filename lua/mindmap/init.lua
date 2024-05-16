@@ -17,12 +17,6 @@ local M = {}
 -- Init
 --------------------
 
-local lggr = logger.Logger:init({
-	log_path = vim.fn.stdpath("data") .. "/mindmap.log",
-})
-
-lggr:log("[Logger] Init mindmap logger.", "info")
-
 -- There is no need to load all mindmaps into memory here,
 -- load them on demand.
 local mindmap_db = database.Database:new()

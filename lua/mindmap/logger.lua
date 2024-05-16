@@ -20,6 +20,7 @@ M.Logger = {
 	cache = {},
 	log_path = "",
 	log_level = "INFO", -- NOT USED
+	---@deprecated
 	log_level_table = {
 		INFO = 1,
 		DEBUG = 2,
@@ -132,5 +133,14 @@ end
 ----------
 
 --------------------
+
+-- I don't think init a logger here is a good idea.
+-- But how to make all items use the same logger?
+
+-- M.lggr = M.Logger:init({
+--   log_path = vim.fn.stdpath("data") .. "/mindmap.log",
+-- })
+--
+-- M.lggr:log("[Logger] Init mindmap logger.", "info")
 
 return M
