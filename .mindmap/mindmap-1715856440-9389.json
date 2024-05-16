@@ -1,0 +1,33 @@
+{
+  "id": "mindmap-1715856440-9389",
+  "updated_at": 1715856440,
+  "created_at": 1715856440,
+  "save_path": "/Users/jpshi/Git/mindmap.nvim/.mindmap",
+  "type": "mindmap",
+  "sub_items": {
+    "mindnode-1715856440-1652": {
+      "id": "mindnode-1715856440-1652",
+      "updated_at": 1715856440,
+      "created_at": 1715856440,
+      "save_path": "/Users/jpshi/Git/mindmap.nvim/.mindmap",
+      "type": "mindnode",
+      "sub_items": {
+        "excerpt-1715856433-5944": {
+          "id": "excerpt-1715856433-5944",
+          "end_row": 7,
+          "save_path": "/Users/jpshi/Git/mindmap.nvim/.mindmap",
+          "file_name": "test.norg",
+          "start_row": 6,
+          "created_at": 1715856433,
+          "type": "excerpt",
+          "updated_at": 1715856433,
+          "end_col": 0,
+          "start_col": 28,
+          "rel_file_path": "tests/test.norg",
+          "sub_items": []
+        }
+      }
+    }
+  }
+}
+

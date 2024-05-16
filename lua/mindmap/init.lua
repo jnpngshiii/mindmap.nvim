@@ -22,7 +22,7 @@ local M = {}
 -- Init
 --------------------
 
-local lggr = M.Logger:new({
+local lggr = logger.Logger:new({
 	id = string.format("log %s", os.date("%Y-%m-%d %H:%M:%S")),
 	log_level = "DEBUG",
 	show_in_nvim = true,
@@ -47,15 +47,16 @@ lggr:info(card_db.type, "Init unused excerpt database.")
 
 function M.create_excerpt_using_latest_visual_selection()
 	local created_excerpt = excerpt.Excerpt.create_using_latest_visual_selection()
-	unused_excerpt_db.add(created_excerpt)
+	unused_excerpt_db:add(created_excerpt)
+	-- unused_excerpt_db.last = created_excerpt.id
 
-	lggr:info("function", " Create excerpt using latest visual selection.")
+	lggr:info("function", "Create excerpt using latest visual selection.")
 end
 
 function M.show_unused_excerpt_ids()
-	unused_excerpt_db.excerpts:trigger("show_id")
+	unused_excerpt_db:trigger("show_id")
 
-	lggr:info("function", " Show unused excerpt IDs.")
+	lggr:info("function", "Show unused excerpt IDs.")
 end
 
 --------------------
@@ -70,11 +71,11 @@ function M.add_last_created_excerpt_to_nearest_mindnode()
 	local mindnode_id = ts_misc.get_nearest_heading_node_id(true)
 	local found_mindnode = found_mindmap:find(mindnode_id, true, mindnode.Mindnode)
 	-- Add excerpt
-	-- TODO: Use pop function.
-	local last_created_excerpt = unused_excerpt_db.pop(unused_excerpt_db:find_biggest_id())
+	local biggest_id = unused_excerpt_db:find_biggest_id()
+	local last_created_excerpt = unused_excerpt_db:pop(biggest_id)
 	found_mindnode:add(last_created_excerpt)
 
-	lggr:info("function", " Add last created excerpt to nearest mindnode.")
+	lggr:info("function", "Add last created excerpt to nearest mindnode.")
 end
 
 --------------------
@@ -85,9 +86,9 @@ function M.save_mindmap_in_current_buf()
 	local mindmap_id = ts_misc.get_buf_mindmap_id(0, false)
 	if mindmap_id then
 		card_db.sub_items[mindmap_id]:save()
-		lggr:info("function", " Save mindmap <" .. mindmap_id .. ">.")
+		lggr:info("function", "Save mindmap <" .. mindmap_id .. ">.")
 	else
-		lggr:warn("function", " Current buffer is not a mindmap buffer. Abort saving.")
+		lggr:warn("function", "Current buffer is not a mindmap buffer. Abort saving.")
 	end
 end
 
@@ -97,9 +98,9 @@ function M.load_mindmap_in_current_buf()
 		card_db:add(mindmap.Mindmap:new({
 			id = mindmap_id,
 		}))
-		lggr:info("function", " Load mindmap <" .. mindmap_id .. ">.")
+		lggr:info("function", "Load mindmap <" .. mindmap_id .. ">.")
 	else
-		lggr:warn("function", " Current buffer is not a mindmap buffer. Abort loading.")
+		lggr:warn("function", "Current buffer is not a mindmap buffer. Abort loading.")
 	end
 end
 

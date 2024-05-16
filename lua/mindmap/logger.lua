@@ -154,7 +154,7 @@ end
 
 --------------------
 
-if true then
+if false then
 	local lg = M.Logger:new({
 		id = os.date("%Y-%m-%d %H:%M:%S"),
 		log_level = "DEBUG",

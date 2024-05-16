@@ -73,7 +73,7 @@ end
 
 if false then
 	local a = M.Excerpt:new()
-	local b = M.Excerpt:new()
+	local b = M.Excerpt.create_using_latest_visual_selection()
 
 	print("a.id: " .. a.id)
 	print("b.id: " .. b.id)

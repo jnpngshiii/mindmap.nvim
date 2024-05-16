@@ -163,10 +163,9 @@ end
 ---Find the biggest id of the sub items in the item.
 -- TODO: This function needs to be improved.
 function M.SimpleItem:find_biggest_id()
-	local biggest_id = ""
+	local biggest_id = self.type .. "-0000000000-0000"
 	for id, _ in pairs(self.sub_items) do
-		local id_num = tonumber(string.match(id, "%d+"))
-		if id_num and id_num > biggest_id then
+		if id < biggest_id then
 			biggest_id = id
 		end
 	end
