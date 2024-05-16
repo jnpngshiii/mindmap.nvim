@@ -1,11 +1,17 @@
 -- Item
 local prototype = require("mindmap.prototype")
+
+local excerpt = require("mindmap.excerpt")
+
 local card = require("mindmap.card")
 local mindnode = require("mindmap.mindnode")
 local mindmap = require("mindmap.mindmap")
+
 local database = require("mindmap.database")
+
 -- Logger
 local logger = require("mindmap.logger")
+
 -- Misc
 local misc = require("mindmap.misc")
 local ts_misc = require("mindmap.ts_misc")
@@ -23,17 +29,17 @@ local lggr = M.Logger:new({
 })
 lggr:info(lggr.type, "Init mindmap.nvim logger.")
 
-local mindmap_db = database.Database:new({
-	id = "mindmap_db",
+local card_db = database.Database:new({
+	id = "card_db",
 	sub_item_class = mindmap.Mindmap,
 })
-lggr:info(mindmap_db.type, "Init mindmap database.")
+lggr:info(card_db.type, "Init card database.")
 
-local unused_excerpt_db = mindnode.Mindnode:new({
+local excerpt_db = mindnode.Mindnode:new({
 	id = "excerpt_db",
-	sub_item_class = card.Card, -- TODO: Excerpt
+	sub_item_class = excerpt.Excerpt,
 })
-lggr:info(mindmap_db.type, "Init excerpt database.")
+lggr:info(card_db.type, "Init excerpt database.")
 
 --------------------
 -- Excerpt Functions
@@ -41,13 +47,13 @@ lggr:info(mindmap_db.type, "Init excerpt database.")
 
 function M.create_excerpt_using_latest_visual_selection()
 	local xpt = excerpt.Excerpt.create_using_latest_visual_selection()
-	unused_excerpt_db.excerpts[#unused_excerpt_db.excerpts + 1] = xpt
+	excerpt_db.excerpts[#excerpt_db.excerpts + 1] = xpt
 
 	lggr:log("[Function] Create excerpt using latest visual selection.", "info")
 end
 
 function M.show_unused_excerpt_ids()
-	unused_excerpt_db.excerpts:trigger("show_id")
+	excerpt_db.excerpts:trigger("show_id")
 
 	lggr:log("[Function] Show unused excerpt IDs.", "info")
 end
@@ -59,14 +65,14 @@ end
 function M.add_last_created_excerpt_to_nearest_mindnode()
 	-- Get mindmap
 	local mindmap_id = ts_misc.get_buf_mindmap_id(0, true)
-	local mmp = mindmap_db.mindmaps.find(mindmap.Mindmap, mindmap_id, true)
+	local mmp = card_db.mindmaps.find(mindmap.Mindmap, mindmap_id, true)
 	-- Get mindnode
 	local mindnode_id = ts_misc.get_nearest_heading_node_id(true)
 	local mnd = mmp.mindnodes.find(mindnode.Mindnode, mindnode_id, true)
 	-- Add excerpt
 	-- TODO: Use pop function.
-	mnd.excerpts:add(unused_excerpt_db.excerpts[#unused_excerpt_db.excerpts])
-	unused_excerpt_db.excerpts[#unused_excerpt_db.excerpts] = nil
+	mnd.excerpts:add(excerpt_db.excerpts[#excerpt_db.excerpts])
+	excerpt_db.excerpts[#excerpt_db.excerpts] = nil
 
 	lggr:log("[Function] Add last created excerpt to nearest mindnode.", "info")
 end
@@ -79,7 +85,7 @@ function M.save_mindmap_in_current_buf()
 	local mindmap_id = ts_misc.get_buf_mindmap_id(0, false)
 	print(mindmap_id)
 	if mindmap_id then
-		mindmap_db.mindmaps[mindmap_id]:save()
+		card_db.mindmaps[mindmap_id]:save()
 		lggr:log("[Function] Save mindmap <" .. mindmap_id .. ">.", "info")
 	else
 		lggr:log("[Function] Current buffer is not a mindmap buffer. Abort saving.", "warn")
@@ -89,10 +95,10 @@ end
 function M.load_mindmap_in_current_buf()
 	local mindmap_id = ts_misc.get_buf_mindmap_id(0, false)
 	if mindmap_id then
-		mindmap_db.mindmaps[mindmap_id] = prototype.SimpleDatabase:new({
+		card_db.mindmaps[mindmap_id] = prototype.SimpleDatabase:new({
 			db_path = misc.get_current_proj_path() .. "/" .. ".mindmap",
 		})
-		mindmap_db.mindmaps[mindmap_id]:load()
+		card_db.mindmaps[mindmap_id]:load()
 		lggr:log("[Function] Load mindmap <" .. mindmap_id .. ">.", "info")
 	else
 		lggr:log("[Function] Current buffer is not a mindmap buffer. Abort loading.", "warn")
