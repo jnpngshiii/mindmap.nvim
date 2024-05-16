@@ -7,46 +7,39 @@ local M = {}
 -- Class Excerpt
 --------------------
 
----@class Excerpt : SimpleDatabase
+---@class Excerpt : SimpleItem
 ---@field rel_file_path string Relative path to the project root of the file where the excerpt is from.
 ---@field file_name string Name of the file where the excerpt is from.
----@field start_row number Start row of the excerpt.
----@field start_col number Start column of the excerpt.
----@field end_row number End row of the excerpt.
----@field end_col number End column of the excerpt.
-M.Excerpt = prototype.SimpleDatabase:new({
-	rel_file_path = "",
-	file_name = "",
-	start_row = -1,
-	start_col = -1,
-	end_row = -1,
-	end_col = -1,
-})
+---@field start_row integer Start row of the excerpt.
+---@field start_col integer Start column of the excerpt.
+---@field end_row integer End row of the excerpt.
+---@field end_col integer End column of the excerpt.
+M.Excerpt = prototype.SimpleItem:new()
 
 ----------
 -- Instance Method
 ----------
 
----@param obj? table
+---Create a new excerpt object.
+---@param tbl? table Table used to create the item.
+---@param sub_item_class? SimpleItem Class of the sub items. Default: nil.
 ---@return table
-function M.Excerpt:new(obj)
-	obj = obj or {}
+function M.Excerpt:new(tbl, sub_item_class)
+	tbl = tbl or {}
+	tbl.type = "excerpt"
+	tbl = prototype.SimpleItem:new(tbl, sub_item_class or nil)
 
-	obj.id = obj.id or ("xpt-" .. misc.get_unique_id())
-	obj.type = obj.type or "xpt"
-	obj.created_at = obj.created_at or tonumber(os.time())
-	obj.updated_at = obj.updated_at or tonumber(os.time())
-	obj.rel_file_path = obj.rel_file_path or self.rel_file_path
-	obj.file_name = obj.file_name or self.file_name
-	obj.start_row = obj.start_row or self.start_row
-	obj.start_col = obj.start_col or self.start_col
-	obj.end_row = obj.end_row or self.end_row
-	obj.end_col = obj.end_col or self.end_col
+	tbl.rel_file_path = tbl.rel_file_path or self.rel_file_path
+	tbl.file_name = tbl.file_name or self.file_name
+	tbl.start_row = tbl.start_row or self.start_row
+	tbl.start_col = tbl.start_col or self.start_col
+	tbl.end_row = tbl.end_row or self.end_row
+	tbl.end_col = tbl.end_col or self.end_col
 
-	setmetatable(obj, self)
+	setmetatable(tbl, self)
 	self.__index = self
 
-	return obj
+	return tbl
 end
 
 ----------
@@ -84,11 +77,8 @@ if false then
 
 	print("a.id: " .. a.id)
 	print("b.id: " .. b.id)
+
 	print("a.created_at: " .. a.created_at)
-
-	--- Sleep for 1 second
-	os.execute("sleep 2")
-
 	print("b.created_at: " .. b.created_at)
 end
 
