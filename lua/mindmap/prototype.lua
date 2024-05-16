@@ -10,7 +10,7 @@ local M = {}
 ---@field id string Message timestamp.
 ---@field type string Message type (DEBUG, INFO, WARN, ERROR). Default: "INFO".
 ---@field source string Message source (Database, Main, Security, etc.). Default: "Unknown".
----@field content string Message content.
+---@field content string Message content. Default: "Unknown Content.".
 ---@field string string Message string.
 -- Example:
 -- 2024-05-15 10:30:10 DEBUG [Database] Connecting to database
@@ -32,7 +32,7 @@ function M.Message:new(tbl)
 	tbl.id = tbl.id or os.date("%Y-%m-%d %H:%M:%S")
 	tbl.type = tbl.type or "INFO"
 	tbl.source = tbl.source or "Unknown"
-	tbl.content = tbl.content or "Unknown Content"
+	tbl.content = tbl.content or "Unknown Content."
 	tbl.string = string.format("%s %s [%s] %s", tbl.id, tbl.type, tbl.source, tbl.content)
 
 	setmetatable(tbl, self)

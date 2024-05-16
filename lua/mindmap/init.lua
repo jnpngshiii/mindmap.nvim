@@ -47,15 +47,15 @@ lggr:info(card_db.type, "Init excerpt database.")
 
 function M.create_excerpt_using_latest_visual_selection()
 	local xpt = excerpt.Excerpt.create_using_latest_visual_selection()
-	excerpt_db.excerpts[#excerpt_db.excerpts + 1] = xpt
+	excerpt_db.add(xpt)
 
-	lggr:log("[Function] Create excerpt using latest visual selection.", "info")
+	lggr:info("function", " Create excerpt using latest visual selection.")
 end
 
 function M.show_unused_excerpt_ids()
 	excerpt_db.excerpts:trigger("show_id")
 
-	lggr:log("[Function] Show unused excerpt IDs.", "info")
+	lggr:info("function", " Show unused excerpt IDs.")
 end
 
 --------------------
@@ -74,7 +74,7 @@ function M.add_last_created_excerpt_to_nearest_mindnode()
 	mnd.excerpts:add(excerpt_db.excerpts[#excerpt_db.excerpts])
 	excerpt_db.excerpts[#excerpt_db.excerpts] = nil
 
-	lggr:log("[Function] Add last created excerpt to nearest mindnode.", "info")
+	lggr:info("function", " Add last created excerpt to nearest mindnode.")
 end
 
 --------------------
@@ -86,9 +86,9 @@ function M.save_mindmap_in_current_buf()
 	print(mindmap_id)
 	if mindmap_id then
 		card_db.mindmaps[mindmap_id]:save()
-		lggr:log("[Function] Save mindmap <" .. mindmap_id .. ">.", "info")
+		lggr:info("function", " Save mindmap <" .. mindmap_id .. ">.")
 	else
-		lggr:log("[Function] Current buffer is not a mindmap buffer. Abort saving.", "warn")
+		lggr:warn("function", " Current buffer is not a mindmap buffer. Abort saving.")
 	end
 end
 
@@ -99,26 +99,10 @@ function M.load_mindmap_in_current_buf()
 			db_path = misc.get_current_proj_path() .. "/" .. ".mindmap",
 		})
 		card_db.mindmaps[mindmap_id]:load()
-		lggr:log("[Function] Load mindmap <" .. mindmap_id .. ">.", "info")
+		lggr:info("function", " Load mindmap <" .. mindmap_id .. ">.")
 	else
-		lggr:log("[Function] Current buffer is not a mindmap buffer. Abort loading.", "warn")
+		lggr:warn("function", " Current buffer is not a mindmap buffer. Abort loading.")
 	end
-end
-
---------------------
--- Logger Functions
---------------------
-
-function M.show_log_in_log_cache()
-	lggr:show()
-
-	lggr:log("[Function] Show logs in the log cache.", "info")
-end
-
-function M.show_log_in_log_file()
-	lggr:show_all()
-
-	lggr:log("[Function] Show logs in the log file.", "info")
 end
 
 --------------------
