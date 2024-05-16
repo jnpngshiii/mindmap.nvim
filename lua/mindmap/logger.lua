@@ -1,4 +1,4 @@
-local misc = require("mindmap.misc")
+local prototype = require("mindmap.prototype")
 
 local M = {}
 
@@ -6,126 +6,145 @@ local M = {}
 -- Class Logger
 --------------------
 
--- 2021-09-15 10:30:15 INFO [Main] Application started
--- 2021-09-15 10:30:20 DEBUG [Database] Connecting to database
--- 2021-09-15 10:30:25 ERROR [Main] Error occurred: NullPointerException
--- 2021-09-15 10:30:30 WARN [Security] Unauthorized access attempt
-
----@class Logger
----@field cache string[] The cache of log messages.
----@field log_path string Path to the log file.
+---@class Logger : SimpleItem
+---@field log_level_tbl table<string, number> Table of log levels.
 ---@field log_level string Log level of the logger.
----@field log_level_table table<string, number> The table of log levels.
-M.Logger = {
-	cache = {},
-	log_path = "",
-	log_level = "INFO", -- NOT USED
-	---@deprecated
-	log_level_table = {
-		INFO = 1,
-		DEBUG = 2,
-		ERROR = 3,
-		WARN = 4,
-	},
-}
+---@field show_in_nvim boolean Show logs in Neovim.
+M.Logger = prototype.SimpleItem:new()
 
 ----------
 -- Instance Method
 ----------
 
----@param obj table?
+---@param tbl table?
 ---@return table
-function M.Logger:init(obj)
-	obj = obj or {}
-	obj.cache = obj.cache or self.cache
-	obj.log_path = obj.log_path or self.log_path
-	obj.log_level = obj.log_level or self.log_level
-	obj.log_level_table = obj.log_level_table or self.log_level_table
+function M.Logger:new(tbl)
+	tbl = tbl or {}
+	tbl.type = "logger"
+	tbl = prototype.SimpleItem:new(tbl)
 
-	if misc.check_table_index(self.log_level, self.log_level_table) then
-		error("Logger Error: Invalid log level: " .. self.log_level)
+	tbl.log_level_tbl = {
+		["DEBUG"] = 1,
+		["INFO"] = 2,
+		["WARN"] = 3,
+		["ERROR"] = 4,
+	}
+
+	if tbl.log_level and tbl.log_level_tbl[tbl.log_level] then
+	else
+		tbl.log_level = "INFO"
 	end
 
-	setmetatable(obj, self)
+	tbl.show_in_nvim = tbl.show_in_nvim or false
+
+	setmetatable(tbl, self)
 	self.__index = self
 
-	return obj
+	return tbl
 end
 
----Log a message.
----@param msg string The message to log.
----@param msg_level string The level of the message.
----@return nil
-function M.Logger:log(msg, msg_level)
-	if misc.check_table_index(msg_level, self.log_level_table) then
-		error("Logger Error: Invalid log level: " .. msg_level)
+---Add a [DEBUG] message to the logger.
+---@param source string Message source (Database, Main, Security, etc.). Default: "Unknown".
+---@param content string Message content.
+function M.Logger:debug(source, content)
+	if self.log_level_tbl["DEBUG"] < self.log_level_tbl[self.log_level] then
+		return
 	end
 
-	local formatted_timestamp = os.date("%Y-%m-%d %H:%M:%S", os.time())
-	msg = formatted_timestamp .. " " .. string.upper(msg_level) .. " " .. msg .. "\n"
+	local msg = prototype.Message:new({
+		type = "DEBUG",
+		source = source,
+		content = content,
+	})
+	self:add(msg)
+	self:save()
 
-	self.cache[#self.cache + 1] = msg
-	self:save(msg)
-
-	if true then
-		vim.api.nvim_out_write(msg)
-	end
-end
-
----Show all logs in the log cache.
----@return nil
-function M.Logger:show()
-	for _, msg in pairs(self.cache) do
-		vim.api.nvim_out_write(msg .. "\n")
+	if self.show_in_nvim then
+		vim.cmd("echohl comment")
+		local ok = pcall(vim.cmd, string.format('echom "%s"', msg.string))
+		if not ok then
+			vim.api.nvim_out_write(msg.string .. "\n")
+		end
+		vim.cmd("echohl NONE")
 	end
 end
 
----Show all logs in the log file.
----@return nil
-function M.Logger:show_all()
-	local log_file, err = io.open(self.log_path, "r")
-	if not log_file then
-		error("Logger Info: Could not open file at: " .. self.log_path .. " Error: " .. err)
+---Add a [INFO] message to the logger.
+---@param source string Message source (Database, Main, Security, etc.). Default: "Unknown".
+---@param content string Message content.
+function M.Logger:info(source, content)
+	if self.log_level_tbl["INFO"] < self.log_level_tbl[self.log_level] then
+		return
 	end
 
-	local log_content = log_file:read("*a")
-	for msg in log_content:gmatch("[^\n\r]+") do
-		vim.api.nvim_out_write(msg .. "\n")
-	end
+	local msg = prototype.Message:new({
+		type = "INFO",
+		source = source,
+		content = content,
+	})
+	self:add(msg)
+	self:save()
 
-	log_file:close()
+	if self.show_in_nvim then
+		vim.cmd("echohl None")
+		local ok = pcall(vim.cmd, string.format('echom "%s"', msg.string))
+		if not ok then
+			vim.api.nvim_out_write(msg.string .. "\n")
+		end
+		vim.cmd("echohl NONE")
+	end
 end
 
----Clean the log cache.
----@return nil
-function M.Logger:clean()
-	self.cache = {}
-end
-
----Clean the log file.
----@return nil
-function M.Logger:clean_all()
-	local log_file, err = io.open(self.log_path, "w")
-	if not log_file then
-		error("Logger Info: Could not open file at: " .. self.log_path .. " Error: " .. err)
+---Add a [WARN] message to the logger.
+---@param source string Message source (Database, Main, Security, etc.). Default: "Unknown".
+---@param content string Message content.
+function M.Logger:warn(source, content)
+	if self.log_level_tbl["WARN"] < self.log_level_tbl[self.log_level] then
+		return
 	end
 
-	log_file:write("")
-	log_file:close()
-	self:clean()
+	local msg = prototype.Message:new({
+		type = "WARN",
+		source = source,
+		content = content,
+	})
+	self:add(msg)
+	self:save()
+
+	if self.show_in_nvim then
+		vim.cmd("echohl WarningMsg")
+		local ok = pcall(vim.cmd, string.format('echom "%s"', msg.string))
+		if not ok then
+			vim.api.nvim_out_write(msg.string .. "\n")
+		end
+		vim.cmd("echohl NONE")
+	end
 end
 
----Save a log to the log file.
----@return nil
-function M.Logger:save(msg)
-	local log_file, err = io.open(self.log_path, "a")
-	if not log_file then
-		error("Logger Info: Could not open file at: " .. self.log_path .. " Error: " .. err)
+---Add a [ERROR] message to the logger.
+---@param source string Message source (Database, Main, Security, etc.). Default: "Unknown".
+---@param content string Message content.
+function M.Logger:error(source, content)
+	if self.log_level_tbl["ERROR"] < self.log_level_tbl[self.log_level] then
+		return
 	end
 
-	log_file:seek("end")
-	log_file:write(msg)
-	log_file:close()
+	local msg = prototype.Message:new({
+		type = "ERROR",
+		source = source,
+		content = content,
+	})
+	self:add(msg)
+	self:save()
+
+	if self.show_in_nvim then
+		vim.cmd("echohl ErrorMsg")
+		local ok = pcall(vim.cmd, string.format('echom "%s"', msg.string))
+		if not ok then
+			vim.api.nvim_out_write(msg.string .. "\n")
+		end
+		vim.cmd("echohl NONE")
+	end
 end
 
 ----------
@@ -134,13 +153,16 @@ end
 
 --------------------
 
--- I don't think init a logger here is a good idea.
--- But how to make all items use the same logger?
-
--- M.lggr = M.Logger:init({
---   log_path = vim.fn.stdpath("data") .. "/mindmap.log",
--- })
---
--- M.lggr:log("[Logger] Init mindmap logger.", "info")
+if true then
+	local lg = M.Logger:new({
+		id = os.date("%Y-%m-%d %H:%M:%S"),
+		log_level = "DEBUG",
+		show_in_nvim = true,
+	})
+	lg:debug("Main", "This is a debug message")
+	lg:info("Main", "This is an info message")
+	lg:warn("Main", "This is a warn message")
+	lg:error("Main", "This is an error message")
+end
 
 return M

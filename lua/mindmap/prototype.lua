@@ -3,32 +3,71 @@ local misc = require("mindmap.misc")
 local M = {}
 
 --------------------
+-- Class Message
+--------------------
+
+---@class Message
+---@field id string Message timestamp.
+---@field type string Message type (DEBUG, INFO, WARN, ERROR). Default: "INFO".
+---@field source string Message source (Database, Main, Security, etc.). Default: "Unknown".
+---@field content string Message content.
+---@field string string Message string.
+-- Example:
+-- 2024-05-15 10:30:10 DEBUG [Database] Connecting to database
+-- 2024-05-15 10:30:15 INFO [Main] Application started
+-- 2024-05-15 10:30:20 WARN [Security] Unauthorized access attempt
+-- 2024-05-15 10:30:25 ERROR [Main] Error occurred: NullPointerException
+M.Message = {}
+
+----------
+-- Instance Method
+----------
+
+---@param tbl table?
+---@return table
+function M.Message:new(tbl)
+	tbl = tbl or {}
+
+	tbl.id = tbl.id or os.date("%Y-%m-%d %H:%M:%S")
+	tbl.type = tbl.type or "INFO"
+	tbl.source = tbl.source or "Unknown"
+	tbl.content = tbl.content or "Unknown Content"
+	tbl.string = string.format("%s %s [%s] %s", tbl.id, tbl.type, tbl.source, tbl.content)
+
+	setmetatable(tbl, self)
+	self.__index = self
+
+	return tbl
+end
+
+----------
+-- Class Method
+----------
+
+--------------------
 -- Class SimpleItem
 --------------------
 
+---@class SimpleItem
 -- SimpleItem can be used as a simple item, or a simple database that manages sub items.
 --
 -- Example:
 -- ---@class Card : SimpleItem
---
 -- ---@class Mindnode : SimpleItem
 -- ---@field sub_items Card Cards in the mindnode.
---
 -- ---@class Mindmap : SimpleItem
 -- ---@field sub_items Mindnode Mindnodes in the mindmap.
---
 -- ---@class Database : SimpleItem
 -- ---@field sub_items Mindmap Mindmaps in the database.
-
----@class SimpleItem
+--
 ---@field type string Type of the item.
 ---@field id string Id of the item.
 ---@field created_at integer Created time of the item.
 ---@field updated_at integer Updated time of the item.
 ---@field save_path string Path to load and save the item.
----Default: {current_project_path}/.mindmap/{id}.json
----Please make sure the path does not contain a "/" at the end.
----@field sub_items table<string, SimpleItem> Sub items in the item.
+-- Default: {current_project_path}/.mindmap/{id}.json
+-- Please make sure the path does not contain a "/" at the end.
+---@field sub_items table<string, SimpleItem|Message> Sub items in the item.
 M.SimpleItem = {}
 
 ----------
