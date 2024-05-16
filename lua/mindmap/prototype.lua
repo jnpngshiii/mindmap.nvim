@@ -68,7 +68,7 @@ end
 ---@field save_path string Path to load and save the item.
 -- Default: {current_project_path}/.mindmap/{id}.json
 -- Please make sure the path does not contain a "/" at the end.
----@field sub_items table<string, SimpleItem|Message> Sub items in the item.
+---@field sub_items table<string, SimpleItem|table> Sub items in the item.
 M.SimpleItem = {}
 
 ----------
@@ -134,28 +134,43 @@ function M.SimpleItem:remove(id)
 	self.sub_items[id] = nil
 end
 
----@deprecated
 ---Pop a sub item from the item and return it.
 ---@param id string Sub item ID to be popped.
 ---@return SimpleItem
 function M.SimpleItem:pop(id)
-	error("Not implemented")
+	local popped_item = self.sub_items[id]
+	self.sub_items[id] = nil
+	return popped_item
 end
 
----@deprecated
 ---Find a sub item in the item and return it.
 ---If the item is not found and created_if_not_found = true,
----then create and return a new item.
+---then create and return a new sub item.
 ---@param id string Sub item ID to be found.
----@param created_if_not_found boolean Create a new item if not found.
+---@param created_if_not_found boolean Create a new sub item if not found.
+---@param sub_item_class SimpleItem Class of the sub item.
 ---@return SimpleItem
-function M.SimpleItem:find(id, created_if_not_found)
+function M.SimpleItem:find(id, created_if_not_found, sub_item_class)
 	local found_item = self.sub_items[id]
 	if not found_item and created_if_not_found then
-		found_item = self:new({ id = id })
+		-- TODO: Maybe we need to pass more arguments to the `new` function.
+		found_item = sub_item_class:new({ id = id })
 		self:add(found_item)
 	end
 	return found_item
+end
+
+---Find the biggest id of the sub items in the item.
+-- TODO: This function needs to be improved.
+function M.SimpleItem:find_biggest_id()
+	local biggest_id = ""
+	for id, _ in pairs(self.sub_items) do
+		local id_num = tonumber(string.match(id, "%d+"))
+		if id_num and id_num > biggest_id then
+			biggest_id = id
+		end
+	end
+	return biggest_id
 end
 
 ---@deprecated

@@ -86,7 +86,7 @@ function M.get_buf_mindmap_id(bufnr, register_if_not)
 	end
 
 	if not id and register_if_not then
-		id = "mmp-" .. misc.get_unique_id()
+		id = "mindmap-" .. misc.get_unique_id()
 		local _, _, end_row, _ = meta_root:range()
 		vim.api.nvim_buf_set_lines(bufnr, end_row, end_row + 1, false, { "mindmap: " .. id, "@end" })
 		-- FIXME: 如何光标恰好在 end_row + 1, 会导致插入异常
@@ -201,7 +201,7 @@ function M.get_nearest_heading_node_id(register_if_not)
 	local nhn_id = string.match(nhn_title, "mnode-%d%d%d%d%d%d%d%d%d%d-%d%d%d%d")
 	-- TODO: Warn user if multiple ids are found.
 	if not nhn_id and register_if_not then
-		nhn_id = "mnd-" .. misc.get_unique_id()
+		nhn_id = "mindnode-" .. misc.get_unique_id()
 		M.replace_node_text(nhn_title .. " %" .. nhn_id .. "%", nhn_title_node)
 	end
 

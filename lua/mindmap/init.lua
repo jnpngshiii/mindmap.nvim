@@ -35,25 +35,25 @@ local card_db = database.Database:new({
 })
 lggr:info(card_db.type, "Init card database.")
 
-local excerpt_db = mindnode.Mindnode:new({
-	id = "excerpt_db",
+local unused_excerpt_db = mindnode.Mindnode:new({
+	id = "unused_excerpt_db",
 	sub_item_class = excerpt.Excerpt,
 })
-lggr:info(card_db.type, "Init excerpt database.")
+lggr:info(card_db.type, "Init unused excerpt database.")
 
 --------------------
 -- Excerpt Functions
 --------------------
 
 function M.create_excerpt_using_latest_visual_selection()
-	local xpt = excerpt.Excerpt.create_using_latest_visual_selection()
-	excerpt_db.add(xpt)
+	local created_excerpt = excerpt.Excerpt.create_using_latest_visual_selection()
+	unused_excerpt_db.add(created_excerpt)
 
 	lggr:info("function", " Create excerpt using latest visual selection.")
 end
 
 function M.show_unused_excerpt_ids()
-	excerpt_db.excerpts:trigger("show_id")
+	unused_excerpt_db.excerpts:trigger("show_id")
 
 	lggr:info("function", " Show unused excerpt IDs.")
 end
@@ -65,14 +65,14 @@ end
 function M.add_last_created_excerpt_to_nearest_mindnode()
 	-- Get mindmap
 	local mindmap_id = ts_misc.get_buf_mindmap_id(0, true)
-	local mmp = card_db.sub_items.find(mindmap.Mindmap, mindmap_id, true)
+	local found_mindmap = card_db:find(mindmap_id, true, mindmap.Mindmap)
 	-- Get mindnode
 	local mindnode_id = ts_misc.get_nearest_heading_node_id(true)
-	local mnd = mmp.mindnodes.find(mindnode.Mindnode, mindnode_id, true)
+	local found_mindnode = found_mindmap:find(mindnode_id, true, mindnode.Mindnode)
 	-- Add excerpt
 	-- TODO: Use pop function.
-	mnd.excerpts:add(excerpt_db.excerpts[#excerpt_db.excerpts])
-	excerpt_db.excerpts[#excerpt_db.excerpts] = nil
+	local last_created_excerpt = unused_excerpt_db.pop(unused_excerpt_db:find_biggest_id())
+	found_mindnode:add(last_created_excerpt)
 
 	lggr:info("function", " Add last created excerpt to nearest mindnode.")
 end
