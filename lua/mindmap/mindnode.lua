@@ -38,14 +38,33 @@ end
 
 if true then
 	local mn = M.Mindnode:new({
-		id = "0000",
+		id = "test_mindnode",
 	})
 
-	local card_1 = M.Card:new({})
+	local card_1 = card.Card:new({
+		id = "test_card_1",
+	})
 	mn:add(card_1)
 
-	local card_2 = M.Card:new({})
+	local simple_item_1_1 = prototype.SimpleItem:new({
+		id = "test_simple_item_1_1",
+	})
+	card_1:add(simple_item_1_1)
+
+	local simple_item_1_2 = prototype.SimpleItem:new({
+		id = "test_simple_item_1_2",
+	})
+	card_1:add(simple_item_1_2)
+
+	local card_2 = card.Card:new({
+		id = "test_card_2",
+	})
 	mn:add(card_2)
+
+	local simple_item_2_1 = prototype.SimpleItem:new({
+		id = "test_simple_item_2_1",
+	})
+	card_2:add(simple_item_2_1)
 
 	mn:save()
 end
