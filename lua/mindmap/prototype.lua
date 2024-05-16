@@ -38,9 +38,8 @@ M.SimpleItem = {}
 
 ---@param tbl? table Table used to create the item.
 ---@param sub_item_class? SimpleItem Class of the sub items.
----@param load? boolean Whether to load sub items from a JSON file.
 ---@return table
-function M.SimpleItem:new(tbl, sub_item_class, load)
+function M.SimpleItem:new(tbl, sub_item_class)
 	tbl = tbl or {}
 
 	tbl.type = tbl.type or "simpleitem"
@@ -54,17 +53,14 @@ function M.SimpleItem:new(tbl, sub_item_class, load)
 	tbl.sub_items = tbl.sub_items or {}
 	-- If sub_item_class is provided and has function `new`, use this function to create sub items.
 	if sub_item_class and sub_item_class.new then
-		-- If `load = true`, load sub items from a JSON file.
-		if load then
-			local json_path = self.save_path .. "/" .. self.id .. ".json"
-			local json, _ = io.open(json_path, "r")
-			if json then
-				local json_content = vim.fn.json_decode(json:read("*a"))
-				for k, v in pairs(json_content) do
-					if type(k) == "string" and type(v) == "table" and not v.new then
-						-- Make sure v is just a table.
-						tbl.sub_items[k] = v
-					end
+		local json_path = self.save_path .. "/" .. self.id .. ".json"
+		local json, _ = io.open(json_path, "r")
+		if json then
+			local json_content = vim.fn.json_decode(json:read("*a"))
+			for k, v in pairs(json_content) do
+				if type(k) == "string" and type(v) == "table" and not v.new then
+					-- Make sure v is just a table.
+					tbl.sub_items[k] = v
 				end
 			end
 		end

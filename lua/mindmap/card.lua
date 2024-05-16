@@ -19,10 +19,10 @@ M.Card = prototype.SimpleItem:new()
 
 ---@param tbl table?
 ---@return table
-function M.Card:new(tbl, sub_item_class, load)
+function M.Card:new(tbl)
 	tbl = tbl or {}
-	tbl.type = "crd"
-	tbl = prototype.SimpleItem:new(tbl, sub_item_class, load)
+	tbl.type = "card"
+	tbl = prototype.SimpleItem:new(tbl, M.SimpleItem)
 
 	tbl.created_at = tbl.created_at or tonumber(os.time())
 	tbl.updated_at = tbl.updated_at or tonumber(os.time())
@@ -48,7 +48,7 @@ if true then
 	local a = M.Card:new({
 		id = "0000",
 		created_at = 1,
-	}, M.Card, true)
+	})
 	-- print("a.id: " .. a.id)
 	-- print("a.type: " .. a.type)
 	-- print("a.created_at: " .. a.created_at)
