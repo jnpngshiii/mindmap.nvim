@@ -1,11 +1,5 @@
 local prototype = require("mindmap.prototype")
 local card = require("mindmap.card")
-local excerpt = require("mindmap.excerpt")
-local misc = require("mindmap.misc")
-
--- ---@alias prototype.SimpleDatabase SimpleDatabase
--- ---@alias card.Card Card
--- ---@alias excerpt.Excerpt Excerpt
 
 local M = {}
 
@@ -13,50 +7,27 @@ local M = {}
 -- Class Mindnode
 --------------------
 
----@class Mindnode : SimpleDatabase
----@field excerpts SimpleDatabase Excerpts in the mindnode.
----@field cards SimpleDatabase Cards in the mindnode.
-M.Mindnode = prototype.SimpleDatabase:new({
-	excerpts = prototype.SimpleDatabase:new(),
-	cards = prototype.SimpleDatabase:new(),
-})
+---@class Mindnode : SimpleItem
+M.Mindnode = prototype.SimpleItem:new()
 
 ----------
 -- Instance Method
 ----------
 
----@param obj table?
+---@param tbl table?
 ---@return table
-function M.Mindnode:new(obj)
-	obj = obj or {}
+function M.Mindnode:new(tbl)
+	tbl = tbl or {}
+	tbl.type = "mindnode"
+	tbl = prototype.SimpleItem:new(tbl, card.Card)
 
-	obj.id = obj.id or ("mnd-" .. misc.get_unique_id())
-	obj.type = obj.type or "mnd"
-	obj.created_at = obj.created_at or tonumber(os.time())
-	obj.updated_at = obj.updated_at or tonumber(os.time())
+	tbl.created_at = tbl.created_at or tonumber(os.time())
+	tbl.updated_at = tbl.updated_at or tonumber(os.time())
 
-	obj.excerpts = obj.excerpts or self.excerpts
-	if obj.excerpts then
-		for k, v in pairs(obj.excerpts) do
-			if type(k) == "string" and type(v) == "table" then
-				obj.excerpts[k] = excerpt.Excerpt:new(v)
-			end
-		end
-	end
-
-	obj.cards = obj.cards or self.cards
-	if obj.cards then
-		for k, v in pairs(obj.cards) do
-			if type(k) == "string" and type(v) == "table" then
-				obj.cards[k] = card.Card:new(v)
-			end
-		end
-	end
-
-	setmetatable(obj, self)
+	setmetatable(tbl, self)
 	self.__index = self
 
-	return obj
+	return tbl
 end
 
 ----------
@@ -64,5 +35,19 @@ end
 ----------
 
 --------------------
+
+if true then
+	local mn = M.Mindnode:new({
+		id = "0000",
+	})
+
+	local card_1 = M.Card:new({})
+	mn:add(card_1)
+
+	local card_2 = M.Card:new({})
+	mn:add(card_2)
+
+	mn:save()
+end
 
 return M

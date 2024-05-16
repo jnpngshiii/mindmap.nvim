@@ -1,5 +1,4 @@
 local prototype = require("mindmap.prototype")
-local misc = require("mindmap.misc")
 
 local M = {}
 
@@ -22,7 +21,7 @@ M.Card = prototype.SimpleItem:new()
 function M.Card:new(tbl)
 	tbl = tbl or {}
 	tbl.type = "card"
-	tbl = prototype.SimpleItem:new(tbl, M.SimpleItem)
+	tbl = prototype.SimpleItem:new(tbl, prototype.SimpleItem)
 
 	tbl.created_at = tbl.created_at or tonumber(os.time())
 	tbl.updated_at = tbl.updated_at or tonumber(os.time())
@@ -36,26 +35,23 @@ function M.Card:new(tbl)
 	return tbl
 end
 
-function M.Card.ttt()
-	print("Hello")
-end
-
 ----------
 -- Class Method
 ----------
 
-if true then
+--------------------
+
+if false then
 	local a = M.Card:new({
 		id = "0000",
 		created_at = 1,
 	})
+
 	-- print("a.id: " .. a.id)
 	-- print("a.type: " .. a.type)
 	-- print("a.created_at: " .. a.created_at)
 	-- print("a.updated_at: " .. a.updated_at)
 	-- print("a.save_path: " .. a.save_path)
-
-	a:ttt()
 
 	local b = M.Card:new({
 		created_at = 2,
@@ -69,7 +65,5 @@ if true then
 
 	a:save()
 end
-
---------------------
 
 return M
