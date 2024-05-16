@@ -23,8 +23,6 @@ function M.Card:new(tbl)
 	tbl.type = "card"
 	tbl = prototype.SimpleItem:new(tbl, prototype.SimpleItem)
 
-	tbl.created_at = tbl.created_at or tonumber(os.time())
-	tbl.updated_at = tbl.updated_at or tonumber(os.time())
 	tbl.due_at = tbl.due_at or 0
 	tbl.ease = tbl.ease or 250
 	tbl.interval = tbl.interval or 1 -- TODO: Needs investigation.
@@ -40,30 +38,5 @@ end
 ----------
 
 --------------------
-
-if false then
-	local a = M.Card:new({
-		id = "0000",
-		created_at = 1,
-	})
-
-	-- print("a.id: " .. a.id)
-	-- print("a.type: " .. a.type)
-	-- print("a.created_at: " .. a.created_at)
-	-- print("a.updated_at: " .. a.updated_at)
-	-- print("a.save_path: " .. a.save_path)
-
-	local b = M.Card:new({
-		created_at = 2,
-	})
-	a:add(b)
-
-	local c = M.Card:new({
-		created_at = 3,
-	})
-	b:add(c)
-
-	a:save()
-end
 
 return M

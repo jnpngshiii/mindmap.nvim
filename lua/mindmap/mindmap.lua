@@ -21,9 +21,6 @@ function M.Mindmap:new(tbl)
 	tbl.type = "mindmap"
 	tbl = prototype.SimpleItem:new(tbl, mindnode.Mindnode)
 
-	tbl.created_at = tbl.created_at or tonumber(os.time())
-	tbl.updated_at = tbl.updated_at or tonumber(os.time())
-
 	setmetatable(tbl, self)
 	self.__index = self
 

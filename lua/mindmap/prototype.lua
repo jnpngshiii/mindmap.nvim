@@ -183,18 +183,4 @@ end
 
 ----------
 
-if false then
-	local a = M.SimpleItem:new({
-		type = "simpleitem",
-		sub_class = M.SimpleItem,
-	})
-	print("a.id: " .. a.id)
-	print("a.type: " .. a.type)
-	print("a.created_at: " .. a.created_at)
-	print("a.updated_at: " .. a.updated_at)
-	print("a.save_path: " .. a.save_path)
-
-	-- a:save()
-end
-
 return M
