@@ -1,12 +1,5 @@
 local prototype = require("mindmap.prototype")
-local card = require("mindmap.card")
-local excerpt = require("mindmap.excerpt")
 local mindnode = require("mindmap.mindnode")
-local misc = require("mindmap.misc")
-
--- ---@alias prototype.SimpleDatabase SimpleDatabase
--- ---@alias card.Card Card
--- ---@alias excerpt.Excerpt Excerpt
 
 local M = {}
 
@@ -14,39 +7,27 @@ local M = {}
 -- Class Mindmap
 --------------------
 
----@class Mindmap : SimpleDatabase
----@field mindnodes SimpleDatabase Mindnodes in the mindmap.
-M.Mindmap = prototype.SimpleDatabase:new({
-	mindnodes = prototype.SimpleDatabase:new(),
-})
+---@class Mindmap : SimpleItem
+M.Mindmap = prototype.SimpleItem:new()
 
 ----------
 -- Instance Method
 ----------
 
----@param obj table?
+---@param tbl table?
 ---@return table
-function M.Mindmap:new(obj)
-	obj = obj or {}
+function M.Mindmap:new(tbl)
+	tbl = tbl or {}
+	tbl.type = "mindmap"
+	tbl = prototype.SimpleItem:new(tbl, mindnode.Mindnode)
 
-	obj.id = obj.id or ("mmp-" .. misc.get_unique_id())
-	obj.type = obj.type or "mmp"
-	obj.created_at = obj.created_at or tonumber(os.time())
-	obj.updated_at = obj.updated_at or tonumber(os.time())
+	tbl.created_at = tbl.created_at or tonumber(os.time())
+	tbl.updated_at = tbl.updated_at or tonumber(os.time())
 
-	obj.mindnodes = obj.mindnodes or self.mindnodes
-	if obj.mindnodes then
-		for k, v in pairs(obj.mindnodes) do
-			if type(k) == "string" and type(v) == "table" then
-				obj.mindnodes[k] = mindnode.Mindnode:new(v)
-			end
-		end
-	end
-
-	setmetatable(obj, self)
+	setmetatable(tbl, self)
 	self.__index = self
 
-	return obj
+	return tbl
 end
 
 ----------
@@ -54,9 +35,5 @@ end
 ----------
 
 --------------------
-
-local mindmap = M.Mindmap:new({
-	db_path = misc.get_current_proj_path() .. "/" .. ".mindmap",
-})
 
 return M
