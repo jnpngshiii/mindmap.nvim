@@ -23,7 +23,8 @@ M.Message = {}
 -- Instance Method
 ----------
 
----@param tbl table?
+---Create a new message object.
+---@param tbl? table Table used to create the item.
 ---@return table
 function M.Message:new(tbl)
 	tbl = tbl or {}
@@ -74,8 +75,9 @@ M.SimpleItem = {}
 -- Instance Method
 ----------
 
+---Create a new simple item object.
 ---@param tbl? table Table used to create the item.
----@param sub_item_class? SimpleItem Class of the sub items.
+---@param sub_item_class? SimpleItem Class of sub items.
 ---@return table
 function M.SimpleItem:new(tbl, sub_item_class)
 	tbl = tbl or {}

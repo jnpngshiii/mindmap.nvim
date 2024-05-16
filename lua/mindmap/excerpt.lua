@@ -27,7 +27,7 @@ M.Excerpt = prototype.SimpleDatabase:new({
 -- Instance Method
 ----------
 
----@param obj table?
+---@param obj? table
 ---@return table
 function M.Excerpt:new(obj)
 	obj = obj or {}

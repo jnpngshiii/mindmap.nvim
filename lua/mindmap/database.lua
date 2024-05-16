@@ -1,5 +1,4 @@
 local prototype = require("mindmap.prototype")
-local mindmap = require("mindmap.mindmap")
 
 local M = {}
 
@@ -14,6 +13,7 @@ M.Database = prototype.SimpleItem:new()
 -- Instance Method
 ----------
 
+---Create a new database object.
 ---@param tbl? table Table used to create the item.
 ---@param sub_item_class? SimpleItem Class of the sub items.
 ---@return table

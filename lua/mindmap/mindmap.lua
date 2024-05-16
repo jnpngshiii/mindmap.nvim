@@ -14,12 +14,14 @@ M.Mindmap = prototype.SimpleItem:new()
 -- Instance Method
 ----------
 
----@param tbl table?
+---Create a new mindmap object.
+---@param tbl? table Table used to create the item.
+---@param sub_item_class? SimpleItem Class of the sub items. Default: Mindnode.
 ---@return table
-function M.Mindmap:new(tbl)
+function M.Mindmap:new(tbl, sub_item_class)
 	tbl = tbl or {}
 	tbl.type = "mindmap"
-	tbl = prototype.SimpleItem:new(tbl, mindnode.Mindnode)
+	tbl = prototype.SimpleItem:new(tbl, sub_item_class or mindnode.Mindnode)
 
 	setmetatable(tbl, self)
 	self.__index = self

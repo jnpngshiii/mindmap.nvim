@@ -16,7 +16,8 @@ M.Logger = prototype.SimpleItem:new()
 -- Instance Method
 ----------
 
----@param tbl table?
+---Create a new logger object.
+---@param tbl? table
 ---@return table
 function M.Logger:new(tbl)
 	tbl = tbl or {}

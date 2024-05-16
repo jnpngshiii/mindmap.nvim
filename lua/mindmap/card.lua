@@ -16,12 +16,14 @@ M.Card = prototype.SimpleItem:new()
 -- Instance Method
 ----------
 
----@param tbl table?
+---Create a new card object.
+---@param tbl? table Table used to create the item.
+---@param sub_item_class? SimpleItem Class of the sub items. Default: nil.
 ---@return table
-function M.Card:new(tbl)
+function M.Card:new(tbl, sub_item_class)
 	tbl = tbl or {}
 	tbl.type = "card"
-	tbl = prototype.SimpleItem:new(tbl, prototype.SimpleItem)
+	tbl = prototype.SimpleItem:new(tbl, sub_item_class or nil)
 
 	tbl.due_at = tbl.due_at or 0
 	tbl.ease = tbl.ease or 250

@@ -13,7 +13,7 @@ local M = {}
 --------------------
 
 ---Get the root node of the neorg meta tree.
----@param bufnr integer? The buffer number.
+---@param bufnr? integer The buffer number.
 ---@return ts_node
 function M.get_neorg_meta_root(bufnr)
 	bufnr = bufnr or 0
@@ -36,7 +36,7 @@ function M.get_neorg_meta_root(bufnr)
 end
 
 ---Get the root node of the neorg document tree.
----@param bufnr integer? The buffer number.
+---@param bufnr? integer The buffer number.
 ---@return ts_node
 function M.get_neorg_doc_root(bufnr)
 	bufnr = bufnr or 0
@@ -56,8 +56,8 @@ end
 
 ---Get the mindmap id of the given buffer.
 ---If the id is not found and register_if_not is true, then generate, register and return a new id.
----@param bufnr integer? The buffer number.
----@param register_if_not boolean? Register a new id if not found.
+---@param bufnr? integer The buffer number.
+---@param register_if_not? boolean Register a new id if not found.
 ---@return string|nil
 function M.get_buf_mindmap_id(bufnr, register_if_not)
 	bufnr = bufnr or 0
@@ -102,7 +102,7 @@ end
 ---Replace the text of a node.
 ---@param text string|table<string>
 ---@param node ts_node
----@param bufnr integer? The buffer number.
+---@param bufnr? integer The buffer number.
 ---@return nil
 function M.replace_node_text(text, node, bufnr)
 	if type(text) == "string" then
@@ -116,7 +116,7 @@ end
 
 ---Get the text of a node.
 ---@param node ts_node
----@param bufnr integer? The buffer number.
+---@param bufnr? integer The buffer number.
 ---@return string
 function M.get_node_text(node, bufnr)
 	bufnr = bufnr or 0
@@ -125,7 +125,7 @@ end
 
 ---Get the title and content node of the given heading node.
 ---@param node ts_node The heading node.
----@param bufnr integer? The buffer number.
+---@param bufnr? integer The buffer number.
 ---@return ts_node[] # { title_node, content_node? }
 function M.get_title_and_content_node(node, bufnr)
 	if not string.match(node:type(), "^heading%d$") then
@@ -158,7 +158,7 @@ end
 
 ---Get subheading nodes of the given heading node.
 ---@param node ts_node The heading node.
----@param bufnr integer? The buffer number.
+---@param bufnr? integer The buffer number.
 ---@return ts_node[]
 function M.get_subheading_nodes(node, bufnr)
 	-- TODO: Implement this function.
@@ -191,7 +191,7 @@ end
 
 ---Get the nearest heading node id at the cursor.
 ---If the id is not found and register_if_not is true, then generate, register and return a new id.
----@param register_if_not boolean? Register a new id if not found.
+---@param register_if_not? boolean Register a new id if not found.
 ---@return string|nil
 function M.get_nearest_heading_node_id(register_if_not)
 	local nearest_heading_node = M.get_nearest_heading_node()
