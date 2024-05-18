@@ -2,14 +2,12 @@ local misc = require("mindmap.misc")
 
 ---@class Node
 ---
----@field id string Node ID.
----@field type string Node type. Default: "node". This field is reserved for future use.
----
----@field created_at integer Node created time.
----@field data table Data of the node. This field is reserved for future use.
----
----@field from_edge_ids string[] Edge IDs from this node.
----@field to_edge_ids string[] Edge IDs to this node.
+---@field type string Type of the node.
+---@field incoming_edge_ids string[] IDs of incoming edges to this node.
+---@field outcoming_edge_ids string[] IDs of outcoming edges from this node.
+---@field data table Data of the node. Subclass should put there own data in this field.
+---@field id string ID of the node.
+---@field created_at integer Created time of the node.
 local Node = {}
 
 --------------------
@@ -17,22 +15,20 @@ local Node = {}
 --------------------
 
 ---Create a new node.
----@param id? string Node ID.
----@param type? string Node type. Default: "node".
----@param created_at? integer Node created time.
+---@param type string Type of the node.
+---@param incoming_edge_ids? string[] IDs of incoming edges to this node.
+---@param outcoming_edge_ids? string[] IDs of outcoming edges from this node.
 ---@param data? table Data of the node. Subclass should put there own data in this field.
----@param from_edge_ids? string[] Edge IDs from this node.
----@param to_edge_ids? string[] Edge IDs to this node.
-function Node:new(id, type, created_at, data, from_edge_ids, to_edge_ids)
+---@param id? string ID of the node.
+---@param created_at? integer Created time of the node.
+function Node:new(type, incoming_edge_ids, outcoming_edge_ids, data, id, created_at)
 	local node = {
-		id = id or misc.get_unique_id(),
-		type = type or "node",
-
-		created_at = created_at or tonumber(os.time()),
+		type = type,
+		incoming_edge_ids = incoming_edge_ids or {},
+		outcoming_edge_ids = outcoming_edge_ids or {},
 		data = data or {},
-
-		from_edge_ids = from_edge_ids or {},
-		to_edge_ids = to_edge_ids or {},
+		id = id or misc.get_unique_id(),
+		created_at = created_at or tonumber(os.time()),
 	}
 
 	setmetatable(node, Node)
@@ -41,48 +37,57 @@ function Node:new(id, type, created_at, data, from_edge_ids, to_edge_ids)
 	return node
 end
 
----Add "from" edge to node.
----@param from_edge_id string "From" edge to add.
-function Node:add_from_edge(from_edge_id)
-	table.insert(self.from_edge_ids, from_edge_id)
-end
-
----Add "to" edge to node.
----@param to_edge_id string "To" edge ID to add.
+---Add incoming edge to node.
+---@param incoming_edge_id string ID of the incoming edge to add.
 ---@return nil
-function Node:add_to_edge(to_edge_id)
-	table.insert(self.to_edge_ids, to_edge_id)
+function Node:add_from_edge(incoming_edge_id)
+	table.insert(self.incoming_edge_ids, incoming_edge_id)
 end
 
+---Add outcoming edge to node.
+---@param outcoming_edge_id string ID of the outcoming edge to add.
+---@return nil
+function Node:add_to_edge(outcoming_edge_id)
+	table.insert(self.outcoming_edge_ids, outcoming_edge_id)
+end
+
+---@abstract
 ---Get content of the node.
 ---Subclass should implement this method.
 function Node:content()
-	error("Not implemented")
+	error("[Node] Please implement this method in subclass.")
 end
 
 --------------------
 -- Class Method
 --------------------
 
----Convert node to table.
----@param node Node Node to convert.
+---Convert a node to a table.
+---@param node Node Node to be converted.
 ---@return table
 function Node.to_table(node)
 	return {
-		id = node.id,
 		type = node.type,
-		created_at = node.created_at,
+		incoming_edge_ids = node.incoming_edge_ids,
+		outcoming_edge_ids = node.outcoming_edge_ids,
 		data = node.data,
-		from_edge_ids = node.from_edge_ids,
-		to_edge_ids = node.to_edge_ids,
+		id = node.id,
+		created_at = node.created_at,
 	}
 end
 
----Convert table to node.
----@param table table Table to convert.
+---Convert a table to a node.
+---@param table table Table to be converted.
 ---@return Node
 function Node.from_table(table)
-	return Node:new(table.id, table.type, table.created_at, table.data, table.from_edge_ids, table.to_edge_ids)
+	return Node:new(
+		table.type,
+		table.incoming_edge_ids,
+		table.outcoming_edge_ids,
+		table.data,
+		table.id,
+		table.created_at
+	)
 end
 
 --------------------
