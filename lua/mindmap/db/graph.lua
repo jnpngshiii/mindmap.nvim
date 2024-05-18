@@ -26,6 +26,20 @@ function Graph:new(nodes, edges)
 	return graph
 end
 
+---Spaced repetition function: Convert edge to card.
+---@param id string ID of the edge to convert.
+---@return table % { front, back, updated_at, due_at, ease, interval }
+function Graph:to_card(id)
+	local edge = self.edges[id]
+	local front = self.nodes[edge.from_node_id]:content()
+	local back = self.nodes[edge.to_node_id]:content()
+	local updated_at = edge.updated_at
+	local due_at = edge.due_at
+	local ease = edge.ease
+	local interval = edge.interval
+	return { front, back, updated_at, due_at, ease, interval }
+end
+
 --------------------
 -- class Method
 --------------------
