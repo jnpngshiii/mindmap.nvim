@@ -10,6 +10,7 @@ local misc = require("mindmap.misc")
 ---@field due_at integer Space repetition due time of the edge.
 ---@field ease integer Space repetition ease of the edge.
 ---@field interval integer Space repetition interval of the edge.
+---@field data table Data of the edge. This field is reserved for future use.
 ---
 ---@field from_node_id string "From" node ID of this edge.
 ---@field to_node_id string "To" node ID of this edge.
@@ -27,9 +28,10 @@ local Edge = {}
 ---@param due_at? integer Space repetition due time of the edge.
 ---@param ease? integer Space repetition ease of the edge.
 ---@param interval? integer Space repetition interval of the edge.
+---@param data? table Data of the edge. This field is reserved for future use.
 ---@param from_node_id? string "From" node ID of this edge.
 ---@param to_node_id? string "To" node ID of this edge.
-function Edge:new(id, type, created_at, updated_at, due_at, ease, interval, from_node_id, to_node_id)
+function Edge:new(id, type, created_at, updated_at, due_at, ease, interval, data, from_node_id, to_node_id)
 	local edge = {
 		id = id or misc.get_unique_id(),
 		type = type or "edge",
@@ -39,6 +41,7 @@ function Edge:new(id, type, created_at, updated_at, due_at, ease, interval, from
 		due_at = due_at or 0,
 		ease = ease or 250,
 		interval = interval or 1,
+    data = data or {},
 
 		to_node_id = to_node_id or "",
 		from_node_id = from_node_id or "",
@@ -55,7 +58,7 @@ end
 --------------------
 
 ---Convert edge to table.
----@param edge Edge Edge object to convert.
+---@param edge Edge Edge to convert.
 ---@return table
 function Edge.to_table(edge)
 	return {
@@ -66,6 +69,7 @@ function Edge.to_table(edge)
 		due_at = edge.due_at,
 		ease = edge.ease,
 		interval = edge.interval,
+    data = edge.data,
 		to_node_id = edge.to_node_id,
 		from_node_id = edge.from_node_id,
 	}
@@ -83,6 +87,7 @@ function Edge.from_table(table)
 		table.due_at,
 		table.ease,
 		table.interval,
+    table.data,
 		table.to_node_id,
 		table.from_node_id
 	)

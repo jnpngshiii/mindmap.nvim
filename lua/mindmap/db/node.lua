@@ -6,6 +6,7 @@ local misc = require("mindmap.misc")
 ---@field type string Node type. Default: "node". This field is reserved for future use.
 ---
 ---@field created_at integer Node created time.
+---@field data table Data of the node. This field is reserved for future use.
 ---
 ---@field from_edge_ids string[] Edge IDs from this node.
 ---@field to_edge_ids string[] Edge IDs to this node.
@@ -19,14 +20,16 @@ local Node = {}
 ---@param id? string Node ID.
 ---@param type? string Node type. Default: "node". This field is reserved for future use.
 ---@param created_at? integer Node created time.
+---@param data? table Data of the node. This field is reserved for future use.
 ---@param from_edge_ids? string[] Edge IDs from this node.
 ---@param to_edge_ids? string[] Edge IDs to this node.
-function Node:new(id, type, created_at, from_edge_ids, to_edge_ids)
+function Node:new(id, type, created_at, data, from_edge_ids, to_edge_ids)
 	local node = {
 		id = id or misc.get_unique_id(),
 		type = type or "node",
 
 		created_at = created_at or tonumber(os.time()),
+    data = data or {},
 
 		from_edge_ids = from_edge_ids or {},
 		to_edge_ids = to_edge_ids or {},
@@ -63,6 +66,7 @@ function Node.to_table(node)
 		id = node.id,
 		type = node.type,
 		created_at = node.created_at,
+    data = node.data,
 		from_edge_ids = node.from_edge_ids,
 		to_edge_ids = node.to_edge_ids,
 	}
@@ -72,7 +76,7 @@ end
 ---@param table table Table to convert.
 ---@return Node
 function Node.from_table(table)
-	return Node:new(table.id, table.type, table.created_at, table.from_edge_ids, table.to_edge_ids)
+	return Node:new(table.id, table.type, table.created_at, table.data, table.from_edge_ids, table.to_edge_ids)
 end
 
 --------------------
