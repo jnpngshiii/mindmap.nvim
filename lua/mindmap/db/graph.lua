@@ -3,8 +3,8 @@ local Edge = require("mindmap.db.edge")
 
 ---@class Graph
 ---
----@field nodes table<string, Node> Nodes in the graph. Key is the node ID.
----@field edges table<string, Edge> Edges in the graph. Key is the edge ID.
+---@field nodes table<string, Node> Nodes in the graph. Key is the ID of the node.
+---@field edges table<string, Edge> Edges in the graph. Key is the ID of the edge.
 local Graph = {}
 
 --------------------
@@ -12,8 +12,8 @@ local Graph = {}
 --------------------
 
 ---Create a new graph.
----@param nodes? Node[] Nodes in the graph.
----@param edges? Edge[] Edges in the graph.
+---@param nodes? table<string, Node> Nodes in the graph.
+---@param edges? table<string, Edge> Edges in the graph.
 function Graph:new(nodes, edges)
 	local graph = {
 		nodes = nodes or {},
@@ -26,8 +26,8 @@ function Graph:new(nodes, edges)
 	return graph
 end
 
----Spaced repetition function: Convert edge to card.
----@param id string ID of the edge to convert.
+---Spaced repetition function: Convert an edge to a card.
+---@param id string ID of the edge to be converted.
 ---@return table % { front, back, updated_at, due_at, ease, interval }
 function Graph:to_card(id)
 	local edge = self.edges[id]
@@ -44,8 +44,8 @@ end
 -- class Method
 --------------------
 
----Convert graph to table.
----@param graph Graph Graph to convert.
+---Convert a graph to a table.
+---@param graph Graph Graph to be converted.
 ---@return table
 function Graph.to_table(graph)
 	local nodes = {}
@@ -64,8 +64,8 @@ function Graph.to_table(graph)
 	}
 end
 
----Convert table to graph.
----@param table table Table to convert.
+---Convert a table to a graph.
+---@param table table Table to be converted.
 ---@return Graph
 function Graph.from_table(table)
 	local nodes = {}
@@ -81,8 +81,8 @@ function Graph.from_table(table)
 	return Graph:new(nodes, edges)
 end
 
----Save the graph to a JSON file.
----@param graph Graph Graph to save.
+---Save a graph to a JSON file.
+---@param graph Graph Graph to be saved.
 ---@param save_path string Path to save the graph.
 ---@return boolean
 function Graph.save(graph, save_path)
@@ -119,13 +119,15 @@ end
 if true then
 	local graph = Graph:new()
 
-	graph.nodes["1"] = Node:new("1")
-	graph.nodes["2"] = Node:new("2")
-	graph.nodes["3"] = Node:new("3")
+	local node1 = Node:new("test")
+	local node2 = Node:new("test")
+	local node3 = Node:new("test")
 
-	graph.edges["1"] = Edge:new("1", "2")
-	graph.edges["2"] = Edge:new("2", "3")
-	graph.edges["3"] = Edge:new("3", "1")
+	local edge1 = Edge:new("test", node1.id, node2.id)
+	local edge2 = Edge:new("test", node2.id, node3.id)
+	local edge3 = Edge:new("test", node3.id, node1.id)
+
+	graph:add_node(node1)
 
 	local ok = Graph.save(graph, "test.json")
 	print(ok)
