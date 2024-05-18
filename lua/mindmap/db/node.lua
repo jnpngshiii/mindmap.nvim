@@ -18,9 +18,9 @@ local Node = {}
 
 ---Create a new node.
 ---@param id? string Node ID.
----@param type? string Node type. Default: "node". This field is reserved for future use.
+---@param type? string Node type. Default: "node".
 ---@param created_at? integer Node created time.
----@param data? table Data of the node. This field is reserved for future use.
+---@param data? table Data of the node. Subclass should put there own data in this field.
 ---@param from_edge_ids? string[] Edge IDs from this node.
 ---@param to_edge_ids? string[] Edge IDs to this node.
 function Node:new(id, type, created_at, data, from_edge_ids, to_edge_ids)
@@ -29,7 +29,7 @@ function Node:new(id, type, created_at, data, from_edge_ids, to_edge_ids)
 		type = type or "node",
 
 		created_at = created_at or tonumber(os.time()),
-    data = data or {},
+		data = data or {},
 
 		from_edge_ids = from_edge_ids or {},
 		to_edge_ids = to_edge_ids or {},
@@ -54,6 +54,12 @@ function Node:add_to_edge(to_edge_id)
 	table.insert(self.to_edge_ids, to_edge_id)
 end
 
+---Get content of the node.
+---Subclass should implement this method.
+function Node:content()
+	error("Not implemented")
+end
+
 --------------------
 -- Class Method
 --------------------
@@ -66,7 +72,7 @@ function Node.to_table(node)
 		id = node.id,
 		type = node.type,
 		created_at = node.created_at,
-    data = node.data,
+		data = node.data,
 		from_edge_ids = node.from_edge_ids,
 		to_edge_ids = node.to_edge_ids,
 	}
