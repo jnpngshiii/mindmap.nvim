@@ -14,6 +14,7 @@ local Graph = {}
 ---Create a new graph.
 ---@param nodes? table<string, Node> Nodes in the graph.
 ---@param edges? table<string, Edge> Edges in the graph.
+---@return Graph
 function Graph:new(nodes, edges)
 	local graph = {
 		nodes = nodes or {},
@@ -26,8 +27,86 @@ function Graph:new(nodes, edges)
 	return graph
 end
 
+---Add a node to the graph and return its ID.
+---@param type string Type of the node.
+---@param incoming_edge_ids? table<ID, ID> IDs of incoming edges to this node.
+---@param outcoming_edge_ids? table<ID, ID> IDs of outcoming edges from this node.
+---@param data? table Data of the node. Subclass should put there own data in this field.
+---@param id? ID ID of the node.
+---@param created_at? integer Created time of the node.
+---@return ID
+function Graph:add_node(type, incoming_edge_ids, outcoming_edge_ids, data, id, created_at)
+	local node = Node:new(type, incoming_edge_ids, outcoming_edge_ids, data, id, created_at)
+	self.nodes[node.id] = node
+
+	return node.id
+end
+
+---Remove a node from the graph and all edges related to it using ID.
+---@param id ID ID of the node to be removed.
+---@return nil
+function Graph:remove_node(id)
+	local node = self.nodes[id]
+
+	for _, incoming_edge_id in pairs(node.incoming_edge_ids) do
+		local edge = self.edges[incoming_edge_id]
+		local from_node = self.nodes[edge.from_node_id]
+		from_node:remove_outcoming_edge_id(incoming_edge_id)
+		self:remove_edge(edge.id)
+	end
+
+	for _, outcoming_edge_id in pairs(node.outcoming_edge_ids) do
+		local edge = self.edges[outcoming_edge_id]
+		local to_node = self.nodes[edge.to_node_id]
+		to_node:remove_incoming_edge_id(outcoming_edge_id)
+		self:remove_edge(edge.id)
+	end
+
+	self.nodes[id] = nil
+end
+
+---Add a edge to the graph and return its ID.
+---@param type string Edge type.
+---@param from_node_id string Where this edge is from.
+---@param to_node_id string Where this edge is to.
+---@param data? table Data of the edge. Subclass should put there own data in this field.
+---@param id? ID ID of the edge.
+---@param created_at? integer Created time of the edge.
+---@param updated_at? integer Space repetition updated time of the edge.
+---@param due_at? integer Space repetition due time of the edge.
+---@param ease? integer Space repetition ease of the edge.
+---@param interval? integer Space repetition interval of the edge.
+---@return ID
+function Graph:add_edge(type, from_node_id, to_node_id, data, id, created_at, updated_at, due_at, ease, interval)
+	local edge = Edge:new(type, from_node_id, to_node_id, data, id, created_at, updated_at, due_at, ease, interval)
+	self.edges[edge.id] = edge
+
+	local from_node = self.nodes[from_node_id]
+	from_node:add_outcoming_edge_id(edge.id)
+
+	local to_node = self.nodes[to_node_id]
+	to_node:add_incoming_edge_id(edge.id)
+
+	return edge.id
+end
+
+---Remove an edge from the graph using ID.
+---@param id ID ID of the edge to be removed.
+---@return nil
+function Graph:remove_edge(id)
+	local edge = self.edges[id]
+
+	local from_node = self.nodes[edge.from_node_id]
+	from_node:remove_outcoming_edge_id(id)
+
+	local to_node = self.nodes[edge.to_node_id]
+	to_node:remove_outcoming_edge_id(edge.id)
+
+	self.edges[id] = nil
+end
+
 ---Spaced repetition function: Convert an edge to a card.
----@param id string ID of the edge to be converted.
+---@param id ID ID of the edge to be converted.
 ---@return table % { front, back, updated_at, due_at, ease, interval }
 function Graph:to_card(id)
 	local edge = self.edges[id]
@@ -116,18 +195,16 @@ end
 
 --------------------
 
-if true then
+if false then
 	local graph = Graph:new()
 
-	local node1 = Node:new("test")
-	local node2 = Node:new("test")
-	local node3 = Node:new("test")
+	local node1 = graph:add_node("test")
+	local node2 = graph:add_node("test")
+	local node3 = graph:add_node("test")
 
-	local edge1 = Edge:new("test", node1.id, node2.id)
-	local edge2 = Edge:new("test", node2.id, node3.id)
-	local edge3 = Edge:new("test", node3.id, node1.id)
-
-	graph:add_node(node1)
+	local edge1 = graph:add_edge("test", node1, node2)
+	local edge2 = graph:add_edge("test", node2, node3)
+	local edge3 = graph:add_edge("test", node3, node1)
 
 	local ok = Graph.save(graph, "test.json")
 	print(ok)

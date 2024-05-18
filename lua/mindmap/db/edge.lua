@@ -29,6 +29,7 @@ local Edge = {}
 ---@param due_at? integer Space repetition due time of the edge.
 ---@param ease? integer Space repetition ease of the edge.
 ---@param interval? integer Space repetition interval of the edge.
+---@return Edge
 function Edge:new(type, from_node_id, to_node_id, data, id, created_at, updated_at, due_at, ease, interval)
 	local edge = {
 		type = type,
