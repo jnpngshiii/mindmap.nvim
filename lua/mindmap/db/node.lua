@@ -5,6 +5,8 @@ local misc = require("mindmap.misc")
 ---@class Node
 ---
 ---@field type string Type of the node.
+---@field rel_file_path string Relative path to the project root of the file where the node is from.
+---@field file_name string Name of the file where the node is from.
 ---@field incoming_edge_ids table<ID, ID> IDs of incoming edges to this node.
 ---@field outcoming_edge_ids table<ID, ID> IDs of outcoming edges from this node.
 ---@field data table Data of the node. Subclass should put there own data in this field.
@@ -18,15 +20,19 @@ local Node = {}
 
 ---Create a new node.
 ---@param type string Type of the node.
+---@param rel_file_path string Relative path to the project root of the file where the node is from.
+---@param file_name string Name of the file where the node is from.
 ---@param data? table Data of the node. Subclass should put there own data in this field.
 ---@param incoming_edge_ids? table<ID, ID> IDs of incoming edges to this node.
 ---@param outcoming_edge_ids? table<ID, ID> IDs of outcoming edges from this node.
 ---@param id? ID ID of the node.
 ---@param created_at? integer Created time of the node.
 ---@return Node
-function Node:new(type, data, incoming_edge_ids, outcoming_edge_ids, id, created_at)
+function Node:new(type, rel_file_path, file_name, data, incoming_edge_ids, outcoming_edge_ids, id, created_at)
 	local node = {
 		type = type,
+		rel_file_path = rel_file_path,
+		file_name = file_name,
 		data = data or {},
 		incoming_edge_ids = incoming_edge_ids or {},
 		outcoming_edge_ids = outcoming_edge_ids or {},
@@ -38,6 +44,10 @@ function Node:new(type, data, incoming_edge_ids, outcoming_edge_ids, id, created
 	self.__index = self
 
 	return node
+end
+
+function Node:node_test()
+  print("Node test")
 end
 
 ---Add incoming edge to the node.
