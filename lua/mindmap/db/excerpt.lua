@@ -10,7 +10,8 @@ local misc = require("mindmap.misc")
 ---@field start_col integer Start column of the excerpt.
 ---@field end_row integer End row of the excerpt.
 ---@field end_col integer End column of the excerpt.
-local Excerpt = Node:new("excerpt", "", "") -- TODO: Needs improvement.
+local Excerpt = setmetatable({}, { __index = Node })
+Excerpt.__index = Excerpt
 
 ----------
 -- Instance method
