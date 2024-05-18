@@ -29,14 +29,14 @@ end
 
 ---Add a node to the graph and return its ID.
 ---@param type string Type of the node.
+---@param data? table Data of the node. Subclass should put there own data in this field.
 ---@param incoming_edge_ids? table<ID, ID> IDs of incoming edges to this node.
 ---@param outcoming_edge_ids? table<ID, ID> IDs of outcoming edges from this node.
----@param data? table Data of the node. Subclass should put there own data in this field.
 ---@param id? ID ID of the node.
 ---@param created_at? integer Created time of the node.
 ---@return ID
-function Graph:add_node(type, incoming_edge_ids, outcoming_edge_ids, data, id, created_at)
-	local node = Node:new(type, incoming_edge_ids, outcoming_edge_ids, data, id, created_at)
+function Graph:add_node(type, data, incoming_edge_ids, outcoming_edge_ids, id, created_at)
+	local node = Node:new(type, data, incoming_edge_ids, outcoming_edge_ids, id, created_at)
 	self.nodes[node.id] = node
 
 	return node.id

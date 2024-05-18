@@ -1,12 +1,9 @@
 -- Item
 local prototype = require("mindmap.prototype")
-
 local excerpt = require("mindmap.excerpt")
-
 local card = require("mindmap.card")
 local mindnode = require("mindmap.mindnode")
 local mindmap = require("mindmap.mindmap")
-
 local database = require("mindmap.database")
 
 -- Logger

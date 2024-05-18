@@ -18,18 +18,18 @@ local Node = {}
 
 ---Create a new node.
 ---@param type string Type of the node.
+---@param data? table Data of the node. Subclass should put there own data in this field.
 ---@param incoming_edge_ids? table<ID, ID> IDs of incoming edges to this node.
 ---@param outcoming_edge_ids? table<ID, ID> IDs of outcoming edges from this node.
----@param data? table Data of the node. Subclass should put there own data in this field.
 ---@param id? ID ID of the node.
 ---@param created_at? integer Created time of the node.
 ---@return Node
-function Node:new(type, incoming_edge_ids, outcoming_edge_ids, data, id, created_at)
+function Node:new(type, data, incoming_edge_ids, outcoming_edge_ids, id, created_at)
 	local node = {
 		type = type,
+		data = data or {},
 		incoming_edge_ids = incoming_edge_ids or {},
 		outcoming_edge_ids = outcoming_edge_ids or {},
-		data = data or {},
 		id = id or misc.get_unique_id(),
 		created_at = created_at or tonumber(os.time()),
 	}
@@ -85,9 +85,9 @@ end
 function Node.to_table(node)
 	return {
 		type = node.type,
+		data = node.data,
 		incoming_edge_ids = node.incoming_edge_ids,
 		outcoming_edge_ids = node.outcoming_edge_ids,
-		data = node.data,
 		id = node.id,
 		created_at = node.created_at,
 	}
@@ -99,9 +99,9 @@ end
 function Node.from_table(table)
 	return Node:new(
 		table.type,
+		table.data,
 		table.incoming_edge_ids,
 		table.outcoming_edge_ids,
-		table.data,
 		table.id,
 		table.created_at
 	)
