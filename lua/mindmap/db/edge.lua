@@ -2,6 +2,9 @@ local misc = require("mindmap.misc")
 
 ---@class Edge
 ---
+---@field from_node_id string Where this edge is from.
+---@field to_node_id string Where this edge is to.
+---
 ---@field id string Edge ID.
 ---@field type string Edge type. Default: "edge". This field is reserved for future use.
 ---
@@ -11,9 +14,6 @@ local misc = require("mindmap.misc")
 ---@field ease integer Space repetition ease of the edge.
 ---@field interval integer Space repetition interval of the edge.
 ---@field data table Data of the edge. This field is reserved for future use.
----
----@field from_node_id string "From" node ID of this edge.
----@field to_node_id string "To" node ID of this edge.
 local Edge = {}
 
 --------------------
@@ -21,6 +21,8 @@ local Edge = {}
 --------------------
 
 ---Create a new edge.
+---@param from_node_id string Where this edge is from.
+---@param to_node_id string Where this edge is to.
 ---@param id? string Edge ID.
 ---@param type? string Edge type. Default: "edge". This field is reserved for future use.
 ---@param created_at? integer Edge created time.
@@ -29,10 +31,11 @@ local Edge = {}
 ---@param ease? integer Space repetition ease of the edge.
 ---@param interval? integer Space repetition interval of the edge.
 ---@param data? table Data of the edge. This field is reserved for future use.
----@param from_node_id? string "From" node ID of this edge.
----@param to_node_id? string "To" node ID of this edge.
-function Edge:new(id, type, created_at, updated_at, due_at, ease, interval, data, from_node_id, to_node_id)
+function Edge:new(from_node_id, to_node_id, id, type, created_at, updated_at, due_at, ease, interval, data)
 	local edge = {
+		from_node_id = from_node_id,
+		to_node_id = to_node_id,
+
 		id = id or misc.get_unique_id(),
 		type = type or "edge",
 
@@ -41,10 +44,7 @@ function Edge:new(id, type, created_at, updated_at, due_at, ease, interval, data
 		due_at = due_at or 0,
 		ease = ease or 250,
 		interval = interval or 1,
-    data = data or {},
-
-		to_node_id = to_node_id or "",
-		from_node_id = from_node_id or "",
+		data = data or {},
 	}
 
 	setmetatable(edge, Edge)
@@ -62,6 +62,8 @@ end
 ---@return table
 function Edge.to_table(edge)
 	return {
+		from_node_id = edge.from_node_id,
+		to_node_id = edge.to_node_id,
 		id = edge.id,
 		type = edge.type,
 		created_at = edge.created_at,
@@ -69,9 +71,7 @@ function Edge.to_table(edge)
 		due_at = edge.due_at,
 		ease = edge.ease,
 		interval = edge.interval,
-    data = edge.data,
-		to_node_id = edge.to_node_id,
-		from_node_id = edge.from_node_id,
+		data = edge.data,
 	}
 end
 
@@ -80,6 +80,8 @@ end
 ---@return Edge
 function Edge.from_table(table)
 	return Edge:new(
+		table.from_node_id,
+		table.to_node_id,
 		table.id,
 		table.type,
 		table.created_at,
@@ -87,9 +89,7 @@ function Edge.from_table(table)
 		table.due_at,
 		table.ease,
 		table.interval,
-    table.data,
-		table.to_node_id,
-		table.from_node_id
+		table.data
 	)
 end
 
