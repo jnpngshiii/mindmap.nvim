@@ -1,0 +1,73 @@
+{
+  "nodes": {
+    "1716219397-8186": {
+      "id": "1716219397-8186",
+      "data": [],
+      "outcoming_edge_ids": { "1716219397-6050": "1716219397-6050" },
+      "created_at": 1716219397,
+      "file_name": "file3",
+      "type": "ExcerptNode",
+      "rel_file_path": "rel_file_path3",
+      "incoming_edge_ids": { "1716219397-5473": "1716219397-5473" }
+    },
+    "1716219397-1937": {
+      "id": "1716219397-1937",
+      "data": [],
+      "outcoming_edge_ids": { "1716219397-5473": "1716219397-5473" },
+      "created_at": 1716219397,
+      "file_name": "file2",
+      "type": "ExcerptNode",
+      "rel_file_path": "rel_file_path2",
+      "incoming_edge_ids": { "1716219397-3713": "1716219397-3713" }
+    },
+    "1716219397-1990": {
+      "id": "1716219397-1990",
+      "data": [],
+      "outcoming_edge_ids": { "1716219397-3713": "1716219397-3713" },
+      "created_at": 1716219397,
+      "file_name": "file1",
+      "type": "ExcerptNode",
+      "rel_file_path": "rel_file_path1",
+      "incoming_edge_ids": { "1716219397-6050": "1716219397-6050" }
+    }
+  },
+  "edges": {
+    "1716219397-3713": {
+      "from_node_id": "1716219397-1990",
+      "data": [],
+      "updated_at": 1716219397,
+      "id": "1716219397-3713",
+      "created_at": 1716219397,
+      "type": "SelfLoopEdge",
+      "due_at": 0,
+      "to_node_id": "1716219397-1937",
+      "interval": 1,
+      "ease": 250
+    },
+    "1716219397-6050": {
+      "from_node_id": "1716219397-8186",
+      "data": [],
+      "updated_at": 1716219397,
+      "id": "1716219397-6050",
+      "created_at": 1716219397,
+      "type": "SelfLoopEdge",
+      "due_at": 0,
+      "to_node_id": "1716219397-1990",
+      "interval": 1,
+      "ease": 250
+    },
+    "1716219397-5473": {
+      "from_node_id": "1716219397-1937",
+      "data": [],
+      "updated_at": 1716219397,
+      "id": "1716219397-5473",
+      "created_at": 1716219397,
+      "type": "SelfLoopEdge",
+      "due_at": 0,
+      "to_node_id": "1716219397-8186",
+      "interval": 1,
+      "ease": 250
+    }
+  }
+}
+
