@@ -1,104 +1,61 @@
--- Item
-local prototype = require("mindmap.prototype")
-local excerpt = require("mindmap.excerpt")
-local card = require("mindmap.card")
-local mindnode = require("mindmap.mindnode")
-local mindmap = require("mindmap.mindmap")
-local database = require("mindmap.database")
-
--- Logger
-local logger = require("mindmap.logger")
-
--- Misc
+local node_class = require("mindmap.graph.node.init")
+local edge_class = require("mindmap.graph.edge.init")
+local graph_class = require("mindmap.graph.init")
+local database_class = require("mindmap.database")
 local misc = require("mindmap.misc")
 local ts_misc = require("mindmap.ts_misc")
 
 local M = {}
+-- Return M if this file is a module.
+-- Return Class if this file is a class.
+-- Return manually if this file is a init.
 
 --------------------
 -- Init
 --------------------
 
-local lggr = logger.Logger:new({
-	id = string.format("log %s", os.date("%Y-%m-%d %H:%M:%S")),
-	log_level = "DEBUG",
-	show_in_nvim = true,
-})
-lggr:info(lggr.type, "Init mindmap.nvim logger.")
+local plugin_config = {
+	log_level = "INFO",
+	show_log_in_nvim = true,
+}
 
-local card_db = database.Database:new({
-	id = "card_db",
-	sub_item_class = mindmap.Mindmap,
-})
-lggr:info(card_db.type, "Init card database.")
-
-local unused_excerpt_db = mindnode.Mindnode:new({
-	id = "unused_excerpt_db",
-	sub_item_class = excerpt.Excerpt,
-})
-lggr:info(card_db.type, "Init unused excerpt database.")
+local plugin_database = database_class["Database"]:new()
 
 --------------------
--- Excerpt Functions
+-- Functions
 --------------------
 
-function M.create_excerpt_using_latest_visual_selection()
-	local created_excerpt = excerpt.Excerpt.create_using_latest_visual_selection()
-	unused_excerpt_db:add(created_excerpt)
-	-- unused_excerpt_db.last = created_excerpt.id
+function M.MindmapTest()
+	local graph = graph_class["Graph"]:new()
 
-	lggr:info("function", "Create excerpt using latest visual selection.")
+	local node1 = node_class["ExcerptNode"]:new("file_name", "rel_file_path")
+	local node2 = node_class["ExcerptNode"]:new("file_name", "rel_file_path")
+	local node3 = node_class["ExcerptNode"]:new("file_name", "rel_file_path")
+	graph:add_node(node1)
+	graph:add_node(node2)
+	graph:add_node(node3)
+
+	local edge1 = edge_class["SelfLoopEdge"]:new(node1.id)
+	local edge2 = edge_class["SelfLoopEdge"]:new(node2.id)
+	local edge3 = edge_class["SelfLoopEdge"]:new(node3.id)
+	graph:add_edge(edge1)
+	graph:add_edge(edge2)
+	graph:add_edge(edge3)
+
+	graph:save()
 end
 
-function M.show_unused_excerpt_ids()
-	unused_excerpt_db:trigger("show_id")
+function M.MindmapAddTheLatestVisualSelectionAsAnExcerptNodeToGraph()
+	local created_excerpt_node = node_class["ExcerptNode"].create_using_latest_visual_selection()
 
-	lggr:info("function", "Show unused excerpt IDs.")
-end
+	local found_graph = plugin_database:find_graph(
+		misc.get_current_proj_path(),
+		plugin_config.log_level,
+		plugin_config.show_log_in_nvim
+	)
+	found_graph:add_node(created_excerpt_node)
 
---------------------
--- Mindnode Functions
---------------------
-
-function M.add_last_created_excerpt_to_nearest_mindnode()
-	-- Get mindmap
-	local mindmap_id = ts_misc.get_buf_mindmap_id(0, true)
-	local found_mindmap = card_db:find(mindmap_id, true, mindmap.Mindmap)
-	-- Get mindnode
-	local mindnode_id = ts_misc.get_nearest_heading_node_id(true)
-	local found_mindnode = found_mindmap:find(mindnode_id, true, mindnode.Mindnode)
-	-- Add excerpt
-	local biggest_id = unused_excerpt_db:find_biggest_id()
-	local last_created_excerpt = unused_excerpt_db:pop(biggest_id)
-	found_mindnode:add(last_created_excerpt)
-
-	lggr:info("function", "Add last created excerpt to nearest mindnode.")
-end
-
---------------------
--- Mindmap Functions
---------------------
-
-function M.save_mindmap_in_current_buf()
-	local mindmap_id = ts_misc.get_buf_mindmap_id(0, false)
-	if mindmap_id then
-		card_db.sub_items[mindmap_id]:save()
-		lggr:info("function", "Save mindmap <" .. mindmap_id .. ">.")
-	else
-		lggr:warn("function", "Current buffer is not a mindmap buffer. Abort saving.")
-	end
-end
-
-function M.load_mindmap_in_current_buf()
-	local mindmap_id = ts_misc.get_buf_mindmap_id(0, false)
-	if mindmap_id then
-		card_db:add(mindmap.Mindmap:new({
-			id = mindmap_id,
-		}))
-		lggr:info("function", "Load mindmap <" .. mindmap_id .. ">.")
-	else
-		lggr:warn("function", "Current buffer is not a mindmap buffer. Abort loading.")
-	end
+	-- lggr:info("function", "Create excerpt using latest visual selection.")
 end
 
 --------------------

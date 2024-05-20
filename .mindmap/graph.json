@@ -1,136 +1,70 @@
 {
   "nodes": {
-    "1716219397-8186": {
-      "id": "1716219397-8186",
+    "1716245917-6897": {
+      "id": "1716245917-6897",
       "data": [],
-      "outcoming_edge_ids": { "1716219397-6050": "1716219397-6050" },
-      "created_at": 1716219397,
-      "file_name": "file3",
+      "file_name": "file_name",
+      "created_at": 1716245917,
+      "outcoming_edge_ids": { "1716245917-1802": "1716245917-1802" },
       "type": "ExcerptNode",
-      "rel_file_path": "rel_file_path3",
-      "incoming_edge_ids": { "1716219397-5473": "1716219397-5473" }
+      "rel_file_path": "rel_file_path",
+      "incoming_edge_ids": { "1716245917-1802": "1716245917-1802" }
     },
-    "1716239727-7911": {
-      "id": "1716239727-7911",
+    "1716245917-7439": {
+      "id": "1716245917-7439",
       "data": [],
-      "outcoming_edge_ids": { "1716239727-1906": "1716239727-1906" },
-      "created_at": 1716239727,
-      "file_name": "file2",
+      "file_name": "file_name",
+      "created_at": 1716245917,
+      "outcoming_edge_ids": { "1716245917-7837": "1716245917-7837" },
       "type": "ExcerptNode",
-      "rel_file_path": "rel_file_path2",
-      "incoming_edge_ids": { "1716239727-6564": "1716239727-6564" }
+      "rel_file_path": "rel_file_path",
+      "incoming_edge_ids": { "1716245917-7837": "1716245917-7837" }
     },
-    "1716219397-1937": {
-      "id": "1716219397-1937",
+    "1716245917-9265": {
+      "id": "1716245917-9265",
       "data": [],
-      "outcoming_edge_ids": { "1716219397-5473": "1716219397-5473" },
-      "created_at": 1716219397,
-      "file_name": "file2",
+      "file_name": "file_name",
+      "created_at": 1716245917,
+      "outcoming_edge_ids": { "1716245917-4802": "1716245917-4802" },
       "type": "ExcerptNode",
-      "rel_file_path": "rel_file_path2",
-      "incoming_edge_ids": { "1716219397-3713": "1716219397-3713" }
-    },
-    "1716239727-4446": {
-      "id": "1716239727-4446",
-      "data": [],
-      "outcoming_edge_ids": { "1716239727-8725": "1716239727-8725" },
-      "created_at": 1716239727,
-      "file_name": "file3",
-      "type": "ExcerptNode",
-      "rel_file_path": "rel_file_path3",
-      "incoming_edge_ids": { "1716239727-1906": "1716239727-1906" }
-    },
-    "1716239727-5826": {
-      "id": "1716239727-5826",
-      "data": [],
-      "outcoming_edge_ids": { "1716239727-6564": "1716239727-6564" },
-      "created_at": 1716239727,
-      "file_name": "file1",
-      "type": "ExcerptNode",
-      "rel_file_path": "rel_file_path1",
-      "incoming_edge_ids": { "1716239727-8725": "1716239727-8725" }
-    },
-    "1716219397-1990": {
-      "id": "1716219397-1990",
-      "data": [],
-      "outcoming_edge_ids": { "1716219397-3713": "1716219397-3713" },
-      "created_at": 1716219397,
-      "file_name": "file1",
-      "type": "ExcerptNode",
-      "rel_file_path": "rel_file_path1",
-      "incoming_edge_ids": { "1716219397-6050": "1716219397-6050" }
+      "rel_file_path": "rel_file_path",
+      "incoming_edge_ids": { "1716245917-4802": "1716245917-4802" }
     }
   },
   "edges": {
-    "1716219397-3713": {
-      "id": "1716219397-3713",
+    "1716245917-4802": {
+      "id": "1716245917-4802",
       "data": [],
-      "updated_at": 1716219397,
+      "updated_at": 1716245917,
       "due_at": 0,
-      "from_node_id": "1716219397-1990",
-      "created_at": 1716219397,
+      "from_node_id": "1716245917-9265",
+      "created_at": 1716245917,
       "type": "SelfLoopEdge",
-      "to_node_id": "1716219397-1937",
+      "to_node_id": "1716245917-9265",
       "interval": 1,
       "ease": 250
     },
-    "1716239727-1906": {
-      "id": "1716239727-1906",
+    "1716245917-1802": {
+      "id": "1716245917-1802",
       "data": [],
-      "updated_at": 1716239727,
+      "updated_at": 1716245917,
       "due_at": 0,
-      "from_node_id": "1716239727-7911",
-      "created_at": 1716239727,
+      "from_node_id": "1716245917-6897",
+      "created_at": 1716245917,
       "type": "SelfLoopEdge",
-      "to_node_id": "1716239727-4446",
+      "to_node_id": "1716245917-6897",
       "interval": 1,
       "ease": 250
     },
-    "1716239727-8725": {
-      "id": "1716239727-8725",
+    "1716245917-7837": {
+      "id": "1716245917-7837",
       "data": [],
-      "updated_at": 1716239727,
+      "updated_at": 1716245917,
       "due_at": 0,
-      "from_node_id": "1716239727-4446",
-      "created_at": 1716239727,
+      "from_node_id": "1716245917-7439",
+      "created_at": 1716245917,
       "type": "SelfLoopEdge",
-      "to_node_id": "1716239727-5826",
-      "interval": 1,
-      "ease": 250
-    },
-    "1716219397-6050": {
-      "id": "1716219397-6050",
-      "data": [],
-      "updated_at": 1716219397,
-      "due_at": 0,
-      "from_node_id": "1716219397-8186",
-      "created_at": 1716219397,
-      "type": "SelfLoopEdge",
-      "to_node_id": "1716219397-1990",
-      "interval": 1,
-      "ease": 250
-    },
-    "1716219397-5473": {
-      "id": "1716219397-5473",
-      "data": [],
-      "updated_at": 1716219397,
-      "due_at": 0,
-      "from_node_id": "1716219397-1937",
-      "created_at": 1716219397,
-      "type": "SelfLoopEdge",
-      "to_node_id": "1716219397-8186",
-      "interval": 1,
-      "ease": 250
-    },
-    "1716239727-6564": {
-      "id": "1716239727-6564",
-      "data": [],
-      "updated_at": 1716239727,
-      "due_at": 0,
-      "from_node_id": "1716239727-5826",
-      "created_at": 1716239727,
-      "type": "SelfLoopEdge",
-      "to_node_id": "1716239727-7911",
+      "to_node_id": "1716245917-7439",
       "interval": 1,
       "ease": 250
     }

@@ -1,6 +1,6 @@
-local node_class = require("mindmap.database.node.init")
-local edge_class = require("mindmap.database.edge.init")
-local logger_class = require("mindmap.database.logger.init")
+local node_class = require("mindmap.graph.node.init")
+local edge_class = require("mindmap.graph.edge.init")
+local logger_class = require("mindmap.graph.logger.init")
 local misc = require("mindmap.misc")
 
 ---@class Graph
@@ -191,18 +191,23 @@ end
 --------------------
 
 if false then
-	local graph = Graph.load(misc.get_current_proj_path() .. "/.mindmap/graph.json")
+	local graph = Graph:new()
 
-	local node1 = graph:add_node("ExcerptNode", "file1", "rel_file_path1")
-	local node2 = graph:add_node("ExcerptNode", "file2", "rel_file_path2")
-	local node3 = graph:add_node("ExcerptNode", "file3", "rel_file_path3")
+	local node1 = node_class["ExcerptNode"]:new()
+	local node2 = node_class["ExcerptNode"]:new()
+	local node3 = node_class["ExcerptNode"]:new()
+	graph:add_node(node1)
+	graph:add_node(node2)
+	graph:add_node(node3)
 
-	local edge1 = graph:add_edge("SelfLoopEdge", node1, node2)
-	local edge2 = graph:add_edge("SelfLoopEdge", node2, node3)
-	local edge3 = graph:add_edge("SelfLoopEdge", node3, node1)
+	local edge1 = edge_class["selfLoopEdge"]:new(node1.id)
+	local edge2 = edge_class["selfLoopEdge"]:new(node2.id)
+	local edge3 = edge_class["selfLoopEdge"]:new(node3.id)
+	graph:add_edge(edge1)
+	graph:add_edge(edge2)
+	graph:add_edge(edge3)
 
 	graph:save()
-	print("ok!")
 end
 
 return {

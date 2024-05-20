@@ -10,7 +10,7 @@ SelfLoopEdge.__index = SelfLoopEdge
 
 ---Create a new self loop edge.
 ---@param from_node_id EdgeID Where this edge is from.
----@param to_node_id EdgeID Where this edge is to.
+---@param to_node_id? EdgeID Where this edge is to.
 ---@param data? table Data of the edge.
 ---@param id? EdgeID ID of the edge.
 ---@param created_at? integer Created time of the edge.
@@ -20,6 +20,8 @@ SelfLoopEdge.__index = SelfLoopEdge
 ---@param interval? integer Interval of the edge.
 ---@return SelfLoopEdge|PrototypeEdge
 function SelfLoopEdge:new(from_node_id, to_node_id, data, id, created_at, updated_at, due_at, ease, interval)
+	to_node_id = from_node_id
+
 	local prototype_edge = PrototypeEdge:new(
 		"SelfLoopEdge",
 		from_node_id,
