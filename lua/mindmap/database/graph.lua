@@ -203,7 +203,7 @@ end
 --------------------
 
 if false then
-	local graph = Graph:new()
+	local graph = Graph.load(misc.get_current_proj_path() .. "/.mindmap/graph.json")
 
 	local node1 = graph:add_node("ExcerptNode", "file1", "rel_file_path1")
 	local node2 = graph:add_node("ExcerptNode", "file2", "rel_file_path2")
