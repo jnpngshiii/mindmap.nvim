@@ -1,4 +1,4 @@
-local graph_class = require("mindmap.graph")
+local graph_class = require("mindmap.graph.init")
 local misc = require("mindmap.misc")
 
 ---@alias path string
