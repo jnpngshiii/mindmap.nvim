@@ -42,16 +42,10 @@ function Graph:new(log_level, show_log_in_nvim, save_path, nodes, edges, logger)
 end
 
 ---Add a node to the graph and return its ID.
----@param node_type NodeType Type of the node to be added.
----@param file_name string Name of the file where the node is from.
----@param rel_file_path string Relative path to the project root of the file where the node is from.
----@param data? table<string, number|string|boolean> Data of the node.
----@return NodeID
-function Graph:add_node(node_type, file_name, rel_file_path, data)
-	local node = node_class[node_type]:new(file_name, rel_file_path, data)
+---@param node PrototypeNode Node to be added.
+---@return nil
+function Graph:add_node(node)
 	self.nodes[node.id] = node
-
-	return node.id
 end
 
 ---Remove a node from the graph and all edges related to it using ID.
@@ -77,23 +71,17 @@ function Graph:remove_node(node_id)
 	self.nodes[node_id] = nil
 end
 
----Add a edge to the graph and return its ID.
----@param edge_type string Edge type to be added.
----@param from_node_id NodeID Where this edge is from.
----@param to_node_id NodeID Where this edge is to.
----@param data? table Data of the edge.
----@return EdgeID
-function Graph:add_edge(edge_type, from_node_id, to_node_id, data)
-	local edge = edge_class[edge_type]:new(from_node_id, to_node_id, data)
+---Add a edge to the graph.
+---@param edge PrototypeEdge Edge to be added.
+---@return nil
+function Graph:add_edge(edge)
 	self.edges[edge.id] = edge
 
-	local from_node = self.nodes[from_node_id]
+	local from_node = self.nodes[edge.from_node_id]
 	from_node:add_outcoming_edge_id(edge.id)
 
-	local to_node = self.nodes[to_node_id]
+	local to_node = self.nodes[edge.to_node_id]
 	to_node:add_incoming_edge_id(edge.id)
-
-	return edge.id
 end
 
 ---Remove an edge from the graph using ID.
