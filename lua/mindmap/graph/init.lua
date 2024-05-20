@@ -217,4 +217,6 @@ if false then
 	print("ok!")
 end
 
-return Graph
+return {
+	["Graph"] = Graph,
+}

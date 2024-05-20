@@ -1,4 +1,4 @@
-local PrototypeEdge = require("mindmap.database.edge.prototype_edge")
+local PrototypeEdge = require("mindmap.graph.edge.prototype_edge")
 
 ---@class SelfLoopEdge : PrototypeEdge
 local SelfLoopEdge = setmetatable({}, { __index = PrototypeEdge })
