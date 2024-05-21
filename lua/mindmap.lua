@@ -51,6 +51,10 @@ function M.MindmapTest()
 	graph:save()
 end
 
+function M.MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
+	local nearest_heading = ts_misc.get_nearest_heading_node()
+end
+
 function M.MindmapAddTheLatestVisualSelectionAsAnExcerptNodeToGraph()
 	local created_excerpt_node = node_class["ExcerptNode"].create_using_latest_visual_selection()
 
