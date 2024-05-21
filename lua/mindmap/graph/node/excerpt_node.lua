@@ -44,6 +44,22 @@ function ExcerptNode:new(file_name, rel_file_path, data, id, created_at, incomin
 	return prototype_node
 end
 
+---Check if the node is healthy.
+---This is a simple check to see if all the required fields are there.
+function ExcerptNode:check_health()
+	if
+		self.data.start_row
+		and self.data.start_col
+		and self.data.end_row
+		and self.data.end_col
+		and PrototypeNode.check_health(self)
+	then
+		return true
+	end
+
+	return false
+end
+
 ----------
 -- Class method
 ----------
