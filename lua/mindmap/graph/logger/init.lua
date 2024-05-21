@@ -40,6 +40,11 @@ function Message:new(type, source, content, timestamp, str)
 	message.str = str
 		or string.format("%s %s [%s] %s", message.timestamp, message.type, message.source, message.content)
 
+	message.type = nil
+	message.source = nil
+	message.content = nil
+	message.timestamp = nil
+
 	setmetatable(message, self)
 	self.__index = self
 
