@@ -46,6 +46,8 @@ end
 ---@return nil
 function Graph:add_node(node)
 	self.nodes[node.id] = node
+
+	self.logger:info("Database", "Add " .. node.type .. " <" .. node.id .. "> in repository <" .. self.save_path .. ">")
 end
 
 ---Remove a node from the graph and all edges related to it using ID.
