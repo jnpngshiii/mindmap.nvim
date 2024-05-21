@@ -51,11 +51,6 @@ function M.MindmapTest()
 	graph:save()
 end
 
-function M.MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
-	local nearest_heading = ts_misc.get_nearest_heading_node()
-	heading_node = node_class["HeadingNode"]:new(file_name, rel_file_path)
-end
-
 function M.MindmapAddTheLatestVisualSelectionAsAnExcerptNodeToGraph()
 	local created_excerpt_node = node_class["ExcerptNode"].create_using_latest_visual_selection()
 
@@ -67,6 +62,22 @@ function M.MindmapAddTheLatestVisualSelectionAsAnExcerptNodeToGraph()
 	found_graph:add_node(created_excerpt_node)
 
 	-- lggr:info("function", "Create excerpt using latest visual selection.")
+end
+
+function M.MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
+	local nearest_heading = ts_misc.get_nearest_heading_node()
+
+	local file_name = misc.get_current_file_name()
+	local abs_file_path = vim.api.nvim_buf_get_name(0)
+	local abs_proj_path = misc.get_current_proj_path()
+	local rel_file_path = misc.get_rel_path(abs_file_path, abs_proj_path)
+	local created_heading_node = node_class["HeadingNode"]:new(file_name, rel_file_path)
+
+	local nearest_heading_title = ts_misc.get_title_and_content_node(nearest_heading)[1]
+	ts_misc.replace_node_text(
+		ts_misc.get_node_text(nearest_heading_title) .. " %" .. created_heading_node.id .. "%",
+		nearest_heading
+	)
 end
 
 --------------------

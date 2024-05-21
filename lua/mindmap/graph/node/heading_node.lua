@@ -6,10 +6,6 @@ local misc = require("mindmap.misc")
 --------------------
 
 ---@class HeadingNode : PrototypeNode
----@field data.start_row integer Start row of the excerpt.
----@field data.start_col integer Start column of the excerpt.
----@field data.end_row integer End row of the excerpt.
----@field data.end_col integer End column of the excerpt.
 local HeadingNode = setmetatable({}, { __index = PrototypeNode })
 HeadingNode.__index = HeadingNode
 
@@ -47,13 +43,7 @@ end
 ---Check if the node is healthy.
 ---This is a simple check to see if all the required fields are there.
 function HeadingNode:check_health()
-	if
-		self.data.start_row
-		and self.data.start_col
-		and self.data.end_row
-		and self.data.end_col
-		and PrototypeNode.check_health(self)
-	then
+	if true and PrototypeNode.check_health(self) then
 		return true
 	end
 
