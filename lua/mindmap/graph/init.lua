@@ -201,7 +201,6 @@ end
 ---@return nil
 function Graph.save(graph, save_path)
 	local json_content = vim.fn.json_encode(Graph.to_table(graph))
-	print(graph.save_path)
 
 	local json, err = io.open(save_path or graph.save_path .. "/" .. "graph.json", "w")
 	if not json then
