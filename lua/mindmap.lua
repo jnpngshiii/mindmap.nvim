@@ -53,6 +53,7 @@ end
 
 function M.MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
 	local nearest_heading = ts_misc.get_nearest_heading_node()
+	heading_node = node_class["HeadingNode"]:new(file_name, rel_file_path)
 end
 
 function M.MindmapAddTheLatestVisualSelectionAsAnExcerptNodeToGraph()
