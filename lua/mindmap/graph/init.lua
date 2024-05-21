@@ -45,15 +45,17 @@ end
 ---@param node PrototypeNode Node to be added.
 ---@return nil
 function Graph:add_node(node)
-	self.nodes[node.id] = node
+	self.logger:info("Node", "Add " .. node.type .. " <" .. node.id .. ">.")
 
-	self.logger:info("Database", "Add " .. node.type .. " <" .. node.id .. "> in repository <" .. self.save_path .. ">")
+	self.nodes[node.id] = node
 end
 
 ---Remove a node from the graph and all edges related to it using ID.
 ---@param node_id NodeID ID of the node to be removed.
 ---@return nil
 function Graph:remove_node(node_id)
+	self.logger:info("Node", "Remove " .. self.nodes[node_id].type .. " <" .. node_id .. "> and related edges.")
+
 	local node = self.nodes[node_id]
 
 	for _, incoming_edge_id in pairs(node.incoming_edge_ids) do
@@ -84,6 +86,23 @@ function Graph:add_edge(edge)
 
 	local to_node = self.nodes[edge.to_node_id]
 	to_node:add_incoming_edge_id(edge.id)
+
+	self.logger:info(
+		"Edge",
+		"Add "
+			.. edge.type
+			.. " <"
+			.. edge.id
+			.. "> from "
+			.. from_node.type
+			.. " <"
+			.. edge.from_node_id
+			.. "> to "
+			.. to_node.type
+			.. "<"
+			.. edge.to_node_id
+			.. ">."
+	)
 end
 
 ---Remove an edge from the graph using ID.
@@ -99,6 +118,23 @@ function Graph:remove_edge(edge_id)
 	to_node:remove_outcoming_edge_id(edge.id)
 
 	self.edges[edge_id] = nil
+
+	self.logger:info(
+		"Edge",
+		"Remove "
+			.. edge.type
+			.. " <"
+			.. edge.id
+			.. "> from "
+			.. from_node.type
+			.. " <"
+			.. edge.from_node_id
+			.. "> to "
+			.. to_node.type
+			.. "<"
+			.. edge.to_node_id
+			.. ">."
+	)
 end
 
 ---Spaced repetition function: Convert an edge to a card.
@@ -106,13 +142,14 @@ end
 ---@return table % { front, back, updated_at, due_at, ease, interval }
 function Graph:to_card(edge_id)
 	local edge = self.edges[edge_id]
-
 	local front = self.nodes[edge.from_node_id]:front()
 	local back = self.nodes[edge.to_node_id]:back()
 	local updated_at = edge.updated_at
 	local due_at = edge.due_at
 	local ease = edge.ease
 	local interval = edge.interval
+
+	self.logger:info("Card", "Convert edge <" .. edge_id .. "> to card.")
 
 	return { front, back, updated_at, due_at, ease, interval }
 end
