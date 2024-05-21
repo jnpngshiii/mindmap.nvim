@@ -99,7 +99,7 @@ function Graph:add_edge(edge)
 			.. edge.from_node_id
 			.. "> to "
 			.. to_node.type
-			.. "<"
+			.. " <"
 			.. edge.to_node_id
 			.. ">."
 	)
@@ -131,7 +131,7 @@ function Graph:remove_edge(edge_id)
 			.. edge.from_node_id
 			.. "> to "
 			.. to_node.type
-			.. "<"
+			.. " <"
 			.. edge.to_node_id
 			.. ">."
 	)

@@ -106,7 +106,7 @@ end
 ---@param msg Message Message to be added.
 ---@return nil
 function Logger:add(msg)
-	self.messages[msg.timestamp] = msg
+	self.messages[#self.messages + 1] = msg
 end
 
 ---Add a [DEBUG] message to the logger.

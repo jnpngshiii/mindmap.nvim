@@ -42,6 +42,12 @@ function M.MindmapTest()
 	graph:add_edge(edge2)
 	graph:add_edge(edge3)
 
+	graph:remove_edge(edge1.id)
+
+	graph:remove_node(node2.id)
+
+	-- graph:to_card(edge3.id)
+
 	graph:save()
 end
 
