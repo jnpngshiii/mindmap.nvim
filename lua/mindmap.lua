@@ -2,6 +2,8 @@ local node_class = require("mindmap.graph.node.init")
 local edge_class = require("mindmap.graph.edge.init")
 local graph_class = require("mindmap.graph.init")
 local database_class = require("mindmap.database")
+
+local utils = require("mindmap.utils")
 local misc = require("mindmap.misc")
 local ts_misc = require("mindmap.ts_misc")
 
@@ -81,5 +83,7 @@ function M.MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
 end
 
 --------------------
+
+M.test = utils.test
 
 return M

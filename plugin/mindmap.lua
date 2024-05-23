@@ -1,5 +1,5 @@
 vim.api.nvim_create_user_command("MindmapTest", function()
-	require("mindmap").MindmapTest()
+	require("mindmap").test()
 end, {})
 
 vim.api.nvim_create_user_command("MindmapAddTheLatestVisualSelectionAsAnExcerptNodeToGraph", function()
