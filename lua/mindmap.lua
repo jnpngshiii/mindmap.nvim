@@ -4,8 +4,7 @@ local graph_class = require("mindmap.graph.init")
 local database_class = require("mindmap.database")
 
 local utils = require("mindmap.utils")
-local misc = require("mindmap.misc")
-local ts_misc = require("mindmap.ts_misc")
+local ts_utils = require("mindmap.ts_utils")
 
 local M = {}
 -- Return M if this file is a module.
@@ -57,7 +56,7 @@ function M.MindmapAddTheLatestVisualSelectionAsAnExcerptNodeToGraph()
 	local created_excerpt_node = node_class["ExcerptNode"].create_using_latest_visual_selection()
 
 	local found_graph = plugin_database:find_graph(
-		misc.get_current_proj_path(),
+		utils.get_current_proj_path(),
 		plugin_config.log_level,
 		plugin_config.show_log_in_nvim
 	)
@@ -67,23 +66,21 @@ function M.MindmapAddTheLatestVisualSelectionAsAnExcerptNodeToGraph()
 end
 
 function M.MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
-	local nearest_heading = ts_misc.get_nearest_heading_node()
+	local nearest_heading = ts_utils.get_nearest_heading_node()
 
-	local file_name = misc.get_current_file_name()
+	local file_name = utils.get_current_file_name()
 	local abs_file_path = vim.api.nvim_buf_get_name(0)
-	local abs_proj_path = misc.get_current_proj_path()
-	local rel_file_path = misc.get_rel_path(abs_file_path, abs_proj_path)
+	local abs_proj_path = utils.get_current_proj_path()
+	local rel_file_path = utils.get_rel_path(abs_file_path, abs_proj_path)
 	local created_heading_node = node_class["HeadingNode"]:new(file_name, rel_file_path)
 
-	local nearest_heading_title = ts_misc.get_title_and_content_node(nearest_heading)[1]
-	ts_misc.replace_node_text(
-		ts_misc.get_node_text(nearest_heading_title) .. " %" .. created_heading_node.id .. "%",
+	local nearest_heading_title = ts_utils.get_title_and_content_node(nearest_heading)[1]
+	ts_utils.replace_node_text(
+		ts_utils.get_node_text(nearest_heading_title) .. " %" .. created_heading_node.id .. "%",
 		nearest_heading
 	)
 end
 
 --------------------
-
-M.test = utils.test
 
 return M

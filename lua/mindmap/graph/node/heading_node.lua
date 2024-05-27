@@ -1,5 +1,4 @@
 local PrototypeNode = require("mindmap.graph.node.prototype_node")
-local misc = require("mindmap.misc")
 
 --------------------
 -- Class HeadingNode

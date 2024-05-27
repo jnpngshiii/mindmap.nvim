@@ -1,5 +1,5 @@
 local graph_class = require("mindmap.graph.init")
-local misc = require("mindmap.misc")
+local utils = require("mindmap.utils")
 
 ---@alias path string
 
@@ -26,7 +26,7 @@ end
 function Database:add_graph(path, log_level, show_log_in_nvim, save_path)
 	local graph = graph_class["Graph"]:new(log_level, show_log_in_nvim, save_path)
 
-	path = path or misc.get_current_proj_path()
+	path = path or utils.get_file_info()[4]
 	self.cache[path] = graph
 end
 

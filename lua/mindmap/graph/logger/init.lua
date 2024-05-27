@@ -1,4 +1,4 @@
-local misc = require("mindmap.misc")
+local utils = require("mindmap.utils")
 
 ---@alias Timestamp string
 
@@ -95,7 +95,7 @@ function Logger:new(log_level, show_log_in_nvim, save_path, messages, timestamp,
 
 	logger.show_log_in_nvim = show_log_in_nvim or false
 
-	logger.save_path = save_path or misc.get_current_proj_path() .. "/.mindmap"
+	logger.save_path = save_path or utils.get_file_info()[4] .. "/.mindmap"
 	vim.fn.system("mkdir -p " .. logger.save_path)
 
 	logger.messages = messages or {}
@@ -210,7 +210,7 @@ end
 ---@param logger Logger Logger to be saved.
 ---@return nil
 function Logger.save(logger)
-	local json_content = vim.fn.json_encode(misc.remove_table_field(logger))
+	local json_content = vim.fn.json_encode(utils.remove_table_fields(logger))
 
 	local json_path = logger.save_path .. "/" .. "log " .. logger.timestamp .. ".json"
 	local json, err = io.open(json_path, "w")

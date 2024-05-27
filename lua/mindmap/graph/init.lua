@@ -1,7 +1,7 @@
 local node_class = require("mindmap.graph.node.init")
 local edge_class = require("mindmap.graph.edge.init")
 local logger_class = require("mindmap.graph.logger.init")
-local misc = require("mindmap.misc")
+local utils = require("mindmap.utils")
 
 ---@class Graph
 ---
@@ -23,16 +23,17 @@ local Graph = {}
 ---@param save_path? string Path to load and save the graph. Default: {current_project_path}/.mindmap
 ---@param nodes? table<NodeID, PrototypeNode> Nodes in the graph. Key is the ID of the node.
 ---@param edges? table<EdgeID, PrototypeEdge> Edges in the graph. Key is the ID of the edge.
+---@param logger? Logger Logger of the graph.
 ---@return Graph
 function Graph:new(log_level, show_log_in_nvim, save_path, nodes, edges, logger)
 	local graph = {
 		-- TODO: Check health?
 		log_level = log_level or "INFO",
 		show_log_in_nvim = show_log_in_nvim or false,
-		save_path = save_path or misc.get_current_proj_path() .. "/.mindmap",
+		save_path = save_path or utils.get_file_info()[4] .. "/.mindmap",
 		nodes = nodes or {},
 		edges = edges or {},
-		logger = logger_class["Logger"]:new(log_level, show_log_in_nvim, save_path),
+		logger = logger_class["Logger"]:new(log_level, show_log_in_nvim, save_path) or logger,
 	}
 
 	setmetatable(graph, self)
@@ -231,9 +232,9 @@ end
 if false then
 	local graph = Graph:new()
 
-	local node1 = node_class["ExcerptNode"]:new()
-	local node2 = node_class["ExcerptNode"]:new()
-	local node3 = node_class["ExcerptNode"]:new()
+	local node1 = node_class["ExcerptNode"]:new("file_name", "rel_file_path")
+	local node2 = node_class["ExcerptNode"]:new("file_name", "rel_file_path")
+	local node3 = node_class["ExcerptNode"]:new("file_name", "rel_file_path")
 	graph:add_node(node1)
 	graph:add_node(node2)
 	graph:add_node(node3)

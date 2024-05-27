@@ -1,4 +1,4 @@
-local misc = require("mindmap.misc")
+local utils = require("mindmap.utils")
 
 ---@alias NodeID string
 ---@alias NodeType string
@@ -38,7 +38,7 @@ function PrototypeNode:new(type, file_name, rel_file_path, data, id, created_at,
 		file_name = file_name,
 		rel_file_path = rel_file_path,
 		data = data or {},
-		id = id or misc.get_unique_id(),
+		id = id or utils.get_unique_id(),
 		created_at = created_at or tonumber(os.time()),
 		incoming_edge_ids = incoming_edge_ids or {},
 		outcoming_edge_ids = outcoming_edge_ids or {},

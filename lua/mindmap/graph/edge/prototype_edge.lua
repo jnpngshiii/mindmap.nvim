@@ -1,4 +1,4 @@
-local misc = require("mindmap.misc")
+local utils = require("mindmap.utils")
 
 ---Do I really need these aliases?
 ---Of course not, but I like them.
@@ -44,7 +44,7 @@ function PrototypeEdge:new(type, from_node_id, to_node_id, data, id, created_at,
 		from_node_id = from_node_id,
 		to_node_id = to_node_id,
 		data = data or {},
-		id = id or misc.get_unique_id(),
+		id = id or utils.get_unique_id(),
 		created_at = created_at or tonumber(os.time()),
 		updated_at = updated_at or tonumber(os.time()),
 		due_at = due_at or 0,

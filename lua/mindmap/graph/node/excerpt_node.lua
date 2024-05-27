@@ -1,5 +1,5 @@
 local PrototypeNode = require("mindmap.graph.node.prototype_node")
-local misc = require("mindmap.misc")
+local utils = require("mindmap.utils")
 
 --------------------
 -- Class ExcerptNode
@@ -67,15 +67,12 @@ end
 ---Create a new excerpt node using the latest visual selection.
 ---@return ExcerptNode|PrototypeNode
 function ExcerptNode.create_using_latest_visual_selection()
-	local file_name = misc.get_current_file_name()
-	local abs_file_path = vim.api.nvim_buf_get_name(0)
-	local abs_proj_path = misc.get_current_proj_path()
-	local rel_file_path = misc.get_rel_path(abs_file_path, abs_proj_path)
 	local start_row = vim.api.nvim_buf_get_mark(0, "<")[1]
 	local start_col = vim.api.nvim_buf_get_mark(0, "<")[2]
 	local end_row = vim.api.nvim_buf_get_mark(0, ">")[1]
 	local end_col = vim.api.nvim_buf_get_mark(0, ">")[2]
 
+	local file_name, _, rel_file_path, _ = table.unpack(utils.get_file_info())
 	return ExcerptNode:new(file_name, rel_file_path, {
 		["start_row"] = start_row,
 		["start_col"] = start_col,

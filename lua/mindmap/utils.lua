@@ -1,5 +1,20 @@
 local M = {}
 
+--------------------
+-- Helper functions
+--------------------
+
+---Get an unique id.
+---@param perfix? string
+---@return string _ {perfix}-timestamp-random or timestamp-random
+function M.get_unique_id(perfix)
+	if perfix then
+		return string.format("%s-%s-%d", perfix, os.time(), math.random(1000, 9999))
+	end
+
+	return string.format("%s-%d", os.time(), math.random(1000, 9999))
+end
+
 ---Match all patterns in the content.
 ---@param content string|string[]
 ---@param pattern string
@@ -35,10 +50,27 @@ function M.split_string(str, sep)
 	return parts
 end
 
----Get an unique id.
----@return string
-function M.get_unique_id()
-	return string.format("%s-%d", os.time(), math.random(1000, 9999))
+---Simple function to get the file path from a buffer number or a file path.
+---This function is used to simplify the code.
+---@param bufnr_or_file_path integer|string Buffer number or file path of the file. Default: 0.
+---@param return_file_handle? boolean Return file handle if true. Default: false.
+---@param mode? string File mode. Default: "r".
+---@return string|file*? _ File path or file handle.
+function M.get_file_from_buf_number_or_file_path(bufnr_or_file_path, return_file_handle, mode)
+	bufnr_or_file_path = bufnr_or_file_path or 0
+
+	if type(bufnr_or_file_path) == "number" then
+		return vim.api.nvim_buf_get_name(bufnr_or_file_path)
+	elseif type(bufnr_or_file_path) == "string" then
+		if return_file_handle then
+			mode = mode or "r"
+			return io.open(bufnr_or_file_path, mode)
+		else
+			return bufnr_or_file_path
+		end
+	end
+
+	return nil
 end
 
 ---Convert relative path (target_path) to absolute path according to reference path (reference_path).
@@ -110,20 +142,14 @@ function M.get_file_info(bufnr_or_file_path)
 	return { file_name, abs_file_path, rel_file_path, proj_path }
 end
 
-function M.get_cursor_line_info()
-	local cursor_row = vim.api.nvim_win_get_cursor(0)[1]
-	local line_content = vim.api.nvim_buf_get_lines(0, cursor_row - 1, cursor_row, false)[1]
-end
-
 ---Get the content of a buffer or a file.
----If start_row, start_col, end_row, and end_col are provided, return the content of the range.
 ---@param bufnr_or_file_path? integer|string Buffer number or file path of the file to be parsed.
 ---@param start_row? integer The start row of the range to be read.
----@param start_col? integer The start column of the range to be read.
 ---@param end_row? integer The end row of the range to be read.
+---@param start_col? integer The start column of the range to be read.
 ---@param end_col? integer The end column of the range to be read.
----@return string[] { line1, line2, ... }
-function M.get_file_content(bufnr_or_file_path, start_row, start_col, end_row, end_col)
+---@return string[] % { line1, line2, ... }
+function M.get_file_content(bufnr_or_file_path, start_row, end_row, start_col, end_col)
 	bufnr_or_file_path = bufnr_or_file_path or 0
 
 	local file_path
@@ -144,22 +170,45 @@ function M.get_file_content(bufnr_or_file_path, start_row, start_col, end_row, e
 	end
 	file:close()
 
-	if start_row and start_col and end_row and end_col then
-		local range_content = {}
-		for i = start_row, end_row do
-			if i == start_row then
-				table.insert(range_content, content[i]:sub(start_col + 1))
-			elseif i == end_row then
-				table.insert(range_content, content[i]:sub(1, end_col))
-			else
-				table.insert(range_content, content[i])
-			end
-		end
+	start_row = start_row or 1 -- If not provided, start from the first row
+	end_row = end_row or #content -- If not provided, end at the last row
+	start_col = start_col or 0 -- If not provided, start from the first symbol of the line
+	end_col = end_col or #content[end_row] -- If not provided, end at the last symbol of the line
 
-		return range_content
+	local range_content = {}
+	for i = start_row, end_row do
+		if i == start_row then
+			table.insert(range_content, content[i]:sub(start_col + 1))
+		elseif i == end_row then
+			table.insert(range_content, content[i]:sub(1, end_col))
+		else
+			table.insert(range_content, content[i])
+		end
 	end
 
-	return content
+	return range_content
 end
+
+--------------------
+-- Deprecated functions
+--------------------
+
+---@deprecated
+---Remove fields that are not string, number, or boolean in a table.
+---@param tbl table
+---@return table
+function M.remove_table_fields(tbl)
+	local proccessed_tbl = tbl
+	for k, v in pairs(proccessed_tbl) do
+		if type(v) == "table" then
+			M.remove_table_fields(v)
+		elseif type(v) ~= "string" and type(v) ~= "number" and type(v) ~= "boolean" then
+			tbl[k] = nil
+		end
+	end
+	return proccessed_tbl
+end
+
+--------------------
 
 return M
