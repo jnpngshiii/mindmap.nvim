@@ -13,7 +13,7 @@ local M = {}
 -- Return manually if this file is a init.
 
 --------------------
--- Init
+-- Init plugin
 --------------------
 
 local plugin_config = {
@@ -24,7 +24,7 @@ local plugin_config = {
 local plugin_database = database_class["Database"]:new()
 
 --------------------
--- Functions
+-- User functions
 --------------------
 
 function M.MindmapTest()
