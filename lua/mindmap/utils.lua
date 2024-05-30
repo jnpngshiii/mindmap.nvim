@@ -18,7 +18,7 @@ end
 ---Match all patterns in the content.
 ---@param content string|string[]
 ---@param pattern string
----@return string[]
+---@return string[] _
 function M.match_pattern(content, pattern)
 	local match_list = {}
 
@@ -41,7 +41,7 @@ end
 ---Split a string using a separator.
 ---@param str string
 ---@param sep string
----@return table
+---@return table _
 function M.split_string(str, sep)
 	local parts = {}
 	for part in string.gmatch(str, "([^" .. sep .. "]+)") do
@@ -77,7 +77,7 @@ end
 ---Example: get_abs_path("../a/b", "/c/d") -> "/c/a/b"
 ---@param target_path string A path to be converted to an absolute path.
 ---@param reference_path string A reference path.
----@return string
+---@return string _
 function M.get_abs_path(target_path, reference_path)
 	local target_path_parts = M.split_string(target_path, "/")
 	local reference_path_parts = M.split_string(reference_path, "/")
@@ -97,7 +97,7 @@ end
 ---Example: get_rel_path("/a/b/c", "/a/b/d") -> "../c"
 ---@param target_path string A path to be converted to a relative path.
 ---@param reference_path string A reference path.
----@return string
+---@return string _
 function M.get_rel_path(target_path, reference_path)
 	local target_parts = M.split_string(target_path, "/")
 	local reference_parts = M.split_string(reference_path, "/")
@@ -120,7 +120,7 @@ end
 
 ---Get the information of a buffer or a file.
 ---@param bufnr_or_file_path? integer|string Buffer number or file path of the file to be parsed.
----@return string[] { file_name, abs_file_path, rel_file_path, proj_path }
+---@return string[] _ { file_name, abs_file_path, rel_file_path, proj_path }
 function M.get_file_info(bufnr_or_file_path)
 	bufnr_or_file_path = bufnr_or_file_path or 0
 
@@ -148,7 +148,7 @@ end
 ---@param end_row? integer The end row of the range to be read.
 ---@param start_col? integer The start column of the range to be read.
 ---@param end_col? integer The end column of the range to be read.
----@return string[] % { line1, line2, ... }
+---@return string[] _ { line1, line2, ... }
 function M.get_file_content(bufnr_or_file_path, start_row, end_row, start_col, end_col)
 	bufnr_or_file_path = bufnr_or_file_path or 0
 
@@ -196,7 +196,7 @@ end
 ---@deprecated
 ---Remove fields that are not string, number, or boolean in a table.
 ---@param tbl table
----@return table
+---@return table _
 function M.remove_table_fields(tbl)
 	local proccessed_tbl = tbl
 	for k, v in pairs(proccessed_tbl) do

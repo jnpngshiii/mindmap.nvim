@@ -20,7 +20,7 @@ HeadingNode.__index = HeadingNode
 ---@param created_at? integer Created time of the node in Unix timestamp format.
 ---@param incoming_edge_ids? table<EdgeID, EdgeID> IDs of incoming edges to this node.
 ---@param outcoming_edge_ids? table<EdgeID, EdgeID> IDs of outcoming edges from this node.
----@return HeadingNode|PrototypeNode
+---@return HeadingNode|PrototypeNode _
 function HeadingNode:new(file_name, rel_file_path, data, id, created_at, incoming_edge_ids, outcoming_edge_ids)
 	local prototype_node = PrototypeNode:new(
 		"HeadingNode",
@@ -55,7 +55,7 @@ end
 
 ---Convert a table to a node.
 ---@param table table Table to be converted.
----@return PrototypeNode
+---@return PrototypeNode _
 function HeadingNode.from_table(table)
 	return HeadingNode:new(
 		table.file_name,

@@ -32,7 +32,7 @@ end, {})
 --- Wrap a function with a wrapping function.
 ---@param wrapping_func function The function used to wrap.
 ---@param wrapped_func function The function to be wrapped.
----@return function
+---@return function _
 local function wrap_func(wrapping_func, wrapped_func)
 	return function(...)
 		wrapping_func(wrapped_func, ...)
@@ -42,7 +42,7 @@ end
 --- Wrap all functions in a table with a wrapping function recursively.
 ---@param wrapping_func function The function used to wrap.
 ---@param wrapped_tbl table The table to be wrapped.
----@return table
+---@return table _
 local function wrap_table(wrapping_func, wrapped_tbl)
 	for key, value in pairs(wrapped_tbl) do
 		-- print("Checking key: " .. key .. " type: " .. type(value))

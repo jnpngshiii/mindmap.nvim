@@ -29,7 +29,7 @@ local Message = {}
 ---@param content string Message content. Default: "Unknown Content.".
 ---@param timestamp? Timestamp Message timestamp.
 ---@param str? string Message string.
----@return Message
+---@return Message _
 function Message:new(type, source, content, timestamp, str)
 	local message = {}
 
@@ -76,7 +76,7 @@ local Logger = {}
 ---@param messages? table<string, Message> Table of messages. Key is the timestamp of the message.
 ---@param timestamp? Timestamp Logger timestamp.
 ---@param log_level_tbl? table<string, number> Table of log levels.
----@return Logger
+---@return Logger _
 function Logger:new(log_level, show_log_in_nvim, save_path, messages, timestamp, log_level_tbl)
 	local logger = {}
 
@@ -109,7 +109,7 @@ end
 
 ---Add a msg to logger.
 ---@param msg Message Message to be added.
----@return nil
+---@return nil _
 function Logger:add(msg)
 	self.messages[#self.messages + 1] = msg
 end
@@ -208,7 +208,7 @@ end
 
 ---Save a logger to a json file.
 ---@param logger Logger Logger to be saved.
----@return nil
+---@return nil _
 function Logger.save(logger)
 	local json_content = vim.fn.json_encode(utils.remove_table_fields(logger))
 

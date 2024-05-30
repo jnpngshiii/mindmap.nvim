@@ -2,14 +2,11 @@ local ts_utils = require("nvim-treesitter.ts_utils")
 
 local utils = require("mindmap.utils")
 
----@alias ts_node userdata
----@alias ts_tree userdata
-
 local M = {}
 
 ---Get the root node of the neorg document tree.
 ---@param bufnr? integer The buffer number.
----@return _ ts_node?
+---@return ts_node? _
 function M.get_ts_root(bufnr)
 	bufnr = bufnr or 0
 
@@ -30,7 +27,7 @@ end
 ---@param text string|table<string>
 ---@param node ts_node
 ---@param bufnr? integer The buffer number.
----@return _ nil
+---@return nil _
 function M.replace_node_text(text, node, bufnr)
 	if type(text) == "string" then
 		text = { text }
@@ -44,7 +41,7 @@ end
 ---Get the text of a node.
 ---@param node ts_node
 ---@param bufnr? integer The buffer number.
----@return _ string
+---@return string _
 function M.get_node_text(node, bufnr)
 	bufnr = bufnr or 0
 	return vim.treesitter.get_node_text(node, bufnr)
@@ -53,7 +50,7 @@ end
 ---Get the title and content node of the given heading node.
 ---@param node ts_node The heading node.
 ---@param bufnr? integer The buffer number.
----@return _ ts_node[] { title_node, content_node? }
+---@return ts_node[] _ { title_node, content_node? }
 function M.get_title_and_content_node(node, bufnr)
 	if not string.match(node:type(), "^heading%d$") then
 		return {}
@@ -86,14 +83,14 @@ end
 ---Get subheading nodes of the given heading node.
 ---@param node ts_node The heading node.
 ---@param bufnr? integer The buffer number.
----@return _ ts_node[]
+---@return ts_node[] _
 function M.get_subheading_nodes(node, bufnr)
 	-- TODO: Implement this function.
 	return {}
 end
 
 ---Get the nearest heading node at the cursor.
----@return _ ts_node
+---@return ts_node _
 function M.get_nearest_heading_node()
 	local current_node = ts_utils.get_node_at_cursor()
 
@@ -105,7 +102,7 @@ function M.get_nearest_heading_node()
 end
 
 ---Get the nearest heading node level at the cursor.
----@return _ string
+---@return string _
 function M.get_nearest_heading_node_level()
 	local nearest_heading_node = M.get_nearest_heading_node()
 	local level = string.match(nearest_heading_node:type(), "^heading(%d)$")
@@ -115,7 +112,7 @@ end
 ---Get the nearest heading node id at the cursor.
 ---If the id is not found and register_if_not is true, then generate, register and return a new id.
 ---@param register_if_not? boolean Register a new id if not found.
----@return _ string?
+---@return string? _
 function M.get_nearest_heading_node_id(register_if_not)
 	local nearest_heading_node = M.get_nearest_heading_node()
 	local nhn_title_node = M.get_title_and_content_node(nearest_heading_node)[1]
@@ -138,7 +135,7 @@ end
 ---@deprecated
 ---Get the root node of the neorg meta tree.
 ---@param bufnr? integer The buffer number.
----@return _ ts_node?
+---@return ts_node? _
 function M.get_neorg_meta_root(bufnr)
 	bufnr = bufnr or 0
 
@@ -164,7 +161,7 @@ end
 ---If the id is not found and register_if_not is true, then generate, register and return a new id.
 ---@param bufnr? integer The buffer number.
 ---@param register_if_not? boolean Register a new id if not found.
----@return _ string?
+---@return string? _
 function M.get_buf_mindmap_id(bufnr, register_if_not)
 	bufnr = bufnr or 0
 

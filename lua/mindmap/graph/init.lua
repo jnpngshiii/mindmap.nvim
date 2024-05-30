@@ -24,7 +24,7 @@ local Graph = {}
 ---@param nodes? table<NodeID, PrototypeNode> Nodes in the graph. Key is the ID of the node.
 ---@param edges? table<EdgeID, PrototypeEdge> Edges in the graph. Key is the ID of the edge.
 ---@param logger? Logger Logger of the graph.
----@return Graph
+---@return Graph _
 function Graph:new(log_level, show_log_in_nvim, save_path, nodes, edges, logger)
 	local graph = {
 		-- TODO: Check health?
@@ -44,7 +44,7 @@ end
 
 ---Add a node to the graph and return its ID.
 ---@param node PrototypeNode Node to be added.
----@return nil
+---@return nil _
 function Graph:add_node(node)
 	self.logger:info("Node", "Add " .. node.type .. " <" .. node.id .. ">.")
 
@@ -53,7 +53,7 @@ end
 
 ---Remove a node from the graph and all edges related to it using ID.
 ---@param node_id NodeID ID of the node to be removed.
----@return nil
+---@return nil _
 function Graph:remove_node(node_id)
 	self.logger:info("Node", "Remove " .. self.nodes[node_id].type .. " <" .. node_id .. "> and related edges.")
 
@@ -78,7 +78,7 @@ end
 
 ---Add a edge to the graph.
 ---@param edge PrototypeEdge Edge to be added.
----@return nil
+---@return nil _
 function Graph:add_edge(edge)
 	self.edges[edge.id] = edge
 
@@ -108,7 +108,7 @@ end
 
 ---Remove an edge from the graph using ID.
 ---@param edge_id EdgeID ID of the edge to be removed.
----@return nil
+---@return nil _
 function Graph:remove_edge(edge_id)
 	local edge = self.edges[edge_id]
 
@@ -140,7 +140,7 @@ end
 
 ---Spaced repetition function: Convert an edge to a card.
 ---@param edge_id EdgeID ID of the edge to be converted.
----@return table % { front, back, updated_at, due_at, ease, interval }
+---@return table _ { front, back, updated_at, due_at, ease, interval }
 function Graph:to_card(edge_id)
 	local edge = self.edges[edge_id]
 	local front = self.nodes[edge.from_node_id]:front()
@@ -161,7 +161,7 @@ end
 
 ---Convert a graph to a table.
 ---@param graph Graph Graph to be converted.
----@return table
+---@return table _
 function Graph.to_table(graph)
 	local nodes = {}
 	for _, node in pairs(graph.nodes) do
@@ -181,7 +181,7 @@ end
 
 ---Convert a table to a graph.
 ---@param table table Table to be converted.
----@return Graph
+---@return Graph _
 function Graph.from_table(table)
 	local nodes = {}
 	for _, node in pairs(table.nodes) do
@@ -199,7 +199,7 @@ end
 ---Save a graph to a JSON file.
 ---@param graph Graph Graph to be saved.
 ---@param save_path? string Path to save the graph.
----@return nil
+---@return nil _
 function Graph.save(graph, save_path)
 	local json_content = vim.fn.json_encode(Graph.to_table(graph))
 
@@ -214,7 +214,7 @@ end
 
 ---Load a graph from a JSON file.
 ---@param save_path string Path to save the graph.
----@return Graph|nil
+---@return Graph|nil _
 function Graph.load(save_path)
 	local json, _ = io.open(save_path, "r")
 	if not json then

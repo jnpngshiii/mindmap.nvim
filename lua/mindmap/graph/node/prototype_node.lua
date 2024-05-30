@@ -31,7 +31,7 @@ local PrototypeNode = {}
 ---@param created_at? integer Created time of the node in Unix timestamp format.
 ---@param incoming_edge_ids? table<EdgeID, EdgeID> IDs of incoming edges to this node.
 ---@param outcoming_edge_ids? table<EdgeID, EdgeID> IDs of outcoming edges from this node.
----@return PrototypeNode
+---@return PrototypeNode _
 function PrototypeNode:new(type, file_name, rel_file_path, data, id, created_at, incoming_edge_ids, outcoming_edge_ids)
 	local node = {
 		type = type,
@@ -72,28 +72,28 @@ end
 
 ---Add incoming edge to the node.
 ---@param incoming_edge_id EdgeID ID of the incoming edge to be added.
----@return nil
+---@return nil _
 function PrototypeNode:add_incoming_edge_id(incoming_edge_id)
 	self.incoming_edge_ids[incoming_edge_id] = incoming_edge_id
 end
 
 ---Remove incoming edge from the node.
 ---@param incoming_edge_id EdgeID ID of the incoming edge to be removed.
----@return nil
+---@return nil _
 function PrototypeNode:remove_incoming_edge_id(incoming_edge_id)
 	self.incoming_edge_ids[incoming_edge_id] = nil
 end
 
 ---Add outcoming edge to the node.
 ---@param outcoming_edge_id EdgeID ID of the outcoming edge to be added.
----@return nil
+---@return nil _
 function PrototypeNode:add_outcoming_edge_id(outcoming_edge_id)
 	self.outcoming_edge_ids[outcoming_edge_id] = outcoming_edge_id
 end
 
 ---Remove outcoming edge from the node.
 ---@param outcoming_edge_id EdgeID ID of the outcoming edge to be removed.
----@return nil
+---@return nil _
 function PrototypeNode:remove_outcoming_edge_id(outcoming_edge_id)
 	self.outcoming_edge_ids[outcoming_edge_id] = nil
 end
@@ -114,7 +114,7 @@ end
 
 ---Convert a node to a table.
 ---@param node PrototypeNode Node to be converted.
----@return table
+---@return table _
 function PrototypeNode.to_table(node)
 	return {
 		type = node.type,
@@ -131,7 +131,7 @@ end
 ---@abstract
 ---Convert a table to a node.
 ---@param table table Table to be converted.
----@return PrototypeNode
+---@return PrototypeNode _
 function PrototypeNode.from_table(table)
 	error("[PrototypeNode] Please implement function `from_table` in subclass.")
 end

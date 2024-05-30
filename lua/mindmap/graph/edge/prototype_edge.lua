@@ -37,7 +37,7 @@ local PrototypeEdge = {}
 ---@param due_at? integer Due time of the edge.
 ---@param ease? integer Ease of the edge.
 ---@param interval? integer Interval of the edge.
----@return PrototypeEdge
+---@return PrototypeEdge _
 function PrototypeEdge:new(type, from_node_id, to_node_id, data, id, created_at, updated_at, due_at, ease, interval)
 	local prototype_edge = {
 		type = type,
@@ -61,7 +61,7 @@ end
 
 ---Check if the edge is healthy.
 ---This is a simple check to see if all the required fields are there.
----@return boolean
+---@return boolean _
 function PrototypeEdge:check_health()
 	if
 		self.type
@@ -86,7 +86,7 @@ end
 
 ---Convert an edge to a table.
 ---@param edge PrototypeEdge Edge to be converted.
----@return table
+---@return table _
 function PrototypeEdge.to_table(edge)
 	return {
 		type = edge.type,
@@ -105,7 +105,7 @@ end
 ---@abstract
 ---Convert a table to an edge.
 ---@param table table Table to be converted.
----@return PrototypeEdge
+---@return PrototypeEdge _
 function PrototypeEdge.from_table(table)
 	error("[PrototypeEdge] Please implement function `from_table` in subclass.")
 end

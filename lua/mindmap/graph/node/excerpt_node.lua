@@ -25,7 +25,7 @@ ExcerptNode.__index = ExcerptNode
 ---@param created_at? integer Created time of the node in Unix timestamp format.
 ---@param incoming_edge_ids? table<EdgeID, EdgeID> IDs of incoming edges to this node.
 ---@param outcoming_edge_ids? table<EdgeID, EdgeID> IDs of outcoming edges from this node.
----@return ExcerptNode|PrototypeNode
+---@return ExcerptNode|PrototypeNode _
 function ExcerptNode:new(file_name, rel_file_path, data, id, created_at, incoming_edge_ids, outcoming_edge_ids)
 	local prototype_node = PrototypeNode:new(
 		"ExcerptNode",
@@ -65,7 +65,7 @@ end
 ----------
 
 ---Create a new excerpt node using the latest visual selection.
----@return ExcerptNode|PrototypeNode
+---@return ExcerptNode|PrototypeNode _
 function ExcerptNode.create_using_latest_visual_selection()
 	local start_row = vim.api.nvim_buf_get_mark(0, "<")[1]
 	local start_col = vim.api.nvim_buf_get_mark(0, "<")[2]
@@ -83,7 +83,7 @@ end
 
 ---Convert a table to a node.
 ---@param table table Table to be converted.
----@return PrototypeNode
+---@return PrototypeNode _
 function ExcerptNode.from_table(table)
 	return ExcerptNode:new(
 		table.file_name,

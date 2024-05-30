@@ -18,7 +18,7 @@ SelfLoopEdge.__index = SelfLoopEdge
 ---@param due_at? integer Due time of the edge.
 ---@param ease? integer Ease of the edge.
 ---@param interval? integer Interval of the edge.
----@return SelfLoopEdge|PrototypeEdge
+---@return SelfLoopEdge|PrototypeEdge _
 function SelfLoopEdge:new(from_node_id, to_node_id, data, id, created_at, updated_at, due_at, ease, interval)
 	to_node_id = from_node_id
 
@@ -43,7 +43,7 @@ end
 
 ---Check if the edge is healthy.
 ---This is a simple check to see if all the required fields are there.
----@return boolean
+---@return boolean _
 function SelfLoopEdge:check_health()
 	if true and PrototypeEdge.check_health(self) then
 		return true
@@ -58,7 +58,7 @@ end
 
 ---Convert a table to an edge.
 ---@param table table Table to be converted.
----@return PrototypeEdge
+---@return PrototypeEdge _
 function SelfLoopEdge.from_table(table)
 	return SelfLoopEdge:new(
 		table.from_node_id,
