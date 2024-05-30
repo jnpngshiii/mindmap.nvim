@@ -4,10 +4,10 @@ local utils = require("mindmap.utils")
 
 local M = {}
 
----Get the root node of the neorg document tree.
----@param bufnr? integer The buffer number.
----@return ts_node? _
-function M.get_ts_root(bufnr)
+---Get the root node of the tree-sitter tree in the given buffer.
+---@param bufnr? integer The buffer number. Default: 0.
+---@return ts_node? _ The root node of the tree-sitter tree in the given buffer.
+function M.get_tstree_root(bufnr)
 	bufnr = bufnr or 0
 
 	local lang_tree = vim.treesitter.get_parser(bufnr, "norg")
@@ -23,28 +23,20 @@ function M.get_ts_root(bufnr)
 	return nil
 end
 
----Replace the text of a node.
----@param text string|table<string>
----@param node ts_node
----@param bufnr? integer The buffer number.
----@return nil _
+---Replace the text of a given tree-sitter node.
+---@param text string|string[] The new text. Each element is a line.
+---@param node ts_node The node whose text will be replaced.
+---@param bufnr? integer The buffer number. Default: 0.
+---@return nil _ This function does not return anything.
 function M.replace_node_text(text, node, bufnr)
+	bufnr = bufnr or 0
+
 	if type(text) == "string" then
 		text = { text }
 	end
-	bufnr = bufnr or 0
 
 	local start_row, start_col, end_row, end_col = node:range()
 	vim.api.nvim_buf_set_text(0, start_row, start_col, end_row, end_col, text)
-end
-
----Get the text of a node.
----@param node ts_node
----@param bufnr? integer The buffer number.
----@return string _
-function M.get_node_text(node, bufnr)
-	bufnr = bufnr or 0
-	return vim.treesitter.get_node_text(node, bufnr)
 end
 
 ---Get the title and content node of the given heading node.
@@ -131,6 +123,17 @@ end
 --------------------
 -- Deprecated Functions
 --------------------
+
+---@deprecated
+---Get the text of a given tree-sitter node.
+---@param node ts_node The node whose text will be returned.
+---@param bufnr? integer The buffer number. Default: 0.
+---@return string _ The text of the given tree-sitter node.
+function M.get_node_text(node, bufnr)
+	bufnr = bufnr or 0
+
+	return vim.treesitter.get_node_text(node, bufnr)
+end
 
 ---@deprecated
 ---Get the root node of the neorg meta tree.
