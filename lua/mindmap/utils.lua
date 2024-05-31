@@ -189,6 +189,24 @@ function M.get_file_content(bufnr_or_file_path, start_row, end_row, start_col, e
 	return range_content
 end
 
+---Get the buffer number of a file using the given file path.
+---If the file is not loaded, create a temporary buffer and return the buffer number.
+---@param file_path string File path to be loaded.
+---@return table _ { bufnr, is_temp_buf }
+function M.get_bufnr_from_file_path(file_path)
+	local bufnr = vim.fn.bufnr(file_path)
+
+	if bufnr == -1 then
+		local content = vim.fn.readfile(file_path)
+		local temp_bufnr = vim.api.nvim_create_buf(false, true)
+		vim.api.nvim_buf_set_lines(temp_bufnr, 0, -1, false, content)
+
+		return { temp_bufnr, true }
+	end
+
+	return { bufnr, false }
+end
+
 --------------------
 -- Deprecated functions
 --------------------
