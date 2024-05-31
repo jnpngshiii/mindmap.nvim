@@ -26,32 +26,6 @@ local plugin_database = database_class["Database"]:new()
 -- User functions
 --------------------
 
-function M.MindmapTest()
-	local graph = graph_class["Graph"]:new()
-
-	local node1 = node_class["ExcerptNode"]:new("file_name", "rel_file_path")
-	local node2 = node_class["ExcerptNode"]:new("file_name", "rel_file_path")
-	local node3 = node_class["ExcerptNode"]:new("file_name", "rel_file_path")
-	graph:add_node(node1)
-	graph:add_node(node2)
-	graph:add_node(node3)
-
-	local edge1 = edge_class["SelfLoopEdge"]:new(node1.id)
-	local edge2 = edge_class["SelfLoopEdge"]:new(node2.id)
-	local edge3 = edge_class["SelfLoopEdge"]:new(node3.id)
-	graph:add_edge(edge1)
-	graph:add_edge(edge2)
-	graph:add_edge(edge3)
-
-	graph:remove_edge(edge1.id)
-
-	graph:remove_node(node2.id)
-
-	-- graph:to_card(edge3.id)
-
-	graph:save()
-end
-
 function M.MindmapAddTheLatestVisualSelectionAsAnExcerptNodeToGraph()
 	local created_excerpt_node = node_class["ExcerptNode"].create_using_latest_visual_selection()
 
@@ -81,5 +55,38 @@ function M.MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
 end
 
 --------------------
+-- Debug functions
+--------------------
+
+function M.MindmapTest()
+	local graph = graph_class["Graph"]:new()
+
+	local node1 = node_class["ExcerptNode"]:new("file_name", "rel_file_path")
+	local node2 = node_class["ExcerptNode"]:new("file_name", "rel_file_path")
+	local node3 = node_class["ExcerptNode"]:new("file_name", "rel_file_path")
+	graph:add_node(node1)
+	graph:add_node(node2)
+	graph:add_node(node3)
+
+	local edge1 = edge_class["SelfLoopEdge"]:new(node1.id)
+	local edge2 = edge_class["SelfLoopEdge"]:new(node2.id)
+	local edge3 = edge_class["SelfLoopEdge"]:new(node3.id)
+	graph:add_edge(edge1)
+	graph:add_edge(edge2)
+	graph:add_edge(edge3)
+
+	graph:remove_edge(edge1.id)
+
+	graph:remove_node(node2.id)
+
+	-- graph:to_card(edge3.id)
+
+	graph:save()
+end
+
+--------------------
 
 return M
+
+-- TODO: auto save
+-- TODO: auto load
