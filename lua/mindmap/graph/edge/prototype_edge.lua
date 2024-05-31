@@ -14,6 +14,7 @@ local utils = require("mindmap.utils")
 ---@field data table<string, number|string|boolean> Data of the edge.
 ---Auto generated and updated fields:
 ---@field id EdgeID ID of the edge. Auto generated.
+---@field version integer Version of the edge. Auto generated and updated.
 ---@field created_at integer Created time of the edge in UNIX timestemp format. Auto generated.
 ---@field updated_at integer Updated time of the edge in UNIX timestemp format. Used in space repetition. Auto generated and updated.
 ---@field due_at integer Due time of the edge in UNIX timestemp format. Used in space repetition. Auto generated and updated.
@@ -21,6 +22,8 @@ local utils = require("mindmap.utils")
 ---@field interval integer Interval of the edge. Used in space repetition. Auto generated and updated.
 ---@field cache table<string, number|string|boolean> Cache of the edge. Save temporary data to avoid recalculation. Auto generated and updated.
 local PrototypeEdge = {}
+
+local prototype_edge_version = 1
 
 --------------------
 -- Instance Method
@@ -32,19 +35,33 @@ local PrototypeEdge = {}
 ---@param to_node_id NodeID Where this edge is to.
 ---@param data? table Data of the edge.
 ---@param id? EdgeID ID of the edge.
+---@param version? integer Version of the edge.
 ---@param created_at? integer Created time of the edge.
 ---@param updated_at? integer Updated time of the edge.
 ---@param due_at? integer Due time of the edge.
 ---@param ease? integer Ease of the edge.
 ---@param interval? integer Interval of the edge.
 ---@return PrototypeEdge _
-function PrototypeEdge:new(type, from_node_id, to_node_id, data, id, created_at, updated_at, due_at, ease, interval)
+function PrototypeEdge:new(
+	type,
+	from_node_id,
+	to_node_id,
+	data,
+	id,
+	version,
+	created_at,
+	updated_at,
+	due_at,
+	ease,
+	interval
+)
 	local prototype_edge = {
 		type = type,
 		from_node_id = from_node_id,
 		to_node_id = to_node_id,
 		data = data or {},
 		id = id or utils.get_unique_id(),
+		version = version or prototype_edge_version,
 		created_at = created_at or tonumber(os.time()),
 		updated_at = updated_at or tonumber(os.time()),
 		due_at = due_at or 0,
@@ -68,6 +85,7 @@ function PrototypeEdge:check_health()
 		and self.from_node_id
 		and self.to_node_id
 		and self.id
+		and self.version
 		and self.created_at
 		and self.updated_at
 		and self.due_at
@@ -94,6 +112,7 @@ function PrototypeEdge.to_table(edge)
 		to_node_id = edge.to_node_id,
 		data = edge.data,
 		id = edge.id,
+		version = edge.version,
 		created_at = edge.created_at,
 		updated_at = edge.updated_at,
 		due_at = edge.due_at,

@@ -12,11 +12,14 @@ local utils = require("mindmap.utils")
 ---@field data table<string, number|string|boolean> Data of the node.
 ---Auto generated and updated fields:
 ---@field id NodeID ID of the node. Auto generated.
+---@field version integer Version of the node. Auto generated and updated.
 ---@field created_at integer Created time of the node in UNIX timestemp format. Auto generated.
 ---@field incoming_edge_ids table<EdgeID, EdgeID> IDs of incoming edges to this node. Auto generated and updated.
 ---@field outcoming_edge_ids table<EdgeID, EdgeID> IDs of outcoming edges from this node. Auto generated and updated.
 ---@field cache table<string, number|string|boolean> Cache of the node. Save temporary data to avoid recalculation. Auto generated and updated.
 local PrototypeNode = {}
+
+local prototype_node_version = 1
 
 --------------------
 -- Instance Method
@@ -28,11 +31,22 @@ local PrototypeNode = {}
 ---@param rel_file_path string Relative path to the project root of the file where the node is from.
 ---@param data? table<string, number|string|boolean> Data of the node. Subclass should put there own data in this field.
 ---@param id? NodeID ID of the node.
+---@param version? integer Version of the node.
 ---@param created_at? integer Created time of the node in Unix timestamp format.
 ---@param incoming_edge_ids? table<EdgeID, EdgeID> IDs of incoming edges to this node.
 ---@param outcoming_edge_ids? table<EdgeID, EdgeID> IDs of outcoming edges from this node.
 ---@return PrototypeNode _
-function PrototypeNode:new(type, file_name, rel_file_path, data, id, created_at, incoming_edge_ids, outcoming_edge_ids)
+function PrototypeNode:new(
+	type,
+	file_name,
+	rel_file_path,
+	data,
+	id,
+	version,
+	created_at,
+	incoming_edge_ids,
+	outcoming_edge_ids
+)
 	local node = {
 		type = type,
 		file_name = file_name,
@@ -42,6 +56,7 @@ function PrototypeNode:new(type, file_name, rel_file_path, data, id, created_at,
 		created_at = created_at or tonumber(os.time()),
 		incoming_edge_ids = incoming_edge_ids or {},
 		outcoming_edge_ids = outcoming_edge_ids or {},
+		version = version or prototype_node_version,
 		cache = {},
 	}
 
@@ -60,6 +75,7 @@ function PrototypeNode:check_health()
 		and self.rel_file_path
 		and self.data
 		and self.id
+		and self.version
 		and self.created_at
 		and self.incoming_edge_ids
 		and self.outcoming_edge_ids
@@ -122,6 +138,7 @@ function PrototypeNode.to_table(node)
 		rel_file_path = node.rel_file_path,
 		data = node.data,
 		id = node.id,
+		version = node.version,
 		created_at = node.created_at,
 		incoming_edge_ids = node.incoming_edge_ids,
 		outcoming_edge_ids = node.outcoming_edge_ids,
