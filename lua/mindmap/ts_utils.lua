@@ -1,7 +1,8 @@
 local ts_utils = require("nvim-treesitter.ts_utils")
 
----@alias ts_node userdata
----@alias ts_tree userdata
+---@class ts_node
+---@field range function()
+---@field type function()
 
 local M = {}
 
@@ -64,6 +65,7 @@ function M.replace_node_text(text, node, bufnr)
 	if type(text) == "string" then
 		text = { text }
 	end
+	table.insert(text, "") -- TODO: Remove this workaround.
 
 	local start_row, start_col, end_row, end_col = node:range()
 	vim.api.nvim_buf_set_text(0, start_row, start_col, end_row, end_col, text)

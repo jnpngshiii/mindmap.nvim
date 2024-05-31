@@ -4,12 +4,11 @@ description:
 authors: jpshi
 categories:
 created: 2024-05-14T10:50:09
-updated: 2024-05-15T17:29:21
+updated: 2024-05-31T20:54:51
 version: 1.1.1
-mindmap: mindmap-1715856440-9389
 @end
 
 * First
 * Second
 ** 2.1 foo
-** 2.2 bar %mindnode-1715856440-1652%
+** 2.2 bar

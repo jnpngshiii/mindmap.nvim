@@ -68,16 +68,15 @@ end
 function M.MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
 	local nearest_heading = ts_utils.get_nearest_heading_node()
 
-	local file_name = utils.get_current_file_name()
-	local abs_file_path = vim.api.nvim_buf_get_name(0)
-	local abs_proj_path = utils.get_current_proj_path()
-	local rel_file_path = utils.get_rel_path(abs_file_path, abs_proj_path)
+	-- local file_name, _, rel_file_path, _ = table.unpack(utils.get_file_info())
+	local file_name = utils.get_file_info()[1]
+	local rel_file_path = utils.get_file_info()[3]
 	local created_heading_node = node_class["HeadingNode"]:new(file_name, rel_file_path)
 
-	local nearest_heading_title = ts_utils.get_title_and_content_node(nearest_heading)[1]
+	local nearest_heading_title_node = ts_utils.get_title_and_content_node(nearest_heading)[1]
 	ts_utils.replace_node_text(
-		ts_utils.get_heading_node_info(nearest_heading_title)[3] .. " %" .. created_heading_node.id .. "%",
-		nearest_heading
+		ts_utils.get_heading_node_info(nearest_heading_title_node)[3] .. " %" .. created_heading_node.id .. "%",
+		nearest_heading_title_node
 	)
 end
 

@@ -76,7 +76,9 @@ function ExcerptNode.create_using_latest_visual_selection()
 	local end_row = vim.api.nvim_buf_get_mark(0, ">")[1]
 	local end_col = vim.api.nvim_buf_get_mark(0, ">")[2]
 
-	local file_name, _, rel_file_path, _ = table.unpack(utils.get_file_info())
+	-- local file_name, _, rel_file_path, _ = table.unpack(utils.get_file_info())
+	local file_name = utils.get_file_info()[1]
+	local rel_file_path = utils.get_file_info()[3]
 	return ExcerptNode:new(file_name, rel_file_path, {
 		["start_row"] = start_row,
 		["start_col"] = start_col,
