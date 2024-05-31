@@ -19,7 +19,7 @@ local Graph = {}
 
 ---Create a new graph.
 ---@param log_level? string Logger log level of the graph. Default: "INFO".
----@param show_log_in_nvim? boolean Show log in Neovim when added.
+---@param show_log_in_nvim? boolean Show log in Neovim when added. Default: false.
 ---@param save_path? string Path to load and save the graph. Default: {current_project_path}.
 ---@param nodes? table<NodeID, PrototypeNode> Nodes in the graph. Key is the ID of the node.
 ---@param edges? table<EdgeID, PrototypeEdge> Edges in the graph. Key is the ID of the edge.
@@ -33,7 +33,7 @@ function Graph:new(log_level, show_log_in_nvim, save_path, nodes, edges, logger)
 		save_path = save_path or utils.get_file_info()[4],
 		nodes = nodes or {},
 		edges = edges or {},
-		logger = logger_class["Logger"]:new(log_level, show_log_in_nvim, save_path) or logger,
+		logger = logger_class["Logger"]:new(log_level, show_log_in_nvim) or logger,
 	}
 
 	setmetatable(graph, self)
@@ -174,6 +174,9 @@ function Graph.to_table(graph)
 	end
 
 	return {
+    log_level = graph.log_level,
+    show_log_in_nvim = graph.show_log_in_nvim,
+    save_path = graph.save_path,
 		nodes = nodes,
 		edges = edges,
 	}
@@ -214,8 +217,10 @@ end
 
 ---Load a graph from a JSON file.
 ---@param save_path string Path to save the graph.
----@return Graph|nil _
+---@return Graph? _
 function Graph.load(save_path)
+	save_path = save_path .. "/" .. ".mindmap.json"
+
 	local json, _ = io.open(save_path, "r")
 	if not json then
 		return nil
@@ -224,7 +229,11 @@ function Graph.load(save_path)
 	local json_content = json:read("*all")
 	json:close()
 
-	return Graph.from_table(vim.fn.json_decode(json_content))
+	if json_content then
+		return Graph.from_table(vim.fn.json_decode(json_content))
+	end
+
+	return nil
 end
 
 --------------------
