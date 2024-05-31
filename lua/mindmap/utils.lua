@@ -207,6 +207,17 @@ function M.get_bufnr_from_file_path(file_path)
 	return { bufnr, false }
 end
 
+function M.trigger_func_in_given_file_path(file_path, func, ...)
+	local bufnr, is_temp_buf = table.unpack(M.get_bufnr_from_file_path(file_path))
+	local func_output = func(bufnr, ...)
+
+	if is_temp_buf then
+		vim.api.nvim_buf_delete(bufnr, { force = true })
+	end
+
+	return func_output
+end
+
 --------------------
 -- Deprecated functions
 --------------------
