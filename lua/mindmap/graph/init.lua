@@ -7,7 +7,7 @@ local utils = require("mindmap.utils")
 ---
 ---@field log_level string Logger log level of the graph. Default: "INFO".
 ---@field show_log_in_nvim boolean Show log in Neovim when added.
----@field save_path string Path to load and save the graph. Default: {current_project_path}/.mindmap
+---@field save_path string Path to load and save the graph. Default: {current_project_path}/.mindmap.json.
 ---@field nodes table<NodeID, PrototypeNode> Nodes in the graph. Key is the ID of the node.
 ---@field edges table<EdgeID, PrototypeEdge> Edges in the graph. Key is the ID of the edge.
 ---@field logger Logger Logger of the graph.
@@ -20,7 +20,7 @@ local Graph = {}
 ---Create a new graph.
 ---@param log_level? string Logger log level of the graph. Default: "INFO".
 ---@param show_log_in_nvim? boolean Show log in Neovim when added.
----@param save_path? string Path to load and save the graph. Default: {current_project_path}/.mindmap
+---@param save_path? string Path to load and save the graph. Default: {current_project_path}/.mindmap.json.
 ---@param nodes? table<NodeID, PrototypeNode> Nodes in the graph. Key is the ID of the node.
 ---@param edges? table<EdgeID, PrototypeEdge> Edges in the graph. Key is the ID of the edge.
 ---@param logger? Logger Logger of the graph.
@@ -30,7 +30,7 @@ function Graph:new(log_level, show_log_in_nvim, save_path, nodes, edges, logger)
 		-- TODO: Check health?
 		log_level = log_level or "INFO",
 		show_log_in_nvim = show_log_in_nvim or false,
-		save_path = save_path or utils.get_file_info()[4] .. "/.mindmap",
+		save_path = save_path or utils.get_file_info()[4],
 		nodes = nodes or {},
 		edges = edges or {},
 		logger = logger_class["Logger"]:new(log_level, show_log_in_nvim, save_path) or logger,
@@ -203,7 +203,7 @@ end
 function Graph.save(graph, save_path)
 	local json_content = vim.fn.json_encode(Graph.to_table(graph))
 
-	local json, err = io.open(save_path or graph.save_path .. "/" .. "graph.json", "w")
+	local json, err = io.open(save_path or graph.save_path .. "/" .. ".mindmap.json", "w")
 	if not json then
 		error("[Graph] Could not open file: " .. err)
 	end

@@ -58,7 +58,7 @@ end
 ---@class Logger
 ---@field log_level string Log level of the logger. Default: "INFO".
 ---@field show_log_in_nvim boolean Show log in Neovim when added.
----@field save_path string Path to load and save the logger. Default: {current_project_path}/.mindmap
+---@field save_path string Path to load and save the logger. Default: {stdpath("data")}/mindmap
 ---@field messages table<string, Message> Table of messages. Key is the timestamp of the message.
 ---@field timestamp Timestamp Logger timestamp.
 ---@field log_level_tbl table<string, number> Table of log levels.
@@ -72,7 +72,7 @@ local Logger = {}
 ---Create a new logger.
 ---@param log_level? string Log level of the logger. Default: "INFO".
 ---@param show_log_in_nvim? boolean Show logs in Neovim when added.
----@param save_path? string Path to load and save the logger. Default: {current_project_path}/.mindmap
+---@param save_path? string Path to load and save the logger. Default: {stdpath("data")}/mindmap
 ---@param messages? table<string, Message> Table of messages. Key is the timestamp of the message.
 ---@param timestamp? Timestamp Logger timestamp.
 ---@param log_level_tbl? table<string, number> Table of log levels.
@@ -95,7 +95,7 @@ function Logger:new(log_level, show_log_in_nvim, save_path, messages, timestamp,
 
 	logger.show_log_in_nvim = show_log_in_nvim or false
 
-	logger.save_path = save_path or utils.get_file_info()[4] .. "/.mindmap"
+	logger.save_path = save_path or vim.fn.stdpath("data") .. "/mindmap"
 	vim.fn.system("mkdir -p " .. logger.save_path)
 
 	logger.messages = messages or {}
