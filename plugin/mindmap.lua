@@ -3,11 +3,16 @@
 --------------------
 
 vim.api.nvim_create_user_command("MindmapAddTheLatestVisualSelectionAsAnExcerptNodeToGraph", function()
+	vim.api.nvim_input("<Esc>") -- TODO: remove this workaround
 	require("mindmap").MindmapAddTheLatestVisualSelectionAsAnExcerptNodeToGraph()
 end, {})
 
 vim.api.nvim_create_user_command("MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph", function()
 	require("mindmap").MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
+end, {})
+
+vim.api.nvim_create_user_command("MindmapSaveAllMindmapsInDatabase", function()
+	require("mindmap").MindmapSaveAllMindmapsInDatabase()
 end, {})
 
 --------------------
@@ -25,6 +30,12 @@ end, {})
 vim.api.nvim_set_keymap(
 	"v",
 	"me",
-	":<cmd>MindmapAddTheLatestVisualSelectionAsAnExcerptNodeToGraph<cr>",
+	"<cmd>MindmapAddTheLatestVisualSelectionAsAnExcerptNodeToGraph<cr>",
 	{ noremap = true, silent = true }
 )
+
+vim.api.nvim_create_autocmd("VimLeave", {
+	callback = function()
+		require("mindmap").MindmapSaveAllMindmapsInDatabase()
+	end,
+})

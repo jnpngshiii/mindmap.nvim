@@ -32,8 +32,6 @@ function M.MindmapAddTheLatestVisualSelectionAsAnExcerptNodeToGraph()
 	local found_graph =
 		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
 	found_graph:add_node(created_excerpt_node)
-
-	-- lggr:info("function", "Create excerpt using latest visual selection.")
 end
 
 function M.MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
@@ -49,6 +47,16 @@ function M.MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
 		ts_utils.get_heading_node_info(nearest_heading_title_node)[3] .. " %" .. created_heading_node.id .. "%",
 		nearest_heading_title_node
 	)
+
+	local found_graph =
+		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
+	found_graph:add_node(created_heading_node)
+end
+
+function M.MindmapSaveAllMindmapsInDatabase()
+	for _, graph in pairs(plugin_database.cache) do
+		graph:save()
+	end
 end
 
 --------------------
@@ -84,6 +92,3 @@ end
 --------------------
 
 return M
-
--- TODO: auto save
--- TODO: auto load

@@ -7,7 +7,7 @@ local utils = require("mindmap.utils")
 ---
 ---@field log_level string Logger log level of the graph. Default: "INFO".
 ---@field show_log_in_nvim boolean Show log in Neovim when added.
----@field save_path string Path to load and save the graph. Default: {current_project_path}/.mindmap.json.
+---@field save_path string Path to load and save the graph. Default: {current_project_path}.
 ---@field nodes table<NodeID, PrototypeNode> Nodes in the graph. Key is the ID of the node.
 ---@field edges table<EdgeID, PrototypeEdge> Edges in the graph. Key is the ID of the edge.
 ---@field logger Logger Logger of the graph.
@@ -20,7 +20,7 @@ local Graph = {}
 ---Create a new graph.
 ---@param log_level? string Logger log level of the graph. Default: "INFO".
 ---@param show_log_in_nvim? boolean Show log in Neovim when added.
----@param save_path? string Path to load and save the graph. Default: {current_project_path}/.mindmap.json.
+---@param save_path? string Path to load and save the graph. Default: {current_project_path}.
 ---@param nodes? table<NodeID, PrototypeNode> Nodes in the graph. Key is the ID of the node.
 ---@param edges? table<EdgeID, PrototypeEdge> Edges in the graph. Key is the ID of the edge.
 ---@param logger? Logger Logger of the graph.

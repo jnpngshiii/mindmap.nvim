@@ -26,8 +26,7 @@ end
 function Database:add_graph(path, log_level, show_log_in_nvim, save_path)
 	local graph = graph_class["Graph"]:new(log_level, show_log_in_nvim, save_path)
 
-	path = path or utils.get_file_info()[4]
-	self.cache[path] = graph
+	self.cache[graph.save_path] = graph
 end
 
 ---Find a graph in the database using path.
