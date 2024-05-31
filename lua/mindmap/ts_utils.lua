@@ -1,6 +1,7 @@
 local ts_utils = require("nvim-treesitter.ts_utils")
 
-local utils = require("mindmap.utils")
+---@alias ts_node userdata
+---@alias ts_tree userdata
 
 local M = {}
 

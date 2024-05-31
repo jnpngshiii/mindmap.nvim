@@ -76,7 +76,7 @@ function M.MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
 
 	local nearest_heading_title = ts_utils.get_title_and_content_node(nearest_heading)[1]
 	ts_utils.replace_node_text(
-		ts_utils.get_node_text(nearest_heading_title) .. " %" .. created_heading_node.id .. "%",
+		ts_utils.get_heading_node_info(nearest_heading_title)[3] .. " %" .. created_heading_node.id .. "%",
 		nearest_heading
 	)
 end
