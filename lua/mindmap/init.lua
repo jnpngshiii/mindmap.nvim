@@ -29,11 +29,8 @@ local plugin_database = database_class["Database"]:new()
 function M.MindmapAddTheLatestVisualSelectionAsAnExcerptNodeToGraph()
 	local created_excerpt_node = node_class["ExcerptNode"].create_using_latest_visual_selection()
 
-	local found_graph = plugin_database:find_graph(
-		utils.get_current_proj_path(),
-		plugin_config.log_level,
-		plugin_config.show_log_in_nvim
-	)
+	local found_graph =
+		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
 	found_graph:add_node(created_excerpt_node)
 
 	-- lggr:info("function", "Create excerpt using latest visual selection.")
