@@ -1,5 +1,8 @@
 local PrototypeNode = require("mindmap.graph.node.prototype_node")
 
+local utils = require("mindmap.utils")
+local ts_utils = require("mindmap.ts_utils")
+
 --------------------
 -- Class HeadingNode
 --------------------
@@ -64,6 +67,60 @@ function HeadingNode:check_health()
 	end
 
 	return false
+end
+
+---Spaced representation
+function HeadingNode:to_card()
+	local output = {
+		title = "N/A",
+		content = "N/A",
+	}
+
+	local parsed_query = vim.treesitter.query.parse(
+		"norg",
+		[[
+    (_
+      title: (paragraph_segment
+        (inline_comment)
+      )
+    ) @heading_node
+    ]]
+	)
+
+	local parsed_sub_query = vim.treesitter.query.parse(
+		"norg",
+		[[
+      title: (paragraph_segment
+        (inline_comment)? @inline_comment
+      ) @title
+      content: (paragraph)? @content
+    ]]
+	)
+
+	local abs_proj_path = utils.get_file_info()[4]
+	local abs_file_path = utils.get_abs_path(self.rel_file_path, abs_proj_path)
+	local bufnr, is_temp_buf = table.unpack(utils.get_bufnr_from_file_path(abs_file_path .. "/" .. self.file_name))
+	local heading_node = utils.get_tstree_root(bufnr)
+
+	for _, sub_node in parsed_query:iter_captures(heading_node, 0) do
+		for _, sub_sub_node in parsed_sub_query:iter_captures(sub_node, 0) do
+			if parsed_sub_query.captures[sub_sub_node] == "title" then
+				output.title = ts_utils.get_node_text(sub_sub_node, bufnr)
+			elseif parsed_sub_query.captures[sub_sub_node] == "content" then
+				output.content = ts_utils.get_node_text(sub_sub_node, bufnr)
+			end
+
+			if string.match(output.title, self.id) then
+				break
+			end
+		end
+	end
+
+	if is_temp_buf then
+		vim.api.nvim_buf_delete(bufnr, { force = true })
+	end
+
+	return output
 end
 
 ----------

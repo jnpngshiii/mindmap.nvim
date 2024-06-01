@@ -122,13 +122,8 @@ function PrototypeNode:remove_outcoming_edge_id(outcoming_edge_id)
 end
 
 ---@abstract
-function PrototypeNode:front()
-	error("[PrototypeNode] Please implement function `front` in subclass.")
-end
-
----@abstract
-function PrototypeNode:back()
-	error("[PrototypeNode] Please implement function `back` in subclass.")
+function PrototypeNode:to_card()
+	error("[PrototypeNode] Please implement function `to_card` in subclass.")
 end
 
 --------------------

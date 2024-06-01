@@ -79,7 +79,7 @@ function M.get_heading_node_info(heading_node, bufnr)
 	bufnr = bufnr or 0
 
 	local text = vim.treesitter.get_node_text(heading_node, bufnr)
-	local id = string.match(text, "%d%d%d%d%d%d%d%d%d%d-%d%d%d%d")
+	local id = string.match(text, "%d%d%d%d%d%d%d%d%d%d%-%d%d%d%d")
 	local level = string.match(heading_node:type(), "^heading(%d)$")
 
 	return { id, level, text }
