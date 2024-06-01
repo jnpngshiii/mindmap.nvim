@@ -71,6 +71,10 @@ function SelfLoopEdge:check_health()
 	return false
 end
 
+---@deprecated
+---Spaced repetition function: Convert an edge to a card.
+function SelfLoopEdge:to_card() end
+
 --------------------
 -- Class Method
 --------------------

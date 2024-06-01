@@ -106,6 +106,12 @@ function PrototypeEdge:check_health()
 	return false
 end
 
+---@abstract
+---Spaced repetition function: Convert an edge to a card.
+function PrototypeEdge:to_card()
+	error("[PrototypeEdge] Please implement function `to_card` in subclass.")
+end
+
 --------------------
 -- Class Method
 --------------------

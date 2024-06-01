@@ -138,21 +138,38 @@ function Graph:remove_edge(edge_id)
 	)
 end
 
----Spaced repetition function: Convert an edge to a card.
+---@deprecated
+---Spaced repetition function.
 ---@param edge_id EdgeID ID of the edge to be converted.
----@return table _ { front, back, updated_at, due_at, ease, interval }
+---@return string[] _ { front, back, created_at, updated_at, due_at, ease, interval }
 function Graph:to_card(edge_id)
 	local edge = self.edges[edge_id]
-	local front = self.nodes[edge.from_node_id]:front()
-	local back = self.nodes[edge.to_node_id]:back()
-	local updated_at = edge.updated_at
-	local due_at = edge.due_at
-	local ease = edge.ease
-	local interval = edge.interval
 
-	self.logger:info("Card", "Convert edge <" .. edge_id .. "> to card.")
+	local front
+	local back
+	if edge.type == "SelfLoopEdge" then
+		local node = self.nodes[edge.from_node_id]
+		if node.type == "HeadingNode" then
+			local content = node:get_content()
 
-	return { front, back, updated_at, due_at, ease, interval }
+			front = content.title
+			back = content.content
+		else
+			self.logger:error("Node", "Can not convert node type <" .. node.type .. "> to card.")
+		end
+	else
+		self.logger:error("Edge", "Can not convert edge type <" .. edge.type .. "> to card.")
+	end
+
+	return {
+		front,
+		back,
+		edge.created_at,
+		edge.updated_at,
+		edge.due_at,
+		edge.ease,
+		edge.interval,
+	}
 end
 
 --------------------

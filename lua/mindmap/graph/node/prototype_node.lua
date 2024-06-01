@@ -122,8 +122,10 @@ function PrototypeNode:remove_outcoming_edge_id(outcoming_edge_id)
 end
 
 ---@abstract
-function PrototypeNode:to_card()
-	error("[PrototypeNode] Please implement function `to_card` in subclass.")
+---Get the content of the node.
+---@return string[] _
+function PrototypeNode:get_content()
+	error("[PrototypeNode] Please implement function `get_content` in subclass.")
 end
 
 --------------------

@@ -90,6 +90,11 @@ function M.get_abs_path(target_path, reference_path)
 		end
 	end
 
+	-- TODO: fix this workaround
+	if string.sub(reference_path, 1, 1) == "/" then
+		return "/" .. table.concat(reference_path_parts, "/")
+	end
+
 	return table.concat(reference_path_parts, "/")
 end
 
