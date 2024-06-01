@@ -8,6 +8,7 @@ local utils = require("mindmap.utils")
 ---@field type NodeType Type of the node.
 ---@field file_name string Name of the file where the node is from.
 ---@field rel_file_path string Relative path to the project root of the file where the node is from.
+---@field tag string[] Tag of the node.
 ---Must provide Fields in some edge classes: subclass should put there own field in this field.
 ---@field data table<string, number|string|boolean> Data of the node.
 ---Auto generated and updated fields:
@@ -19,7 +20,9 @@ local utils = require("mindmap.utils")
 ---@field cache table<string, number|string|boolean> Cache of the node. Save temporary data to avoid recalculation. Auto generated and updated.
 local PrototypeNode = {}
 
-local prototype_node_version = 1
+local prototype_node_version = 1.1
+-- v1.0: Initial version.
+-- v1.1: Add `tag` field.
 
 --------------------
 -- Instance Method
@@ -29,6 +32,7 @@ local prototype_node_version = 1
 ---@param type NodeType Type of the node.
 ---@param file_name string Name of the file where the node is from.
 ---@param rel_file_path string Relative path to the project root of the file where the node is from.
+---@param tag? string[] Tag of the node.
 ---@param data? table<string, number|string|boolean> Data of the node. Subclass should put there own data in this field.
 ---@param id? NodeID ID of the node.
 ---@param version? integer Version of the node.
@@ -40,6 +44,7 @@ function PrototypeNode:new(
 	type,
 	file_name,
 	rel_file_path,
+	tag,
 	data,
 	id,
 	version,
@@ -51,6 +56,7 @@ function PrototypeNode:new(
 		type = type,
 		file_name = file_name,
 		rel_file_path = rel_file_path,
+		tag = tag or {},
 		data = data or {},
 		id = id or utils.get_unique_id(),
 		created_at = created_at or tonumber(os.time()),
@@ -73,7 +79,8 @@ function PrototypeNode:check_health()
 		self.type
 		and self.file_name
 		and self.rel_file_path
-		and self.data
+		and self.tag
+		-- and self.data
 		and self.id
 		and self.version
 		and self.created_at
@@ -136,6 +143,7 @@ function PrototypeNode.to_table(node)
 		type = node.type,
 		file_name = node.file_name,
 		rel_file_path = node.rel_file_path,
+		tag = node.tag,
 		data = node.data,
 		id = node.id,
 		version = node.version,

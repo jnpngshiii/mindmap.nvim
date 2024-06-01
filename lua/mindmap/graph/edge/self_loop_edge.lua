@@ -5,6 +5,7 @@ local SelfLoopEdge = setmetatable({}, { __index = PrototypeEdge })
 SelfLoopEdge.__index = SelfLoopEdge
 
 local self_loop_edge_version = 1
+-- v1.0: Initial version.
 
 --------------------
 -- Instance Method
@@ -13,6 +14,7 @@ local self_loop_edge_version = 1
 ---Create a new self loop edge.
 ---@param from_node_id EdgeID Where this edge is from.
 ---@param to_node_id? EdgeID Where this edge is to.
+---@param tag? string[] Tag of the edge.
 ---@param data? table Data of the edge.
 ---@param id? EdgeID ID of the edge.
 ---@param version? integer Version of the edge.
@@ -22,13 +24,26 @@ local self_loop_edge_version = 1
 ---@param ease? integer Ease of the edge.
 ---@param interval? integer Interval of the edge.
 ---@return SelfLoopEdge|PrototypeEdge _
-function SelfLoopEdge:new(from_node_id, to_node_id, data, id, version, created_at, updated_at, due_at, ease, interval)
+function SelfLoopEdge:new(
+	from_node_id,
+	to_node_id,
+	tag,
+	data,
+	id,
+	version,
+	created_at,
+	updated_at,
+	due_at,
+	ease,
+	interval
+)
 	to_node_id = from_node_id
 
 	local prototype_edge = PrototypeEdge:new(
 		"SelfLoopEdge",
 		from_node_id,
 		to_node_id,
+		tag,
 		data,
 		id,
 		version or self_loop_edge_version,
@@ -67,6 +82,7 @@ function SelfLoopEdge.from_table(table)
 	return SelfLoopEdge:new(
 		table.from_node_id,
 		table.to_node_id,
+		table.tag,
 		table.data,
 		table.id,
 		table.version,

@@ -9,6 +9,7 @@ local HeadingNode = setmetatable({}, { __index = PrototypeNode })
 HeadingNode.__index = HeadingNode
 
 local heading_node_version = 1
+-- v1.0: Initial version.
 
 ----------
 -- Instance method
@@ -17,6 +18,7 @@ local heading_node_version = 1
 ---Create a new excerpt.
 ---@param file_name string Name of the file where the node is from.
 ---@param rel_file_path string Relative path to the project root of the file where the node is from.
+---@param tag? string[] Tag of the node.
 ---@param data? table Data of the node. Subclass should put there own data in this field.
 ---@param id? NodeID ID of the node.
 ---@param version? integer Version of the node.
@@ -24,14 +26,25 @@ local heading_node_version = 1
 ---@param incoming_edge_ids? table<EdgeID, EdgeID> IDs of incoming edges to this node.
 ---@param outcoming_edge_ids? table<EdgeID, EdgeID> IDs of outcoming edges from this node.
 ---@return HeadingNode|PrototypeNode _
-function HeadingNode:new(file_name, rel_file_path, data, id, version, created_at, incoming_edge_ids, outcoming_edge_ids)
+function HeadingNode:new(
+	file_name,
+	rel_file_path,
+	tag,
+	data,
+	id,
+	version,
+	created_at,
+	incoming_edge_ids,
+	outcoming_edge_ids
+)
 	local prototype_node = PrototypeNode:new(
 		"HeadingNode",
 		file_name,
 		rel_file_path,
+		tag,
 		data,
 		id,
-		version,
+		version or heading_node_version,
 		created_at,
 		incoming_edge_ids,
 		outcoming_edge_ids
@@ -64,6 +77,7 @@ function HeadingNode.from_table(table)
 	return HeadingNode:new(
 		table.file_name,
 		table.rel_file_path,
+		table.tag,
 		table.data,
 		table.id,
 		table.version,

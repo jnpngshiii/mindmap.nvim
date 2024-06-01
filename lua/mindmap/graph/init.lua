@@ -174,9 +174,9 @@ function Graph.to_table(graph)
 	end
 
 	return {
-    log_level = graph.log_level,
-    show_log_in_nvim = graph.show_log_in_nvim,
-    save_path = graph.save_path,
+		log_level = graph.log_level,
+		show_log_in_nvim = graph.show_log_in_nvim,
+		save_path = graph.save_path,
 		nodes = nodes,
 		edges = edges,
 	}

@@ -10,6 +10,7 @@ local utils = require("mindmap.utils")
 ---@field type EdgeType Type of the edge.
 ---@field from_node_id NodeID Where this edge is from.
 ---@field to_node_id NodeID Where this edge is to.
+---@field tag string[] Tag of the edge.
 ---Must provide Fields in some edge classes: subclass should put there own field in this field.
 ---@field data table<string, number|string|boolean> Data of the edge.
 ---Auto generated and updated fields:
@@ -23,7 +24,9 @@ local utils = require("mindmap.utils")
 ---@field cache table<string, number|string|boolean> Cache of the edge. Save temporary data to avoid recalculation. Auto generated and updated.
 local PrototypeEdge = {}
 
-local prototype_edge_version = 1
+local prototype_edge_version = 1.1
+-- v1.0: Initial version.
+-- v1.1: Add `tag` field.
 
 --------------------
 -- Instance Method
@@ -33,6 +36,7 @@ local prototype_edge_version = 1
 ---@param type EdgeType Type of the edge.
 ---@param from_node_id NodeID Where this edge is from.
 ---@param to_node_id NodeID Where this edge is to.
+---@param tag? string[] Tag of the edge.
 ---@param data? table Data of the edge.
 ---@param id? EdgeID ID of the edge.
 ---@param version? integer Version of the edge.
@@ -46,6 +50,7 @@ function PrototypeEdge:new(
 	type,
 	from_node_id,
 	to_node_id,
+	tag,
 	data,
 	id,
 	version,
@@ -59,6 +64,7 @@ function PrototypeEdge:new(
 		type = type,
 		from_node_id = from_node_id,
 		to_node_id = to_node_id,
+		tag = tag or {},
 		data = data or {},
 		id = id or utils.get_unique_id(),
 		version = version or prototype_edge_version,
@@ -84,6 +90,8 @@ function PrototypeEdge:check_health()
 		self.type
 		and self.from_node_id
 		and self.to_node_id
+		and self.tag
+		-- and self.data
 		and self.id
 		and self.version
 		and self.created_at
@@ -110,6 +118,7 @@ function PrototypeEdge.to_table(edge)
 		type = edge.type,
 		from_node_id = edge.from_node_id,
 		to_node_id = edge.to_node_id,
+		tag = edge.tag,
 		data = edge.data,
 		id = edge.id,
 		version = edge.version,

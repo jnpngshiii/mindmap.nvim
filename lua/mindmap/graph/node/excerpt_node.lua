@@ -22,6 +22,7 @@ local excerpt_node_version = 1
 ---Create a new excerpt.
 ---@param file_name string Name of the file where the node is from.
 ---@param rel_file_path string Relative path to the project root of the file where the node is from.
+---@param tag? string[] Tag of the node.
 ---@param data? table Data of the node. Subclass should put there own data in this field.
 ---@param id? NodeID ID of the node.
 ---@param version? integer Version of the node.
@@ -29,11 +30,22 @@ local excerpt_node_version = 1
 ---@param incoming_edge_ids? table<EdgeID, EdgeID> IDs of incoming edges to this node.
 ---@param outcoming_edge_ids? table<EdgeID, EdgeID> IDs of outcoming edges from this node.
 ---@return ExcerptNode|PrototypeNode _
-function ExcerptNode:new(file_name, rel_file_path, data, id, version, created_at, incoming_edge_ids, outcoming_edge_ids)
+function ExcerptNode:new(
+	file_name,
+	rel_file_path,
+	tag,
+	data,
+	id,
+	version,
+	created_at,
+	incoming_edge_ids,
+	outcoming_edge_ids
+)
 	local prototype_node = PrototypeNode:new(
 		"ExcerptNode",
 		file_name,
 		rel_file_path,
+		tag,
 		data,
 		id,
 		version or excerpt_node_version,
@@ -94,6 +106,7 @@ function ExcerptNode.from_table(table)
 	return ExcerptNode:new(
 		table.file_name,
 		table.rel_file_path,
+		table.tag,
 		table.data,
 		table.id,
 		table.version,
