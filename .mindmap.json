@@ -1,67 +1,53 @@
 {
-  "show_log_in_nvim": true,
+  "log_level": "INFO",
   "save_path": "/Users/jpshi/Git/mindmap.nvim",
-  "edges": {
-    "1717228450-8806": {
+  "edges": [],
+  "nodes": [
+    {
       "tag": [],
-      "from_node_id": "1717227961-7088",
-      "version": 1,
-      "updated_at": 1717228450,
-      "created_at": 1717228450,
-      "id": "1717228450-8806",
       "data": [],
-      "type": "SelfLoopEdge",
-      "due_at": 0,
-      "to_node_id": "1717227961-7088",
-      "interval": 1,
-      "ease": 250
-    },
-    "1717228435-9770": {
-      "tag": [],
-      "from_node_id": "1717227961-7088",
-      "version": 1,
-      "updated_at": 1717228435,
-      "created_at": 1717228435,
-      "id": "1717228435-9770",
-      "data": [],
-      "type": "SelfLoopEdge",
-      "due_at": 0,
-      "to_node_id": "1717227961-7088",
-      "interval": 1,
-      "ease": 250
-    }
-  },
-  "nodes": {
-    "1717227961-7088": {
-      "tag": [],
-      "id": "1717227961-7088",
-      "version": 1,
-      "outcoming_edge_ids": {
-        "1717228450-8806": "1717228450-8806",
-        "1717228435-9770": "1717228435-9770"
-      },
-      "created_at": 1717227961,
       "file_name": "test.norg",
-      "type": "HeadingNode",
-      "data": [],
-      "rel_file_path": "tests",
-      "incoming_edge_ids": {
-        "1717228450-8806": "1717228450-8806",
-        "1717228435-9770": "1717228435-9770"
-      }
-    },
-    "1717227967-9002": {
-      "tag": [],
-      "id": "1717227967-9002",
-      "version": 1,
+      "created_at": 1717287986,
       "outcoming_edge_ids": [],
-      "created_at": 1717227967,
-      "file_name": "test.norg",
       "type": "HeadingNode",
+      "version": 0,
+      "rel_file_path": "tests",
+      "incoming_edge_ids": []
+    },
+    {
+      "tag": [],
       "data": [],
+      "file_name": "test.norg",
+      "created_at": 1717288010,
+      "outcoming_edge_ids": [],
+      "type": "HeadingNode",
+      "version": 0,
+      "rel_file_path": "tests",
+      "incoming_edge_ids": []
+    },
+    {
+      "tag": [],
+      "data": { "start_col": 0, "start_row": 0, "end_col": 0, "end_row": 0 },
+      "file_name": "ipsum.txt",
+      "created_at": 1717288094,
+      "outcoming_edge_ids": [],
+      "type": "ExcerptNode",
+      "version": 0,
+      "rel_file_path": "tests",
+      "incoming_edge_ids": []
+    },
+    {
+      "tag": [],
+      "data": [],
+      "file_name": "test.norg",
+      "created_at": 1717287986,
+      "outcoming_edge_ids": [],
+      "type": "HeadingNode",
+      "version": 0,
       "rel_file_path": "tests",
       "incoming_edge_ids": []
     }
-  },
-  "log_level": "INFO"
+  ],
+  "show_log_in_nvim": true
 }
+

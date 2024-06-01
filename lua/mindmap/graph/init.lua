@@ -8,8 +8,8 @@ local utils = require("mindmap.utils")
 ---@field log_level string Logger log level of the graph. Default: "INFO".
 ---@field show_log_in_nvim boolean Show log in Neovim when added.
 ---@field save_path string Path to load and save the graph. Default: {current_project_path}.
----@field nodes table<NodeID, PrototypeNode> Nodes in the graph. Key is the ID of the node.
----@field edges table<EdgeID, PrototypeEdge> Edges in the graph. Key is the ID of the edge.
+---@field nodes table<NodeID, PrototypeNode> Nodes in the graph. Key is the ID of the node. If the value is 0, the node is removed.
+---@field edges table<EdgeID, PrototypeEdge> Edges in the graph. Key is the ID of the edge. If the value is 0, the edge is removed.
 ---@field logger Logger Logger of the graph.
 local Graph = {}
 
@@ -24,10 +24,9 @@ local Graph = {}
 ---@param nodes? table<NodeID, PrototypeNode> Nodes in the graph. Key is the ID of the node.
 ---@param edges? table<EdgeID, PrototypeEdge> Edges in the graph. Key is the ID of the edge.
 ---@param logger? Logger Logger of the graph.
----@return Graph _
+---@return Graph _ The new graph.
 function Graph:new(log_level, show_log_in_nvim, save_path, nodes, edges, logger)
 	local graph = {
-		-- TODO: Check health?
 		log_level = log_level or "INFO",
 		show_log_in_nvim = show_log_in_nvim or false,
 		save_path = save_path or utils.get_file_info()[4],
@@ -42,58 +41,59 @@ function Graph:new(log_level, show_log_in_nvim, save_path, nodes, edges, logger)
 	return graph
 end
 
----Add a node to the graph and return its ID.
+---Add a node to the graph.
 ---@param node PrototypeNode Node to be added.
----@return nil _
+---@return nil _ This function does not return anything.
 function Graph:add_node(node)
-	self.logger:info("Node", "Add " .. node.type .. " <" .. node.id .. ">.")
+	local node_id = #self.nodes + 1
+	self.nodes[node_id] = node
 
-	self.nodes[node.id] = node
+	self.logger:info("Node", "Add " .. node.type .. " <" .. node_id .. ">.")
 end
 
 ---Remove a node from the graph and all edges related to it using ID.
 ---@param node_id NodeID ID of the node to be removed.
----@return nil _
+---@return nil _ This function does not return anything.
 function Graph:remove_node(node_id)
-	self.logger:info("Node", "Remove " .. self.nodes[node_id].type .. " <" .. node_id .. "> and related edges.")
-
 	local node = self.nodes[node_id]
 
 	for _, incoming_edge_id in pairs(node.incoming_edge_ids) do
-		local edge = self.edges[incoming_edge_id]
-		local from_node = self.nodes[edge.from_node_id]
+		local incoming_edge = self.edges[incoming_edge_id]
+		local from_node = self.nodes[incoming_edge.from_node_id]
 		from_node:remove_outcoming_edge_id(incoming_edge_id)
-		self:remove_edge(edge.id)
+		self:remove_edge(incoming_edge_id)
 	end
 
 	for _, outcoming_edge_id in pairs(node.outcoming_edge_ids) do
-		local edge = self.edges[outcoming_edge_id]
-		local to_node = self.nodes[edge.to_node_id]
+		local outcoming_edge = self.edges[outcoming_edge_id]
+		local to_node = self.nodes[outcoming_edge.to_node_id]
 		to_node:remove_incoming_edge_id(outcoming_edge_id)
-		self:remove_edge(edge.id)
+		self:remove_edge(outcoming_edge_id)
 	end
 
-	self.nodes[node_id] = nil
+	self.nodes[node_id] = nil -- Mark as removed
+
+	self.logger:info("Node", "Remove " .. self.nodes[node_id].type .. " <" .. node_id .. "> and related edges.")
 end
 
 ---Add a edge to the graph.
 ---@param edge PrototypeEdge Edge to be added.
----@return nil _
+---@return nil _ This function does not return anything.
 function Graph:add_edge(edge)
-	self.edges[edge.id] = edge
+	local edge_id = #self.edges + 1
+	self.edges[edge_id] = edge
 
 	local from_node = self.nodes[edge.from_node_id]
-	from_node:add_outcoming_edge_id(edge.id)
-
+	from_node:add_outcoming_edge_id(edge_id)
 	local to_node = self.nodes[edge.to_node_id]
-	to_node:add_incoming_edge_id(edge.id)
+	to_node:add_incoming_edge_id(edge_id)
 
 	self.logger:info(
 		"Edge",
 		"Add "
 			.. edge.type
 			.. " <"
-			.. edge.id
+			.. edge_id
 			.. "> from "
 			.. from_node.type
 			.. " <"
@@ -108,7 +108,7 @@ end
 
 ---Remove an edge from the graph using ID.
 ---@param edge_id EdgeID ID of the edge to be removed.
----@return nil _
+---@return nil _ This function does not return anything.
 function Graph:remove_edge(edge_id)
 	local edge = self.edges[edge_id]
 
@@ -116,16 +116,16 @@ function Graph:remove_edge(edge_id)
 	from_node:remove_outcoming_edge_id(edge_id)
 
 	local to_node = self.nodes[edge.to_node_id]
-	to_node:remove_outcoming_edge_id(edge.id)
+	to_node:remove_outcoming_edge_id(edge_id)
 
-	self.edges[edge_id] = nil
+	self.edges[edge_id] = nil -- Mark as removed
 
 	self.logger:info(
 		"Edge",
 		"Remove "
 			.. edge.type
 			.. " <"
-			.. edge.id
+			.. edge_id
 			.. "> from "
 			.. from_node.type
 			.. " <"
@@ -147,7 +147,7 @@ function Graph:to_card(edge_id)
 
 	local front
 	local back
-	if edge.type == "SelfLoopEdge" then
+	if edge.type == "SelfLoopContentEdge" then
 		local node = self.nodes[edge.from_node_id]
 		if node.type == "HeadingNode" then
 			local content = node:get_content()
@@ -178,16 +178,16 @@ end
 
 ---Convert a graph to a table.
 ---@param graph Graph Graph to be converted.
----@return table _
+---@return table _ The converted table.
 function Graph.to_table(graph)
 	local nodes = {}
-	for _, node in pairs(graph.nodes) do
-		nodes[node.id] = node_class[node.type].to_table(node)
+	for node_id, node in ipairs(graph.nodes) do
+		nodes[node_id] = node_class[node.type].to_table(node)
 	end
 
 	local edges = {}
-	for _, edge in pairs(graph.edges) do
-		edges[edge.id] = edge_class[edge.type].to_table(edge)
+	for edge_id, edge in ipairs(graph.edges) do
+		edges[edge_id] = edge_class[edge.type].to_table(edge)
 	end
 
 	return {
@@ -201,16 +201,16 @@ end
 
 ---Convert a table to a graph.
 ---@param table table Table to be converted.
----@return Graph _
+---@return Graph _ The converted graph.
 function Graph.from_table(table)
 	local nodes = {}
-	for _, node in pairs(table.nodes) do
-		nodes[node.id] = node_class[node.type].from_table(node)
+	for node_id, node in ipairs(table.nodes) do
+		nodes[node_id] = node_class[node.type].from_table(node)
 	end
 
 	local edges = {}
-	for _, edge in pairs(table.edges) do
-		edges[edge.id] = edge_class[edge.type].from_table(edge)
+	for edge_id, edge in ipairs(table.edges) do
+		edges[edge_id] = edge_class[edge.type].from_table(edge)
 	end
 
 	return Graph:new(table.log_level, table.show_log_in_nvim, table.save_path, nodes, edges)
@@ -219,7 +219,7 @@ end
 ---Save a graph to a JSON file.
 ---@param graph Graph Graph to be saved.
 ---@param save_path? string Path to save the graph.
----@return nil _
+---@return nil _ This function does not return anything.
 function Graph.save(graph, save_path)
 	local json_content = vim.fn.json_encode(Graph.to_table(graph))
 
@@ -234,7 +234,7 @@ end
 
 ---Load a graph from a JSON file.
 ---@param save_path string Path to save the graph.
----@return Graph? _
+---@return Graph? _ The loaded graph. If the file does not exist, return nil.
 function Graph.load(save_path)
 	save_path = save_path .. "/" .. ".mindmap.json"
 

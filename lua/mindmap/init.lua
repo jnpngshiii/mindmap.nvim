@@ -35,22 +35,23 @@ function M.MindmapAddTheLatestVisualSelectionAsAnExcerptNodeToGraph()
 end
 
 function M.MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
-	local nearest_heading = ts_utils.get_nearest_heading_node()
-
-	-- local file_name, _, rel_file_path, _ = table.unpack(utils.get_file_info())
-	local file_name = utils.get_file_info()[1]
-	local rel_file_path = utils.get_file_info()[3]
+	local file_name, _, rel_file_path, _ = unpack(utils.get_file_info())
 	local created_heading_node = node_class["HeadingNode"]:new(file_name, rel_file_path)
 
+	local nearest_heading = ts_utils.get_nearest_heading_node()
 	local nearest_heading_title_node = ts_utils.get_title_and_content_node(nearest_heading)[1]
-	ts_utils.replace_node_text(
-		ts_utils.get_heading_node_info(nearest_heading_title_node)[3] .. " %" .. created_heading_node.id .. "%",
-		nearest_heading_title_node
-	)
 
 	local found_graph =
 		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
 	found_graph:add_node(created_heading_node)
+
+	ts_utils.replace_node_text(
+		ts_utils.get_heading_node_info(nearest_heading_title_node)[3]
+			.. " %"
+			.. string.format("%08d", #found_graph.nodes)
+			.. "%",
+		nearest_heading_title_node
+	)
 end
 
 function M.MindmapSaveAllMindmapsInDatabase()
@@ -66,14 +67,15 @@ end
 function M.MindmapTest()
 	local pth = utils.get_file_info()[4]
 	local graph = graph_class["Graph"].load(pth)
+	local node = graph.nodes[1]
 
-	local node = graph.nodes["1717227961-7088"]
 	local output = node:get_content()
 	print(table.concat(output.title, "\n"))
 	print(table.concat(output.content, "\n"))
-end
 
-M.MindmapTest()
+	graph:add_node(node)
+	graph:save()
+end
 
 --------------------
 
