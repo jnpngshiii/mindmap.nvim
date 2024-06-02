@@ -70,11 +70,14 @@ function M.MindmapTest()
 	local node = graph.nodes[1]
 
 	local output = node:get_content()
+  print("title:\n")
 	print(table.concat(output.title, "\n"))
-	print(table.concat(output.content, "\n"))
+	-- print(table.concat(output.content, "\n"))
+  print("sub:\n")
+	print(table.concat(output.sub_headings_titles, "\n"))
 
-	graph:add_node(node)
-	graph:save()
+	-- graph:add_node(node)
+	-- graph:save()
 end
 
 --------------------

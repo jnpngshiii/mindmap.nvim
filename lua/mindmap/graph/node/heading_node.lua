@@ -65,11 +65,12 @@ function HeadingNode:new(
 end
 
 ---Get the content of the node.
----@return table<string, string[]> _ { title = string[], content = string[] }
+---@return table<string, string[], string[]> _ { title = string[], content = string[], sub_headings_titles = string[] }
 function HeadingNode:get_content()
 	local output = {
 		title = {},
 		content = {},
+		sub_headings_titles = {},
 	}
 
 	local parsed_query = vim.treesitter.query.parse(
@@ -85,8 +86,10 @@ function HeadingNode:get_content()
 
 	local abs_proj_path = utils.get_file_info()[4]
 	local abs_file_path = utils.get_abs_path(self.rel_file_path, abs_proj_path)
-	local bufnr, is_temp_buf = unpack(utils.get_bufnr_from_file_path(abs_file_path .. "/" .. self.file_name))
+	local bufnr, is_temp_buf = utils.get_bufnr(bufnr_or_file_path)(abs_file_path .. "/" .. self.file_name)
 	local root_node = ts_utils.get_tstree_root(bufnr)
+
+	-- TODO: get heanding node first
 
 	for _, heading_node in parsed_query:iter_captures(root_node, 0) do
 		local results = ts_utils.get_title_and_content_node(heading_node, bufnr)
@@ -95,6 +98,24 @@ function HeadingNode:get_content()
 		end
 		if results[2] then
 			output.content = nts_utils.get_node_text(results[2], bufnr)
+		end
+	end
+
+	for _, heading_node in parsed_query:iter_captures(root_node, 0) do
+		local sub_heading_level = tonumber(string.match(heading_node:type(), "%d")) + 1
+		local sub_heading_type = "heading" .. sub_heading_level
+		local query_str = string.format(
+			[[
+        (%s
+          title: (paragraph_segment) @sub_title
+        )
+      ]],
+			sub_heading_type
+		)
+
+		local sub_parsed_query = vim.treesitter.query.parse("norg", query_str)
+		for _, sub_heading_node in sub_parsed_query:iter_captures(heading_node, 0) do
+			table.insert(output.sub_headings_titles, nts_utils.get_node_text(sub_heading_node, bufnr)[1])
 		end
 	end
 

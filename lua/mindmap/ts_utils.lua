@@ -1,4 +1,4 @@
-local ts_utils = require("nvim-treesitter.ts_utils")
+local nts_utils = require("nvim-treesitter.ts_utils")
 
 ---@class ts_node
 ---@field range function()
@@ -32,7 +32,7 @@ end
 ---Get the nearest heading node according to the cursor.
 ---@return ts_node _ The nearest heading node according to the cursor.
 function M.get_nearest_heading_node()
-	local current_node = ts_utils.get_node_at_cursor()
+	local current_node = nts_utils.get_node_at_cursor()
 
 	while not current_node:type():match("^heading%d$") do
 		current_node = current_node:parent()
@@ -41,13 +41,43 @@ function M.get_nearest_heading_node()
 	return current_node
 end
 
----Get subheading nodes of the given heading node.
----@param heading_node ts_node The heading node.
----@param bufnr? integer The buffer number. Default: 0.
----@return ts_node[] _ The subheading nodes of the given heading node.
-function M.get_subheading_nodes(heading_node, bufnr)
-	-- TODO: Implement this function.
-	return {}
+---Get the heading node using node id.
+---@param node_id integer The node id.
+---@param bufnr? integer The buffer number.
+function M.get_heading_node_using_id(node_id, bufnr)
+	local node_id_str = string.format("%08d", node_id)
+	local root_node = M.get_tstree_root(bufnr)
+
+	local parsed_query = vim.treesitter.query.parse(
+		"norg",
+		[[
+    (_
+      title: (paragraph_segment
+        (inline_comment)
+      )
+    ) @heading_node
+    ]]
+	)
+
+	local sub_parsed_query = vim.treesitter.query.parse(
+		"norg",
+		[[
+    title: (paragraph_segment
+      (inline_comment) @inline_comment
+    )
+    ]]
+	)
+
+	for _, heading_node in parsed_query:iter_captures(root_node, 0) do
+		for _, sub_heading_node in sub_parsed_query:iter_captures(heading_node, 0) do
+			local inline_comment = nts_utils.get_node_text(sub_heading_node, bufnr)
+			if string.match(inline_comment, node_id_str) then
+				return sub_heading_node
+			end
+		end
+	end
+
+	return nil
 end
 
 --------------------

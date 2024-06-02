@@ -4,17 +4,6 @@ local M = {}
 -- Helper functions
 --------------------
 
----Get an unique id.
----@param perfix? string
----@return string _ {perfix}-timestamp-random or timestamp-random
-function M.get_unique_id(perfix)
-	if perfix then
-		return string.format("%s-%s-%d", perfix, os.time(), math.random(1000, 9999))
-	end
-
-	return string.format("%s-%d", os.time(), math.random(1000, 9999))
-end
-
 ---Match all patterns in the content.
 ---@param content string|string[]
 ---@param pattern string
@@ -48,29 +37,6 @@ function M.split_string(str, sep)
 		table.insert(parts, part)
 	end
 	return parts
-end
-
----Simple function to get the file path from a buffer number or a file path.
----This function is used to simplify the code.
----@param bufnr_or_file_path integer|string Buffer number or file path of the file. Default: 0.
----@param return_file_handle? boolean Return file handle if true. Default: false.
----@param mode? string File mode. Default: "r".
----@return string|file*? _ File path or file handle.
-function M.get_file_from_buf_number_or_file_path(bufnr_or_file_path, return_file_handle, mode)
-	bufnr_or_file_path = bufnr_or_file_path or 0
-
-	if type(bufnr_or_file_path) == "number" then
-		return vim.api.nvim_buf_get_name(bufnr_or_file_path)
-	elseif type(bufnr_or_file_path) == "string" then
-		if return_file_handle then
-			mode = mode or "r"
-			return io.open(bufnr_or_file_path, mode)
-		else
-			return bufnr_or_file_path
-		end
-	end
-
-	return nil
 end
 
 ---Convert relative path (target_path) to absolute path according to reference path (reference_path).
@@ -194,22 +160,26 @@ function M.get_file_content(bufnr_or_file_path, start_row, end_row, start_col, e
 	return range_content
 end
 
----Get the buffer number of a file using the given file path.
----If the file is not loaded, create a temporary buffer and return the buffer number.
----@param file_path string File path to be loaded.
----@return table _ { bufnr, is_temp_buf }
-function M.get_bufnr_from_file_path(file_path)
-	local bufnr = vim.fn.bufnr(file_path)
+---Get the buffer number, or get the temp buffer number.
+---@param bufnr_or_file_path integer|string Buffer number or file path.
+---@return integer?, boolean _ Buffer number and whether it is a temp buffer.
+function M.get_bufnr(bufnr_or_file_path)
+	if type(bufnr_or_file_path) == "number" then
+		return bufnr_or_file_path, false
+	elseif type(bufnr_or_file_path) == "string" then
+		local bufnr = vim.fn.bufnr(bufnr_or_file_path)
+		if bufnr == -1 then
+			local content = vim.fn.readfile(bufnr_or_file_path)
+			local temp_bufnr = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(temp_bufnr, 0, -1, false, content)
 
-	if bufnr == -1 then
-		local content = vim.fn.readfile(file_path)
-		local temp_bufnr = vim.api.nvim_create_buf(false, true)
-		vim.api.nvim_buf_set_lines(temp_bufnr, 0, -1, false, content)
+			return temp_bufnr, true
+		end
 
-		return { temp_bufnr, true }
+		return bufnr, false
 	end
 
-	return { bufnr, false }
+	return nil, false
 end
 
 --------------------
