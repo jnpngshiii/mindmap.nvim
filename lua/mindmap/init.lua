@@ -39,7 +39,7 @@ function M.MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
 	local created_heading_node = node_class["HeadingNode"]:new(file_name, rel_file_path)
 
 	local nearest_heading = ts_utils.get_nearest_heading_node()
-	local nearest_heading_title_node = ts_utils.get_title_and_content_node(nearest_heading)[1]
+	local nearest_heading_title_node = ts_utils.get_sub_nodes(nearest_heading)[1]
 
 	local found_graph =
 		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
@@ -70,10 +70,10 @@ function M.MindmapTest()
 	local node = graph.nodes[1]
 
 	local output = node:get_content()
-  print("title:\n")
+	print("title:\n")
 	print(table.concat(output.title, "\n"))
 	-- print(table.concat(output.content, "\n"))
-  print("sub:\n")
+	print("sub:\n")
 	print(table.concat(output.sub_headings_titles, "\n"))
 
 	-- graph:add_node(node)

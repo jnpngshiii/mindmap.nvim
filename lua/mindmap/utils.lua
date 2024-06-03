@@ -161,8 +161,8 @@ function M.get_file_content(bufnr_or_file_path, start_row, end_row, start_col, e
 end
 
 ---Get the buffer number, or get the temp buffer number.
----@param bufnr_or_file_path integer|string Buffer number or file path.
----@return integer?, boolean _ Buffer number and whether it is a temp buffer.
+---@param bufnr_or_file_path? integer|string Buffer number or file path.
+---@return integer bufnr, boolean is_temp_buf Buffer number and whether it is a temp buffer. Default: 0, false.
 function M.get_bufnr(bufnr_or_file_path)
 	if type(bufnr_or_file_path) == "number" then
 		return bufnr_or_file_path, false
@@ -179,7 +179,7 @@ function M.get_bufnr(bufnr_or_file_path)
 		return bufnr, false
 	end
 
-	return nil, false
+	return 0, false
 end
 
 --------------------
