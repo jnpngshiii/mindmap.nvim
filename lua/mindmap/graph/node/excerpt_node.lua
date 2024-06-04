@@ -60,6 +60,7 @@ function ExcerptNode:new(
 	setmetatable(prototype_node, self)
 	self.__index = self
 
+	---@cast prototype_node ExcerptNode
 	return prototype_node
 end
 
