@@ -1,0 +1,58 @@
+{
+  "log_level": "INFO",
+  "save_path": "/Users/jpshi/Git/mindmap.nvim",
+  "edges": [
+    {
+      "tag": [],
+      "from_node_id": 1,
+      "data": [],
+      "updated_at": 1717474354,
+      "created_at": 1717474354,
+      "to_node_id": 1,
+      "due_at": 0,
+      "type": "SelfLoopContentEdge",
+      "version": 0,
+      "ease": 250,
+      "interval": 1
+    },
+    {
+      "tag": [],
+      "from_node_id": 2,
+      "data": [],
+      "updated_at": 1717474371,
+      "created_at": 1717474371,
+      "to_node_id": 2,
+      "due_at": 0,
+      "type": "SelfLoopContentEdge",
+      "version": 0,
+      "ease": 250,
+      "interval": 1
+    }
+  ],
+  "nodes": [
+    {
+      "tag": [],
+      "data": [],
+      "outcoming_edge_ids": [1],
+      "created_at": 1717474354,
+      "file_name": "test.norg",
+      "type": "HeadingNode",
+      "version": 0,
+      "rel_file_path": "tests",
+      "incoming_edge_ids": [1]
+    },
+    {
+      "tag": [],
+      "data": [],
+      "outcoming_edge_ids": [null, 2],
+      "created_at": 1717474371,
+      "file_name": "test.norg",
+      "type": "HeadingNode",
+      "version": 0,
+      "rel_file_path": "tests",
+      "incoming_edge_ids": [null, 2]
+    }
+  ],
+  "show_log_in_nvim": true
+}
+
