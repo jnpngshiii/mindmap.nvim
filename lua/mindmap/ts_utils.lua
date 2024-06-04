@@ -32,12 +32,19 @@ function M.get_tstree_root(bufnr_or_file_path)
 end
 
 ---Get the nearest heading node according to the cursor.
+---If node_id is given, return the nearest heading node with the id.
+---If node_id is not given, return the nearest heading node.
+---@param node_id? NodeID The id of the heading node.
 ---@return TSNode? _ The nearest heading node according to the cursor.
-function M.get_nearest_heading_node()
+function M.get_nearest_heading_node(node_id)
 	local current_node = nts_utils.get_node_at_cursor()
 
-	while current_node and not current_node:type():match("^heading%d$") do
+	local ok
+	while current_node and not current_node:type():match("^heading%d$") and not ok do
 		current_node = current_node:parent()
+		if node_id then
+			ok = node_id == M.get_heading_node_info(current_node, 0)
+		end
 	end
 
 	return current_node
