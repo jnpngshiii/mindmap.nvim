@@ -28,7 +28,7 @@ local self_loop_content_edge_version = 0.0
 ---@param due_at? integer Due time of the edge.
 ---@param ease? integer Ease of the edge.
 ---@param interval? integer Interval of the edge.
----@return SelfLoopContentEdge|PrototypeEdge _ The created edge.
+---@return SelfLoopContentEdge _ The created edge.
 function SelfLoopContentEdge:new(
 	from_node_id,
 	to_node_id,

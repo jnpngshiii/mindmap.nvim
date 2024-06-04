@@ -7,69 +7,65 @@
 
 ---@class PrototypeNode
 ---Must provide fields in all node classes:
----@field type NodeType Type of the node.
 ---@field file_name string Name of the file where the node is from.
 ---@field rel_file_path string Relative path to the project root of the file where the node is from.
----Must provide Fields in some edge classes: subclass should put there own field in this field.
----@field data table Data of the node.
 ---Auto generated and updated fields:
+---@field type NodeType Type of the node. Auto generated.
 ---@field tag string[] Tag of the node.
 ---@field version integer Version of the node. Auto generated and updated.
 ---@field created_at integer Created time of the node in UNIX timestemp format. Auto generated.
 ---@field incoming_edge_ids table<EdgeID, EdgeID> IDs of incoming edges to this node. Auto generated and updated.
 ---@field outcoming_edge_ids table<EdgeID, EdgeID> IDs of outcoming edges from this node. Auto generated and updated.
+---@field data table Data of the node. Subclass should put there own field in this field.
 ---@field cache table Cache of the node. Save temporary data to avoid recalculation. Auto generated and updated.
 local PrototypeNode = {}
 
-local prototype_node_version = 0.2
+local prototype_node_version = 0.3
 -- v0.0: Initial version.
 -- v0.1: Add `tag` field.
 -- v0.2: Remove `id` field.
+-- v0.3: Make `type` field auto generated.
 
 --------------------
 -- Instance Method
 --------------------
 
 ---Create a new node.
----@param type NodeType Type of the node.
 ---@param file_name string Name of the file where the node is from.
 ---@param rel_file_path string Relative path to the project root of the file where the node is from.
----
----@param data? table Data of the node. Subclass should put there own data in this field.
 ---
 ---@param tag? string[] Tag of the node.
 ---@param version? integer Version of the node.
 ---@param created_at? integer Created time of the node in Unix timestamp format.
 ---@param incoming_edge_ids? table<EdgeID, EdgeID> IDs of incoming edges to this node.
 ---@param outcoming_edge_ids? table<EdgeID, EdgeID> IDs of outcoming edges from this node.
+---@param data? table Data of the node. Subclass should put there own data in this field.
 ---@return PrototypeNode _ The created node.
 function PrototypeNode:new(
-	type,
 	file_name,
 	rel_file_path,
-
-	data,
 
 	tag,
 	version,
 	created_at,
 	incoming_edge_ids,
-	outcoming_edge_ids
+	outcoming_edge_ids,
+	data
 )
 	local node = {
-		type = type,
 		file_name = file_name,
 		rel_file_path = rel_file_path,
-
-		data = data or {},
 
 		tag = tag or {},
 		created_at = created_at or tonumber(os.time()),
 		incoming_edge_ids = incoming_edge_ids or {},
 		outcoming_edge_ids = outcoming_edge_ids or {},
 		version = version or prototype_node_version,
-		cache = {},
+		data = data or {},
 	}
+
+	node.type = "PrototypeNode"
+	node.cache = {}
 
 	setmetatable(node, self)
 	self.__index = self
@@ -125,13 +121,12 @@ function PrototypeNode.to_table(node)
 		file_name = node.file_name,
 		rel_file_path = node.rel_file_path,
 
-		data = node.data,
-
 		tag = node.tag,
 		version = node.version,
 		created_at = node.created_at,
 		incoming_edge_ids = node.incoming_edge_ids,
 		outcoming_edge_ids = node.outcoming_edge_ids,
+		data = node.data,
 	}
 end
 
