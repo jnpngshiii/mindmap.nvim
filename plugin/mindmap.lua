@@ -11,6 +11,11 @@ vim.api.nvim_create_user_command("MindmapAddTheNearestHeadingAsAnHeandingNodeToG
 	require("mindmap").MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
 end, {})
 
+
+vim.api.nvim_create_user_command("MindmapAddSelfLoopContentEdgeToNearestHeadingNode", function()
+	require("mindmap").MindmapAddSelfLoopContentEdgeToNearestHeadingNode()
+end, {})
+
 vim.api.nvim_create_user_command("MindmapSaveAllMindmapsInDatabase", function()
 	require("mindmap").MindmapSaveAllMindmapsInDatabase()
 end, {})

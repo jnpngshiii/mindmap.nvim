@@ -8,8 +8,8 @@ local utils = require("mindmap.utils")
 ---@field log_level string Logger log level of the graph. Default: "INFO".
 ---@field show_log_in_nvim boolean Show log in Neovim when added.
 ---@field save_path string Path to load and save the graph. Default: {current_project_path}.
----@field nodes table<NodeID, PrototypeNode> Nodes in the graph. Key is the ID of the node. If the value is 0, the node is removed.
----@field edges table<EdgeID, PrototypeEdge> Edges in the graph. Key is the ID of the edge. If the value is 0, the edge is removed.
+---@field nodes table<NodeID, PrototypeNode|HeadingNode|ExcerptNode> Nodes in the graph. Key is the ID of the node. If the value is 0, the node is removed.
+---@field edges table<EdgeID, PrototypeEdge|SelfLoopContentEdge|SelfLoopSubheadingEdge> Edges in the graph. Key is the ID of the edge. If the value is 0, the edge is removed.
 ---@field logger Logger Logger of the graph.
 local Graph = {}
 
@@ -22,7 +22,7 @@ local Graph = {}
 ---@param show_log_in_nvim? boolean Show log in Neovim when added. Default: false.
 ---@param save_path? string Path to load and save the graph. Default: {current_project_path}.
 ---@param nodes? table<NodeID, PrototypeNode|HeadingNode|ExcerptNode> Nodes in the graph. Key is the ID of the node.
----@param edges? table<EdgeID, PrototypeEdge|SelfLoopContentEdge> Edges in the graph. Key is the ID of the edge.
+---@param edges? table<EdgeID, PrototypeEdge|SelfLoopContentEdge|SelfLoopSubheadingEdge> Edges in the graph. Key is the ID of the edge.
 ---@param logger? Logger Logger of the graph.
 ---@return Graph _ The new graph.
 function Graph:new(log_level, show_log_in_nvim, save_path, nodes, edges, logger)
@@ -157,7 +157,7 @@ function Graph:get_card_info_from_edge(edge_id)
 		else
 			self.logger:error("Node", "Can not convert node type <" .. node.type .. "> to card.")
 		end
-	elseif edge.type == "SelfLoopSubHeadingEdge" then
+	elseif edge.type == "SelfLoopSubheadingEdge" then
 		local node = self.nodes[edge.from_node_id]
 		if node.type == "HeadingNode" then
 			local title_text, _, sub_heading_text = node:get_content()

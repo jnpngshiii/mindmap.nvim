@@ -67,6 +67,40 @@ function M.MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
 	)
 end
 
+function M.MindmapAddSelfLoopContentEdgeToNearestHeadingNode()
+	local nearest_heading = ts_utils.get_nearest_heading_node()
+	if not nearest_heading then
+		vim.notify_once(
+			"Do not find the nearest heading node. Abort adding the self loop content edge.",
+			vim.log.levels.WARN
+		)
+		return
+	end
+
+	local id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
+	if not id then
+		vim.notify_once(
+			"Do not find the nearest heading id. Add the nearest heading node to the graph first.",
+			vim.log.levels.WARN
+		)
+		M.MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
+		id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
+	end
+
+	local created_self_loop_content_edge = edge_class["SelfLoopContentEdge"]:new(id)
+	local found_graph =
+		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
+	found_graph:add_edge(created_self_loop_content_edge)
+
+	local front, back, _, _, _, _, _ = found_graph:get_card_info_from_edge(#found_graph.edges)
+	for _, text in ipairs(front) do
+		print("F: ", text)
+	end
+	for _, text in ipairs(back) do
+		print("B: ", text)
+	end
+end
+
 function M.MindmapSaveAllMindmapsInDatabase()
 	for _, graph in pairs(plugin_database.cache) do
 		graph:save()
