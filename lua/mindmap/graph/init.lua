@@ -1,4 +1,4 @@
-local node_class = require("mindmap.graph.node.init")
+local node_class = require("mindmap.graph.node")
 local edge_class = require("mindmap.graph.edge.init")
 local logger_class = require("mindmap.graph.logger.init")
 local utils = require("mindmap.utils")

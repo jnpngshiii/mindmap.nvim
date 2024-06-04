@@ -1,4 +1,4 @@
-local node_class = require("mindmap.graph.node.init")
+local node_class = require("mindmap.graph.node")
 local edge_class = require("mindmap.graph.edge.init")
 local graph_class = require("mindmap.graph.init")
 local database_class = require("mindmap.database")
@@ -30,7 +30,7 @@ local plugin_database = database_class["Database"]:new()
 -- Node
 ----------
 
-function M.Mindmap_Add_VisualSelection_As_ExcerptNode()
+function M.MindmapAddVisualSelectionAsExcerptNode()
 	local created_excerpt_node = node_class["ExcerptNode"].create_using_latest_visual_selection()
 
 	local found_graph =
@@ -38,7 +38,7 @@ function M.Mindmap_Add_VisualSelection_As_ExcerptNode()
 	found_graph:add_node(created_excerpt_node)
 end
 
-function M.Mindmap_Add_NearestHeading_As_HeadingNode()
+function M.MindmapAddNearestHeadingAsHeadingNode()
 	local nearest_heading = ts_utils.get_nearest_heading_node()
 	if not nearest_heading then
 		return
@@ -62,18 +62,20 @@ function M.Mindmap_Add_NearestHeading_As_HeadingNode()
 	)
 end
 
+function M.MindmapRemoveNearestHeadingNode() end
+
 ----------
 -- Edge
 ----------
 
-function M.Mindmap_Add_SimpleEdge_From_LatestAddedNode_To_NearestHeadingNode()
+function M.MindmapAddSimpleEdgeFromLatestAddedNodeToNearestHeadingNode()
 	local nearest_heading = ts_utils.get_nearest_heading_node()
 	if not nearest_heading then
 		return
 	end
 	local id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
 	if not id then
-		M.Mindmap_Add_NearestHeading_As_HeadingNode()
+		M.MindmapAddNearestHeadingAsHeadingNode()
 		id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
 	end
 	if not id then
@@ -86,7 +88,7 @@ function M.Mindmap_Add_SimpleEdge_From_LatestAddedNode_To_NearestHeadingNode()
 	found_graph:add_edge(created_simple_edge)
 end
 
-function M.Mindmap_Add_SelfLoopContentEdge_From_NearestHeadingNode_To_Itself()
+function M.MindmapAddSelfLoopContentEdgeFromNearestHeadingNodeToItself()
 	local nearest_heading = ts_utils.get_nearest_heading_node()
 	if not nearest_heading then
 		return
@@ -94,7 +96,7 @@ function M.Mindmap_Add_SelfLoopContentEdge_From_NearestHeadingNode_To_Itself()
 
 	local id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
 	if not id then
-		M.Mindmap_Add_TheNearestHeading_As_AnHeadingNode_To_Graph()
+		M.MindmapAddTheNearestHeadingAsAnHeadingNodeToGraph()
 		id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
 	end
 
@@ -116,7 +118,7 @@ function M.Mindmap_Add_SelfLoopContentEdge_From_NearestHeadingNode_To_Itself()
 	end
 end
 
-function M.Mindmap_Add_SelfLoopSubheadingEdge_From_NearestHeadingNode_To_Itself()
+function M.MindmapAddSelfLoopSubheadingEdgeFromNearestHeadingNodeToItself()
 	local nearest_heading = ts_utils.get_nearest_heading_node()
 	if not nearest_heading then
 		return
@@ -124,7 +126,7 @@ function M.Mindmap_Add_SelfLoopSubheadingEdge_From_NearestHeadingNode_To_Itself(
 
 	local id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
 	if not id then
-		M.Mindmap_Add_NearestHeading_As_HeadingNode()
+		M.MindmapAddNearestHeadingAsHeadingNode()
 		id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
 	end
 
@@ -150,7 +152,7 @@ end
 -- Database
 ----------
 
-function M.Mindmap_Save_AllMindmaps()
+function M.MindmapSaveAllMindmaps()
 	for _, graph in pairs(plugin_database.cache) do
 		graph:save()
 	end
@@ -160,7 +162,7 @@ end
 -- Debug functions
 --------------------
 
-function M.Mindmap_Test()
+function M.MindmapTest()
 	local graph =
 		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
 	local front, back, _, _, _, _, _ = graph:get_card_info_from_edge(1)

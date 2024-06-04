@@ -6,47 +6,42 @@
 -- Node
 ----------
 
-vim.api.nvim_create_user_command("Mindmap_Add_VisualSelection_As_ExcerptNode", function()
+vim.api.nvim_create_user_command("MindmapAddVisualSelectionAsExcerptNode", function()
 	vim.api.nvim_input("<Esc>") -- TODO: remove this workaround
-	require("mindmap").Mindmap_Add_VisualSelection_As_ExcerptNode()
+	require("mindmap").MindmapAddVisualSelectionAsExcerptNode()
 end, {})
-vim.api.nvim_set_keymap(
-	"v",
-	"E",
-	"<cmd>Mindmap_Add_VisualSelection_As_ExcerptNode<cr>",
-	{ noremap = true, silent = true }
-)
+vim.api.nvim_set_keymap("v", "E", "<cmd>MindmapAddVisualSelectionAsExcerptNode<cr>", { noremap = true, silent = true })
 
-vim.api.nvim_create_user_command("Mindmap_Add_NearestHeading_As_HeadingNode", function()
-	require("mindmap").Mindmap_Add_NearestHeading_As_HeadingNode()
+vim.api.nvim_create_user_command("MindmapAddNearestHeadingAsHeadingNode", function()
+	require("mindmap").MindmapAddNearestHeadingAsHeadingNode()
 end, {})
 
 ----------
 -- Edge
 ----------
 
-vim.api.nvim_create_user_command("Mindmap_Add_SimpleEdge_From_LatestAddedNode_To_NearestHeadingNode", function()
-	require("mindmap").Mindmap_Add_SimpleEdge_From_LatestAdd_edNode_To_NearestHeadingNode()
+vim.api.nvim_create_user_command("MindmapAddSimpleEdgeFromLatestAddedNodeToNearestHeadingNode", function()
+	require("mindmap").MindmapAddSimpleEdgeFromLatestAdd_edNodeToNearestHeadingNode()
 end, {})
 
-vim.api.nvim_create_user_command("Mindmap_Add_SelfLoopContentEdge_From_NearestHeadingNode_To_Itself", function()
-	require("mindmap").Mindmap_Add_SelfLoopContentEdge_From_NearestHeadingNode_To_Itself()
+vim.api.nvim_create_user_command("MindmapAddSelfLoopContentEdgeFromNearestHeadingNodeToItself", function()
+	require("mindmap").MindmapAddSelfLoopContentEdgeFromNearestHeadingNodeToItself()
 end, {})
 
-vim.api.nvim_create_user_command("Mindmap_Add_SelfLoopSubheadingEdge_From_NearestHeadingNode_To_Itself", function()
-	require("mindmap").Mindmap_Add_SelfLoopSubheadingEdge_From_NearestHeadingNode_To_Itself()
+vim.api.nvim_create_user_command("MindmapAddSelfLoopSubheadingEdgeFromNearestHeadingNodeToItself", function()
+	require("mindmap").MindmapAddSelfLoopSubheadingEdgeFromNearestHeadingNodeToItself()
 end, {})
 
 ----------
 -- Database
 ----------
 
-vim.api.nvim_create_user_command("Mindmap_Save_AllMindmaps", function()
-	require("mindmap").Mindmap_Save_AllMindmaps()
+vim.api.nvim_create_user_command("MindmapSaveAllMindmaps", function()
+	require("mindmap").MindmapSaveAllMindmaps()
 end, {})
 vim.api.nvim_create_autocmd("VimLeave", {
 	callback = function()
-		require("mindmap").Mindmap_Save_AllMindmaps()
+		require("mindmap").MindmapSaveAllMindmaps()
 	end,
 })
 
@@ -54,6 +49,6 @@ vim.api.nvim_create_autocmd("VimLeave", {
 -- Debug functions
 --------------------
 
-vim.api.nvim_create_user_command("Mindmap_Test", function()
-	require("mindmap").Mindmap_Test()
+vim.api.nvim_create_user_command("MindmapTest", function()
+	require("mindmap").MindmapTest()
 end, {})
