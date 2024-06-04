@@ -107,7 +107,7 @@ end
 
 ---@abstract
 ---Get the content of the node.
----@return table _ Content of the node.
+---@return any content Content of the node.
 function PrototypeNode:get_content()
 	error("[PrototypeNode] Please implement function `get_content` in subclass.")
 end
