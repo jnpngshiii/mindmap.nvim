@@ -7,10 +7,9 @@ vim.api.nvim_create_user_command("MindmapAddTheLatestVisualSelectionAsAnExcerptN
 	require("mindmap").MindmapAddTheLatestVisualSelectionAsAnExcerptNodeToGraph()
 end, {})
 
-vim.api.nvim_create_user_command("MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph", function()
-	require("mindmap").MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
+vim.api.nvim_create_user_command("MindmapAddTheNearestHeadingAsAnHeadingNodeToGraph", function()
+	require("mindmap").MindmapAddTheNearestHeadingAsAnHeadingNodeToGraph()
 end, {})
-
 
 vim.api.nvim_create_user_command("MindmapAddSelfLoopContentEdgeToNearestHeadingNode", function()
 	require("mindmap").MindmapAddSelfLoopContentEdgeToNearestHeadingNode()

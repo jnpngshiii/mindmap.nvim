@@ -117,7 +117,7 @@ end
 ---@return EdgeID? id, integer? level, string text The id, level, and text of the heading node.
 function M.get_heading_node_info(heading_node, bufnr)
 	local text = vim.treesitter.get_node_text(heading_node, bufnr)
-	local id = string.match(text, "%d%d%d%d%d%d%d%d")
+	local id = tonumber(string.match(text, "%d%d%d%d%d%d%d%d"))
 	local level = tonumber(string.match(heading_node:type(), "^heading(%d)$"))
 
 	return id, level, text
@@ -135,11 +135,9 @@ function M.get_sub_nodes(heading_node)
 		"norg",
 		string.format(
 			[[
-        title: (paragraph_segment
-          (inline_comment)
-        ) @title
-        content: (paragraph)? @content
-        content: (%s)? @sub_heading
+        title: (paragraph_segment) @title
+        content: (paragraph) @content
+        content: (%s) @sub_heading
       ]],
 			sub_heading_type
 		)
@@ -151,7 +149,8 @@ function M.get_sub_nodes(heading_node)
 
 	for index, sub_node in parsed_query:iter_captures(heading_node, 0) do
 		if parsed_query.captures[index] == "title" then
-			title_node = sub_node
+			-- Only add the first content node.
+			title_node = title_node or sub_node
 		elseif parsed_query.captures[index] == "content" then
 			-- Only add the first content node.
 			content_node = content_node or sub_node

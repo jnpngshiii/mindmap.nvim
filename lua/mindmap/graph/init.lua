@@ -150,7 +150,7 @@ function Graph:get_card_info_from_edge(edge_id)
 	if edge.type == "SelfLoopContentEdge" then
 		local node = self.nodes[edge.from_node_id]
 		if node.type == "HeadingNode" then
-			local title_text, content_text, _ = node:get_content()
+			local title_text, content_text, _ = node:get_content(edge.from_node_id)
 
 			front = title_text
 			back = content_text
@@ -160,7 +160,7 @@ function Graph:get_card_info_from_edge(edge_id)
 	elseif edge.type == "SelfLoopSubheadingEdge" then
 		local node = self.nodes[edge.from_node_id]
 		if node.type == "HeadingNode" then
-			local title_text, _, sub_heading_text = node:get_content()
+			local title_text, _, sub_heading_text = node:get_content(edge.from_node_id)
 
 			front = title_text
 			back = sub_heading_text

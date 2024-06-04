@@ -34,7 +34,7 @@ function M.MindmapAddTheLatestVisualSelectionAsAnExcerptNodeToGraph()
 	found_graph:add_node(created_excerpt_node)
 end
 
-function M.MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
+function M.MindmapAddTheNearestHeadingAsAnHeadingNodeToGraph()
 	local file_name, _, rel_file_path, _ = unpack(utils.get_file_info())
 	local created_heading_node = node_class["HeadingNode"]:new(file_name, rel_file_path)
 
@@ -57,11 +57,9 @@ function M.MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
 		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
 	found_graph:add_node(created_heading_node)
 
+	local _, _, node_text = ts_utils.get_heading_node_info(nearest_heading_title_node, 0)
 	ts_utils.replace_node_text(
-		ts_utils.get_heading_node_info(nearest_heading_title_node, 0)[3]
-			.. " %"
-			.. string.format("%08d", #found_graph.nodes)
-			.. "%",
+		node_text .. " %" .. string.format("%08d", #found_graph.nodes) .. "%",
 		nearest_heading_title_node,
 		0
 	)
@@ -83,7 +81,7 @@ function M.MindmapAddSelfLoopContentEdgeToNearestHeadingNode()
 			"Do not find the nearest heading id. Add the nearest heading node to the graph first.",
 			vim.log.levels.WARN
 		)
-		M.MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
+		M.MindmapAddTheNearestHeadingAsAnHeadingNodeToGraph()
 		id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
 	end
 
@@ -94,10 +92,10 @@ function M.MindmapAddSelfLoopContentEdgeToNearestHeadingNode()
 
 	local front, back, _, _, _, _, _ = found_graph:get_card_info_from_edge(#found_graph.edges)
 	for _, text in ipairs(front) do
-		print("F: ", text)
+		print(text)
 	end
 	for _, text in ipairs(back) do
-		print("B: ", text)
+		print(text)
 	end
 end
 
@@ -115,14 +113,6 @@ function M.MindmapTest()
 	local pth = utils.get_file_info()[4]
 	local graph = graph_class["Graph"].load(pth)
 	local node = graph.nodes[1]
-
-	local output = node:get_content()
-	print("title:\n")
-	print(table.concat(output.title, "\n"))
-	-- print(table.concat(output.content, "\n"))
-	print("sub:\n")
-	print(table.concat(output.sub_headings_titles, "\n"))
-
 	-- graph:add_node(node)
 	-- graph:save()
 end
