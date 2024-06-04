@@ -7,12 +7,10 @@
 
 ---@class PrototypeEdge
 ---Must provide fields in all edge classes:
----@field type EdgeType Type of the edge.
 ---@field from_node_id NodeID Where this edge is from.
 ---@field to_node_id NodeID Where this edge is to.
----Must provide Fields in some edge classes: subclass should put there own field in this field.
----@field data table Data of the edge.
 ---Auto generated and updated fields:
+---@field type EdgeType Type of the edge. Auto generated.
 ---@field tag string[] Tag of the edge.
 ---@field version integer Version of the edge. Auto generated and updated.
 ---@field created_at integer Created time of the edge in UNIX timestemp format. Auto generated.
@@ -20,24 +18,23 @@
 ---@field due_at integer Due time of the edge in UNIX timestemp format. Used in space repetition. Auto generated and updated.
 ---@field ease integer Ease of the edge. Used in space repetition. Auto generated and updated.
 ---@field interval integer Interval of the edge. Used in space repetition. Auto generated and updated.
+---@field data table Data of the node. Subclass should put there own field in this field.
 ---@field cache table Cache of the edge. Save temporary data to avoid recalculation. Auto generated and updated.
 local PrototypeEdge = {}
 
-local prototype_edge_version = 0.2
+local prototype_edge_version = 0.3
 -- v0.0: Initial version.
 -- v0.1: Add `tag` field.
 -- v0.2: Remove `id` field.
+-- v0.3: Make `type` field auto generated.
 
 --------------------
 -- Instance Method
 --------------------
 
 ---Create a new edge.
----@param type EdgeType Type of the edge.
 ---@param from_node_id NodeID Where this edge is from.
 ---@param to_node_id NodeID Where this edge is to.
----
----@param data? table Data of the edge.
 ---
 ---@param tag? string[] Tag of the edge.
 ---@param version? integer Version of the edge.
@@ -46,13 +43,11 @@ local prototype_edge_version = 0.2
 ---@param due_at? integer Due time of the edge.
 ---@param ease? integer Ease of the edge.
 ---@param interval? integer Interval of the edge.
+---@param data? table Data of the edge.
 ---@return PrototypeEdge _ The created edge.
 function PrototypeEdge:new(
-	type,
 	from_node_id,
 	to_node_id,
-
-	data,
 
 	tag,
 	version,
@@ -60,14 +55,12 @@ function PrototypeEdge:new(
 	updated_at,
 	due_at,
 	ease,
-	interval
+	interval,
+	data
 )
-	local prototype_edge = {
-		type = type,
+	local edge = {
 		from_node_id = from_node_id,
 		to_node_id = to_node_id,
-
-		data = data or {},
 
 		tag = tag or {},
 		version = version or prototype_edge_version,
@@ -76,13 +69,16 @@ function PrototypeEdge:new(
 		due_at = due_at or 0,
 		ease = ease or 250,
 		interval = interval or 1,
-		cache = {},
+		data = data or {},
 	}
 
-	setmetatable(prototype_edge, self)
+	edge.type = "PrototypeEdge"
+	edge.cache = {}
+
+	setmetatable(edge, self)
 	self.__index = self
 
-	return prototype_edge
+	return edge
 end
 
 ---@abstract
@@ -101,11 +97,8 @@ end
 ---@return table _ The converted table.
 function PrototypeEdge.to_table(edge)
 	return {
-		type = edge.type,
 		from_node_id = edge.from_node_id,
 		to_node_id = edge.to_node_id,
-
-		data = edge.data,
 
 		tag = edge.tag,
 		version = edge.version,
@@ -114,6 +107,7 @@ function PrototypeEdge.to_table(edge)
 		due_at = edge.due_at,
 		ease = edge.ease,
 		interval = edge.interval,
+		data = edge.data,
 	}
 end
 

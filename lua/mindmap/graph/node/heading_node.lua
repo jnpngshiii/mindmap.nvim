@@ -57,6 +57,7 @@ function HeadingNode:new(
 	setmetatable(prototype_node, self)
 	self.__index = self
 
+	---@cast prototype_node HeadingNode
 	return prototype_node
 end
 
@@ -96,7 +97,7 @@ end
 
 ---Convert a table to a node.
 ---@param table table Table to be converted.
----@return PrototypeNode _ The converted node.
+---@return HeadingNode _ The converted node.
 function HeadingNode.from_table(table)
 	return HeadingNode:new(
 		table.file_name,

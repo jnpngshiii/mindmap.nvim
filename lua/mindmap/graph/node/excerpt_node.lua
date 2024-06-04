@@ -69,7 +69,7 @@ end
 ----------
 
 ---Create a new excerpt node using the latest visual selection.
----@return ExcerptNode|PrototypeNode _ The created node.
+---@return ExcerptNode _ The created node.
 function ExcerptNode.create_using_latest_visual_selection()
 	local start_row = vim.api.nvim_buf_get_mark(0, "<")[1]
 	local start_col = vim.api.nvim_buf_get_mark(0, "<")[2]
@@ -87,7 +87,7 @@ end
 
 ---Convert a table to a node.
 ---@param table table Table to be converted.
----@return PrototypeNode _ The converted node.
+---@return ExcerptNode _ The converted node.
 function ExcerptNode.from_table(table)
 	return ExcerptNode:new(
 		table.file_name,

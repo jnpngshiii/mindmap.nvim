@@ -19,8 +19,6 @@ local self_loop_content_edge_version = 0.0
 ---@param from_node_id EdgeID Where this edge is from.
 ---@param to_node_id? EdgeID Where this edge is to.
 ---
----@param data? table Data of the edge.
----
 ---@param tag? string[] Tag of the edge.
 ---@param version? integer Version of the edge.
 ---@param created_at? integer Created time of the edge.
@@ -28,12 +26,11 @@ local self_loop_content_edge_version = 0.0
 ---@param due_at? integer Due time of the edge.
 ---@param ease? integer Ease of the edge.
 ---@param interval? integer Interval of the edge.
----@return SelfLoopSubheadingEdge|PrototypeEdge _ The created edge.
+---@param data? table Data of the edge.
+---@return SelfLoopSubheadingEdge _ The created edge.
 function SelfLoopSubheadingEdge:new(
 	from_node_id,
 	to_node_id,
-
-	data,
 
 	tag,
 	version,
@@ -41,27 +38,28 @@ function SelfLoopSubheadingEdge:new(
 	updated_at,
 	due_at,
 	ease,
-	interval
+	interval,
+	data
 )
 	to_node_id = from_node_id
 
 	local prototype_edge = PrototypeEdge:new(
-		"SelfLoopSubheadingEdge",
 		from_node_id,
 		to_node_id,
-		data,
 		tag,
 		version or self_loop_content_edge_version,
 		created_at,
 		updated_at,
 		due_at,
 		ease,
-		interval
+		interval,
+		data
 	)
 
 	setmetatable(prototype_edge, self)
 	self.__index = self
 
+	---@cast prototype_edge SelfLoopSubheadingEdge
 	return prototype_edge
 end
 
@@ -77,15 +75,14 @@ function SelfLoopSubheadingEdge.from_table(table)
 		table.from_node_id,
 		table.to_node_id,
 		--
-		table.data,
-		--
 		table.tag,
 		table.version,
 		table.created_at,
 		table.updated_at,
 		table.due_at,
 		table.ease,
-		table.interval
+		table.interval,
+		table.data
 	)
 end
 
