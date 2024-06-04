@@ -39,18 +39,31 @@ function M.MindmapAddTheNearestHeadingAsAnHeandingNodeToGraph()
 	local created_heading_node = node_class["HeadingNode"]:new(file_name, rel_file_path)
 
 	local nearest_heading = ts_utils.get_nearest_heading_node()
-	local nearest_heading_title_node = ts_utils.get_sub_nodes(nearest_heading)[1]
+	if not nearest_heading then
+		vim.notify_once("Do not find the nearest heading node. Abort adding the heading node.", vim.log.levels.WARN)
+		return
+	end
+
+	local nearest_heading_title_node, _, _ = ts_utils.get_sub_nodes(nearest_heading)
+	if not nearest_heading_title_node then
+		vim.notify_once(
+			"Do not find the nearest heading title node. Abort adding the heading node.",
+			vim.log.levels.WARN
+		)
+		return
+	end
 
 	local found_graph =
 		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
 	found_graph:add_node(created_heading_node)
 
 	ts_utils.replace_node_text(
-		ts_utils.get_heading_node_info(nearest_heading_title_node)[3]
+		ts_utils.get_heading_node_info(nearest_heading_title_node, 0)[3]
 			.. " %"
 			.. string.format("%08d", #found_graph.nodes)
 			.. "%",
-		nearest_heading_title_node
+		nearest_heading_title_node,
+		0
 	)
 end
 

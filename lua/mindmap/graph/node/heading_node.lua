@@ -68,8 +68,13 @@ end
 function HeadingNode:get_content(node_id)
 	local abs_proj_path = utils.get_file_info()[4]
 	local abs_file_path = utils.get_abs_path(self.rel_file_path, abs_proj_path)
+	local bufnr, is_temp_buf = utils.get_bufnr(abs_file_path)
+	local heading_node = ts_utils.get_heading_node_using_id(node_id, bufnr)
+	if not heading_node then
+		return {}, {}, {}
+	end
 
-	local title_node, content_node, sub_heading_nodes, bufnr = ts_utils.get_sub_nodes(node_id, abs_file_path)
+	local title_node, content_node, sub_heading_nodes = ts_utils.get_sub_nodes(heading_node)
 	local title_text = utils.split_string(vim.treesitter.get_node_text(title_node, bufnr), "\n")
 	local content_text = utils.split_string(vim.treesitter.get_node_text(content_node, bufnr), "\n")
 	local sub_heading_text = {}
@@ -80,7 +85,7 @@ function HeadingNode:get_content(node_id)
 		)
 	end
 
-	if bufnr then
+	if is_temp_buf then
 		vim.api.nvim_buf_delete(bufnr, { force = true })
 	end
 
