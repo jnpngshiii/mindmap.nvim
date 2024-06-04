@@ -167,6 +167,16 @@ function Graph:get_card_info_from_edge(edge_id)
 		else
 			self.logger:error("Node", "Can not convert node type <" .. node.type .. "> to card.")
 		end
+	elseif edge.type == "SimpleEdge" then
+		-- TODO: needs update
+		local from_node = self.nodes[edge.from_node_id]
+		if from_node.type == "ExcerptNode" then
+			back = from_node:get_content()
+		end
+		local to_node = self.nodes[edge.to_node_id]
+		if to_node.type == "HeadingNode" then
+			front, _, _ = to_node:get_content(edge.to_node_id)
+		end
 	else
 		self.logger:error("Edge", "Can not convert edge type <" .. edge.type .. "> to card.")
 	end
@@ -256,26 +266,6 @@ function Graph.load(save_path)
 end
 
 --------------------
-
-if false then
-	local graph = Graph:new()
-
-	local node1 = node_class["ExcerptNode"]:new("file_name", "rel_file_path")
-	local node2 = node_class["ExcerptNode"]:new("file_name", "rel_file_path")
-	local node3 = node_class["ExcerptNode"]:new("file_name", "rel_file_path")
-	graph:add_node(node1)
-	graph:add_node(node2)
-	graph:add_node(node3)
-
-	local edge1 = edge_class["selfLoopEdge"]:new(node1.id)
-	local edge2 = edge_class["selfLoopEdge"]:new(node2.id)
-	local edge3 = edge_class["selfLoopEdge"]:new(node3.id)
-	graph:add_edge(edge1)
-	graph:add_edge(edge2)
-	graph:add_edge(edge3)
-
-	graph:save()
-end
 
 return {
 	["Graph"] = Graph,

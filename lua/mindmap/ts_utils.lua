@@ -105,7 +105,7 @@ function M.replace_node_text(text, node, bufnr)
 	if type(text) == "string" then
 		text = { text }
 	end
-	table.insert(text, "") -- TODO: Remove this workaround.
+	-- table.insert(text, "") -- TODO: Remove this workaround.
 
 	local start_row, start_col, end_row, end_col = node:range()
 	vim.api.nvim_buf_set_text(bufnr, start_row, start_col, end_row, end_col, text)

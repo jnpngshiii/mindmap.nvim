@@ -1,12 +1,12 @@
 local PrototypeEdge = require("mindmap.graph.edge.prototype_edge")
 
 --------------------
--- Class SelfLoopContentEdge
+-- Class SimpleEdge
 --------------------
 
----@class SelfLoopContentEdge : PrototypeEdge
-local SelfLoopContentEdge = setmetatable({}, { __index = PrototypeEdge })
-SelfLoopContentEdge.__index = SelfLoopContentEdge
+---@class SimpleEdge : PrototypeEdge
+local SimpleEdge = setmetatable({}, { __index = PrototypeEdge })
+SimpleEdge.__index = SimpleEdge
 
 local self_loop_content_edge_version = 0.0
 -- v0.0: Initial version.
@@ -17,7 +17,7 @@ local self_loop_content_edge_version = 0.0
 
 ---Create a new edge.
 ---@param from_node_id EdgeID Where this edge is from.
----@param to_node_id? EdgeID Where this edge is to.
+---@param to_node_id EdgeID Where this edge is to.
 ---
 ---@param data? table Data of the edge.
 ---@param tag? string[] Tag of the edge.
@@ -27,8 +27,8 @@ local self_loop_content_edge_version = 0.0
 ---@param due_at? integer Due time of the edge.
 ---@param ease? integer Ease of the edge.
 ---@param interval? integer Interval of the edge.
----@return SelfLoopContentEdge _ The created edge.
-function SelfLoopContentEdge:new(
+---@return SimpleEdge _ The created edge.
+function SimpleEdge:new(
 	from_node_id,
 	to_node_id,
 	--
@@ -41,8 +41,6 @@ function SelfLoopContentEdge:new(
 	ease,
 	interval
 )
-	to_node_id = from_node_id
-
 	local prototype_edge = PrototypeEdge:new(
 		from_node_id,
 		to_node_id,
@@ -57,12 +55,12 @@ function SelfLoopContentEdge:new(
 		interval
 	)
 
-	prototype_edge.type = "SelfLoopContentEdge"
+	prototype_edge.type = "SimpleEdge"
 
 	setmetatable(prototype_edge, self)
 	self.__index = self
 
-	---@cast prototype_edge SelfLoopContentEdge
+	---@cast prototype_edge SimpleEdge
 	return prototype_edge
 end
 
@@ -73,8 +71,8 @@ end
 ---Convert a table to an edge.
 ---@param table table Table to be converted.
 ---@return PrototypeEdge _ The converted edge.
-function SelfLoopContentEdge.from_table(table)
-	return SelfLoopContentEdge:new(
+function SimpleEdge.from_table(table)
+	return SimpleEdge:new(
 		table.from_node_id,
 		table.to_node_id,
 		--
@@ -91,4 +89,4 @@ end
 
 --------------------
 
-return SelfLoopContentEdge
+return SimpleEdge

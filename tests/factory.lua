@@ -6,7 +6,7 @@ local uni_factory = {}
 ---@param additional_fields? table A map of extra fields specific to this type, along with their default values.
 ---@return table factory A new factory object that can create instances of the new type.
 function uni_factory.create_class(prototype, type, additional_fields)
-	assert(type(prototype.new) == "function", "Prototype must have a 'new' method")
+	assert(type(prototype.new) == "function", "Prototype must have method `new`.")
 
 	local class_factory = {}
 
@@ -18,7 +18,7 @@ function uni_factory.create_class(prototype, type, additional_fields)
 		instance.cache = {}
 
 		for field, default in pairs(additional_fields or {}) do
-			assert(type(prototype.new) ~= "function", "Field default must be a value, not a function")
+			assert(type(prototype.new) ~= "function", "Field in data must not be a function.")
 			instance.data[field] = default
 		end
 
