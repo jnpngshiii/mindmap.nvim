@@ -70,7 +70,7 @@ function M.MindmapAddSelfLoopContentEdgeToNearestHeadingNode()
 	if not nearest_heading then
 		vim.notify_once(
 			"Do not find the nearest heading node. Abort adding the self loop content edge.",
-			vim.log.levels.WARN
+			vim.log.levels.ERROR
 		)
 		return
 	end
@@ -85,7 +85,15 @@ function M.MindmapAddSelfLoopContentEdgeToNearestHeadingNode()
 		id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
 	end
 
+	if not id then
+		vim.notify_once(
+			"Do not find the nearest heading id. Abort adding the self loop content edge.",
+			vim.log.levels.ERROR
+		)
+		return
+	end
 	local created_self_loop_content_edge = edge_class["SelfLoopContentEdge"]:new(id)
+
 	local found_graph =
 		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
 	found_graph:add_edge(created_self_loop_content_edge)

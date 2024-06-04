@@ -44,7 +44,7 @@ function M.get_nearest_heading_node()
 end
 
 ---Get the heading node with id in the given buffer or file path.
----@param node_id integer The id of the heading node.
+---@param node_id NodeID The id of the heading node.
 ---@param bufnr_or_file_path? integer|string The buffer number or file path.
 ---@return TSNode? _ The heading node with id in the given buffer or file path.
 function M.get_heading_node_using_id(node_id, bufnr_or_file_path)
