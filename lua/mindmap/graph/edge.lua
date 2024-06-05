@@ -41,6 +41,7 @@ local prototype_edge_version = 4
 ---@param to_node_id NodeID Where this edge is to.
 ---
 ---@param data? table Data of the edge.
+---@param type? EdgeType Type of the edge.
 ---@param tag? string[] Tag of the edge.
 ---@param version? integer Version of the edge.
 ---@param created_at? integer Created time of the edge.
@@ -54,6 +55,7 @@ function PrototypeEdge:new(
 	to_node_id,
 	--
 	data,
+	type,
 	tag,
 	version,
 	created_at,
@@ -62,12 +64,12 @@ function PrototypeEdge:new(
 	ease,
 	interval
 )
-	local edge = {
+	local prototype_edge = {
 		from_node_id = from_node_id,
 		to_node_id = to_node_id,
 		--
 		data = data or {},
-		type = "PrototypeEdge",
+		type = type or "PrototypeEdge",
 		tag = tag or {},
 		version = version or prototype_edge_version, -- TODO: add merge function
 		created_at = created_at or tonumber(os.time()),
@@ -77,7 +79,10 @@ function PrototypeEdge:new(
 		interval = interval or 1,
 	}
 
-	return setmetatable(edge, { __index = self })
+	setmetatable(prototype_edge, self)
+	self.__index = self
+
+	return prototype_edge
 end
 
 ---@abstract
@@ -99,25 +104,25 @@ local edge_factory = require("mindmap.graph.factory")
 edge_factory.register_base("EdgeClass", PrototypeEdge)
 
 local edge_cls_methods = {
-	to_table = function(_, edge)
+	to_table = function(cls, self)
 		return {
-			from_node_id = edge.from_node_id,
-			to_node_id = edge.to_node_id,
+			from_node_id = self.from_node_id,
+			to_node_id = self.to_node_id,
 			--
-			data = edge.data,
-			type = edge.type,
-			tag = edge.tag,
-			version = edge.version,
-			created_at = edge.created_at,
-			updated_at = edge.updated_at,
-			due_at = edge.due_at,
-			ease = edge.ease,
-			interval = edge.interval,
+			data = self.data,
+			type = self.type,
+			tag = self.tag,
+			version = self.version,
+			created_at = self.created_at,
+			updated_at = self.updated_at,
+			due_at = self.due_at,
+			ease = self.ease,
+			interval = self.interval,
 		}
 	end,
 
-	from_table = function(edge_cls, table)
-		return edge_cls:new(
+	from_table = function(cls, self, table)
+		return cls:new(
 			table.from_node_id,
 			table.to_node_id,
 			--

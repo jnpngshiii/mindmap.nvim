@@ -71,7 +71,10 @@ function PrototypeNode:new(
 		outcoming_edge_ids = outcoming_edge_ids or {},
 	}
 
-	return setmetatable(prototype_node, { __index = self })
+	setmetatable(prototype_node, self)
+	self.__index = self
+
+	return prototype_node
 end
 
 ---Add incoming edge to the node.
@@ -131,23 +134,23 @@ local node_factory = require("mindmap.graph.factory")
 node_factory.register_base("NodeClass", PrototypeNode)
 
 local node_cls_methods = {
-	to_table = function(_, node)
+	to_table = function(cls, self)
 		return {
-			file_name = node.file_name,
-			rel_file_path = node.rel_file_path,
+			file_name = self.file_name,
+			rel_file_path = self.rel_file_path,
 			--
-			data = node.data,
-			type = node.type,
-			tag = node.tag,
-			version = node.version,
-			created_at = node.created_at,
-			incoming_edge_ids = node.incoming_edge_ids,
-			outgoing_edge_ids = node.outgoing_edge_ids,
+			data = self.data,
+			type = self.type,
+			tag = self.tag,
+			version = self.version,
+			created_at = self.created_at,
+			incoming_edge_ids = self.incoming_edge_ids,
+			outgoing_edge_ids = self.outgoing_edge_ids,
 		}
 	end,
 
-	from_table = function(node_cls, table)
-		return node_cls:new(
+	from_table = function(cls, self, table)
+		return cls:new(
 			table.file_name,
 			table.rel_file_path,
 			--

@@ -43,11 +43,11 @@ end, {})
 vim.api.nvim_create_user_command("MindmapSaveAllMindmaps", function()
 	require("mindmap").MindmapSaveAllMindmaps()
 end, {})
-vim.api.nvim_create_autocmd("VimLeave", {
-	callback = function()
-		require("mindmap").MindmapSaveAllMindmaps()
-	end,
-})
+-- vim.api.nvim_create_autocmd("VimLeave", {
+-- 	callback = function()
+-- 		require("mindmap").MindmapSaveAllMindmaps()
+-- 	end,
+-- })
 
 --------------------
 -- Debug functions

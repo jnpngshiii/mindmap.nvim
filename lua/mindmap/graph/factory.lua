@@ -36,13 +36,12 @@ function uni_factory.create_class(cls_category, cls_type, additional_fields, add
 	end
 
 	local prototype = uni_factory.cls_categories[cls_category].prototype
-	local sub_class = setmetatable({}, { __index = prototype })
+	local sub_class = prototype:new() -- TODO: fix this
 
 	function sub_class:new(...)
-		local sub_class_instance = setmetatable(prototype:new(...), { __index = self })
+		local sub_class_instance = prototype:new(...)
 
 		sub_class_instance.type = cls_type
-		sub_class_instance.data = sub_class_instance.data or {}
 
 		for field, default in pairs(additional_fields or {}) do
 			assert(type(default) ~= "function", "Additional field `" .. field .. "` is a function.")
@@ -55,6 +54,9 @@ function uni_factory.create_class(cls_category, cls_type, additional_fields, add
 			-- assert(prototype[name] == nil, "Additional method `" .. name .. "` would override a prototype method.")
 			sub_class_instance[name] = func
 		end
+
+		setmetatable(sub_class_instance, self) -- Here `self` is `sub_class`.
+		self.__index = self
 
 		return sub_class_instance
 	end

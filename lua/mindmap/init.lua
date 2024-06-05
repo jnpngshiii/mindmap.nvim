@@ -191,12 +191,8 @@ end
 function M.MindmapTest()
 	local graph =
 		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
-	local front, back, _, _, _, _, _ = graph:get_card_info_from_edge(1)
-	print("F: " .. table.concat(front, "\n"))
-	print("B: " .. table.concat(back, "\n"))
-	front, back, _, _, _, _, _ = graph:get_card_info_from_edge(2)
-	print("F: " .. table.concat(front, "\n"))
-	print("B: " .. table.concat(back, "\n"))
+
+	graph:save()
 end
 
 --------------------

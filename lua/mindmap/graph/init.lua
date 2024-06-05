@@ -194,12 +194,14 @@ end
 function Graph.to_table(graph)
 	local nodes = {}
 	for node_id, node in ipairs(graph.nodes) do
-		nodes[node_id] = node_class[node.type].to_table(node)
+		nodes[node_id] = node:to_table()
 	end
 
 	local edges = {}
 	for edge_id, edge in ipairs(graph.edges) do
-		edges[edge_id] = edge_class[edge.type].to_table(edge)
+		print("to")
+		print(edge.type)
+		edges[edge_id] = edge:to_table()
 	end
 
 	return {
@@ -217,12 +219,14 @@ end
 function Graph.from_table(table)
 	local nodes = {}
 	for node_id, node in ipairs(table.nodes) do
-		nodes[node_id] = node_class[node.type].from_table(node)
+		nodes[node_id] = node_class[node.type]:from_table(node)
 	end
 
 	local edges = {}
 	for edge_id, edge in ipairs(table.edges) do
-		edges[edge_id] = edge_class[edge.type].from_table(edge)
+		print("from")
+		print(edge.type)
+		edges[edge_id] = edge_class[edge.type]:from_table(edge)
 	end
 
 	return Graph:new(table.log_level, table.show_log_in_nvim, table.save_path, nodes, edges)
@@ -233,7 +237,11 @@ end
 ---@param save_path? string Path to save the graph.
 ---@return nil _ This function does not return anything.
 function Graph.save(graph, save_path)
-	local json_content = vim.fn.json_encode(Graph.to_table(graph))
+	local a = Graph.to_table(graph)
+
+	print("save")
+	print(a.edges[1].type)
+	local json_content = vim.fn.json_encode(a)
 
 	local json, err = io.open(save_path or graph.save_path .. "/" .. ".mindmap.json", "w")
 	if not json then
