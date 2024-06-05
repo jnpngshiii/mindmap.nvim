@@ -55,6 +55,8 @@ end
 ---@param node_id NodeID ID of the node to be removed.
 ---@return nil _ This function does not return anything.
 function Graph:remove_node(node_id)
+	self.logger:info("Node", "Remove " .. self.nodes[node_id].type .. " <" .. node_id .. "> and related edges.")
+
 	local node = self.nodes[node_id]
 
 	for _, incoming_edge_id in pairs(node.incoming_edge_ids) do
@@ -72,8 +74,6 @@ function Graph:remove_node(node_id)
 	end
 
 	self.nodes[node_id] = nil -- Mark as removed
-
-	self.logger:info("Node", "Remove " .. self.nodes[node_id].type .. " <" .. node_id .. "> and related edges.")
 end
 
 ---Add a edge to the graph.
