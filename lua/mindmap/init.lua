@@ -62,7 +62,33 @@ function M.MindmapAddNearestHeadingAsHeadingNode()
 	)
 end
 
-function M.MindmapRemoveNearestHeadingNode() end
+function M.MindmapRemoveNearestHeadingNode()
+	local nearest_heading = ts_utils.get_nearest_heading_node()
+	if not nearest_heading then
+		return
+	end
+	local id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
+	if not id then
+		vim.notify("Do not find the nearest heading title node. Abort removing the heading node.", vim.log.levels.WARN)
+		return
+	end
+
+	local found_graph =
+		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
+	found_graph:remove_node(id)
+
+	local nearest_heading_title_node, _, _ = ts_utils.get_sub_nodes(nearest_heading)
+	if not nearest_heading_title_node then
+		return
+	end
+
+	local _, _, node_text = ts_utils.get_heading_node_info(nearest_heading_title_node, 0)
+	ts_utils.replace_node_text(
+		string.gsub(node_text, " %" .. string.format("%08d", id) .. "%", ""),
+		nearest_heading_title_node,
+		0
+	)
+end
 
 ----------
 -- Edge

@@ -16,6 +16,10 @@ vim.api.nvim_create_user_command("MindmapAddNearestHeadingAsHeadingNode", functi
 	require("mindmap").MindmapAddNearestHeadingAsHeadingNode()
 end, {})
 
+vim.api.nvim_create_user_command("MindmapRemoveNearestHeadingNode", function()
+	require("mindmap").MindmapRemoveNearestHeadingNode()
+end, {})
+
 ----------
 -- Edge
 ----------

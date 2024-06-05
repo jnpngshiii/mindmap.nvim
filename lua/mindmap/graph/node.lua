@@ -242,6 +242,13 @@ node_factory.create_class(
 		---@param node_id NodeID ID of the node.
 		---@return string[] title_text, string[] content_text, string[] sub_heading_text
 		get_content = function(self, node_id)
+			local is_modified -- TODO: Only use cache if the file is not modified
+			if self.cache and self.cache.get_content and not is_modified then
+				return self.cache.get_content.title_text,
+					self.cache.get_content.content_text,
+					self.cache.get_content.sub_heading_text
+			end
+
 			local abs_proj_path = utils.get_file_info()[4]
 			local abs_file_path = utils.get_abs_path(self.rel_file_path, abs_proj_path)
 			local bufnr, is_temp_buf = utils.get_bufnr(abs_file_path .. "/" .. self.file_name)
@@ -263,6 +270,14 @@ node_factory.create_class(
 
 			if is_temp_buf then
 				vim.api.nvim_buf_delete(bufnr, { force = true })
+			end
+
+			if self.cache then
+				self.cache.get_content = {
+					title_text = title_text,
+					content_text = content_text,
+					sub_heading_text = sub_heading_text,
+				}
 			end
 
 			return title_text, content_text, sub_heading_text
