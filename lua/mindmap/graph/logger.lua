@@ -127,12 +127,7 @@ function Logger:debug(source, content)
 	self:save()
 
 	if self.show_log_in_nvim then
-		vim.cmd("echohl comment")
-		local ok = pcall(vim.cmd, string.format('echom "%s"', msg.str))
-		if not ok then
-			vim.api.nvim_out_write(msg.str .. "\n")
-		end
-		vim.cmd("echohl NONE")
+		vim.notify(msg.str, vim.log.levels.DEBUG)
 	end
 end
 
@@ -149,12 +144,7 @@ function Logger:info(source, content)
 	self:save()
 
 	if self.show_log_in_nvim then
-		vim.cmd("echohl None")
-		local ok = pcall(vim.cmd, string.format('echom "%s"', msg.str))
-		if not ok then
-			vim.api.nvim_out_write(msg.str .. "\n")
-		end
-		vim.cmd("echohl NONE")
+		vim.notify(msg.str, vim.log.levels.INFO)
 	end
 end
 
@@ -171,12 +161,7 @@ function Logger:warn(source, content)
 	self:save()
 
 	if self.show_log_in_nvim then
-		vim.cmd("echohl WarningMsg")
-		local ok = pcall(vim.cmd, string.format('echom "%s"', msg.str))
-		if not ok then
-			vim.api.nvim_out_write(msg.str .. "\n")
-		end
-		vim.cmd("echohl NONE")
+		vim.notify(msg.str, vim.log.levels.WARN)
 	end
 end
 
@@ -193,12 +178,7 @@ function Logger:error(source, content)
 	self:save()
 
 	if self.show_log_in_nvim then
-		vim.cmd("echohl ErrorMsg")
-		local ok = pcall(vim.cmd, string.format('echom "%s"', msg.str))
-		if not ok then
-			vim.api.nvim_out_write(msg.str .. "\n")
-		end
-		vim.cmd("echohl NONE")
+		vim.notify(msg.str, vim.log.levels.ERROR)
 	end
 end
 
