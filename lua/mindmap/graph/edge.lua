@@ -1,3 +1,6 @@
+local utils = require("mindmap.utils")
+local ts_utils = require("mindmap.ts_utils")
+
 ---@alias EdgeID integer
 ---@alias EdgeType string
 
@@ -6,10 +9,10 @@
 --------------------
 
 ---@class PrototypeEdge
----Must provide fields in all edge classes:
+---Mandatory fields:
 ---@field from_node_id NodeID Where this edge is from.
 ---@field to_node_id NodeID Where this edge is to.
----Auto generated and updated fields:
+---Optional fields:
 ---@field data table Data of the node. Subclass should put there own field in this field.
 ---@field type EdgeType Type of the edge. Auto generated.
 ---@field tag string[] Tag of the edge.
@@ -22,15 +25,16 @@
 ---@field cache table Cache of the edge. Save temporary data to avoid recalculation. Auto generated and updated.
 local PrototypeEdge = {}
 
-local prototype_edge_version = 0.3
--- v0.0: Initial version.
--- v0.1: Add `tag` field.
--- v0.2: Remove `id` field.
--- v0.3: Make `type` field auto generated.
+local prototype_edge_version = 4
+-- v0: Initial version.
+-- v1: Add `tag` field.
+-- v2: Remove `id` field.
+-- v3: Make `type` field auto generated.
+-- v4: Factory.
 
---------------------
+----------
 -- Instance Method
---------------------
+----------
 
 ---Create a new edge.
 ---@param from_node_id NodeID Where this edge is from.
@@ -63,9 +67,9 @@ function PrototypeEdge:new(
 		to_node_id = to_node_id,
 		--
 		data = data or {},
+		type = "PrototypeEdge",
 		tag = tag or {},
-		-- TODO: add merge function
-		version = version or prototype_edge_version,
+		version = version or prototype_edge_version, -- TODO: add merge function
 		created_at = created_at or tonumber(os.time()),
 		updated_at = updated_at or tonumber(os.time()),
 		due_at = due_at or 0,
@@ -73,13 +77,7 @@ function PrototypeEdge:new(
 		interval = interval or 1,
 	}
 
-	edge.type = "PrototypeEdge"
-	edge.cache = {}
-
-	setmetatable(edge, self)
-	self.__index = self
-
-	return edge
+	return setmetatable(edge, { __index = self })
 end
 
 ---@abstract
@@ -89,38 +87,119 @@ function PrototypeEdge:get_sp_info()
 	error("[PrototypeEdge] Please implement function `get_sp_info` in subclass.")
 end
 
---------------------
+----------
 -- Class Method
+----------
+
+--------------------
+-- Factory
 --------------------
 
----Convert an edge to a table.
----@param edge PrototypeEdge Edge to be converted.
----@return table _ The converted table.
-function PrototypeEdge.to_table(edge)
-	return {
-		from_node_id = edge.from_node_id,
-		to_node_id = edge.to_node_id,
+local edge_factory = require("mindmap.graph.factory")
+edge_factory.register_base("EdgeClass", PrototypeEdge)
+
+local edge_cls_methods = {
+	to_table = function(_, edge)
+		return {
+			from_node_id = edge.from_node_id,
+			to_node_id = edge.to_node_id,
+			--
+			data = edge.data,
+			type = edge.type,
+			tag = edge.tag,
+			version = edge.version,
+			created_at = edge.created_at,
+			updated_at = edge.updated_at,
+			due_at = edge.due_at,
+			ease = edge.ease,
+			interval = edge.interval,
+		}
+	end,
+
+	from_table = function(edge_cls, table)
+		return edge_cls:new(
+			table.from_node_id,
+			table.to_node_id,
+			--
+			table.data,
+			table.type,
+			table.tag,
+			table.version,
+			table.created_at,
+			table.updated_at,
+			table.due_at,
+			table.ease,
+			table.interval
+		)
+	end,
+}
+
+--------------------
+-- Subclass SimpleEdge
+--------------------
+
+---@class SimpleEdge : PrototypeEdge
+
+edge_factory.create_class(
+	-- Class category
+	"EdgeClass",
+	-- Class type
+	"SimpleEdge",
+	-- Additional fields
+	{
 		--
-		data = edge.data,
-		type = edge.type,
-		tag = edge.tag,
-		version = edge.version,
-		created_at = edge.created_at,
-		updated_at = edge.updated_at,
-		due_at = edge.due_at,
-		ease = edge.ease,
-		interval = edge.interval,
+	},
+	-- Additional methods
+	{
+		--
 	}
-end
+)
+edge_factory.add_cls_method("EdgeClass", "SimpleEdge", edge_cls_methods)
 
----@abstract
----Convert a table to an edge.
----@param table table Table to be converted.
----@return PrototypeEdge _ The converted edge.
-function PrototypeEdge.from_table(table)
-	error("[PrototypeEdge] Please implement function `from_table` in subclass.")
-end
+--------------------
+-- Subclass SelfLoopContentEdge
+--------------------
+
+---@class SelfLoopContentEdge : PrototypeEdge
+
+edge_factory.create_class(
+	-- Class category
+	"EdgeClass",
+	-- Class type
+	"SelfLoopContentEdge",
+	-- Additional fields
+	{
+		--
+	},
+	-- Additional methods
+	{
+		--
+	}
+)
+edge_factory.add_cls_method("EdgeClass", "SelfLoopContentEdge", edge_cls_methods)
+
+--------------------
+-- Subclass SelfLoopSubheadingEdge
+--------------------
+
+---@class SelfLoopSubheadingEdge : PrototypeEdge
+
+edge_factory.create_class(
+	-- Class category
+	"EdgeClass",
+	-- Class type
+	"SelfLoopSubheadingEdge",
+	-- Additional fields
+	{
+		--
+	},
+	-- Additional methods
+	{
+		--
+	}
+)
+edge_factory.add_cls_method("EdgeClass", "SelfLoopSubheadingEdge", edge_cls_methods)
 
 --------------------
 
-return PrototypeEdge
+return edge_factory.cls_categories["EdgeClass"]
