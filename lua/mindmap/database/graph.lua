@@ -189,7 +189,7 @@ function Graph:remove_node(node_id)
 		self:remove_edge(outcoming_edge_id)
 	end
 
-	self.nodes[node_id] = nil -- Mark as removed
+	self.nodes[node_id].state = "removed"
 end
 
 ---Add a edge to the graph.
@@ -234,7 +234,7 @@ function Graph:remove_edge(edge_id)
 	local to_node = self.nodes[edge.to_node_id]
 	to_node:remove_outcoming_edge_id(edge_id)
 
-	self.edges[edge_id] = nil -- Mark as removed
+	self.edges[edge_id].state = "removed"
 
 	self.logger:info(
 		"Edge",
