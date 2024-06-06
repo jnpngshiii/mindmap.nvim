@@ -139,7 +139,7 @@ function Graph:new(
 	local json_path = graph.save_path .. "/" .. ".mindmap.json"
 	local json, _ = io.open(json_path, "r")
 	if not json then
-		graph.logger:error("Graph", "Can not open file `" .. json_path .. "`. Skip loading.")
+		graph.logger:warn("Graph", "Can not open file `" .. json_path .. "`. Skip loading.")
 	else
 		local json_content = vim.fn.json_decode(json:read("*all"))
 		json:close()

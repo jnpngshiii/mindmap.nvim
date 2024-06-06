@@ -4,9 +4,6 @@ local utils = require("mindmap.utils")
 local ts_utils = require("mindmap.ts_utils")
 
 local M = {}
--- Return M if this file is a module.
--- Return Class if this file is a class.
--- Return manually if this file is a init.
 
 --------------------
 -- Init plugin
@@ -27,38 +24,48 @@ local plugin_database = Database:new()
 -- Node
 ----------
 
--- function M.MindmapAddVisualSelectionAsExcerptNode()
--- 	local created_excerpt_node = node_class["ExcerptNode"].create_using_latest_visual_selection()
---
--- 	local found_graph =
--- 		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
--- 	found_graph:add_node(created_excerpt_node)
--- end
---
--- function M.MindmapAddNearestHeadingAsHeadingNode()
--- 	local nearest_heading = ts_utils.get_nearest_heading_node()
--- 	if not nearest_heading then
--- 		return
--- 	end
--- 	local nearest_heading_title_node, _, _ = ts_utils.get_sub_nodes(nearest_heading)
--- 	if not nearest_heading_title_node then
--- 		return
--- 	end
---
--- 	local found_graph =
--- 		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
--- 	local file_name, _, rel_file_path, _ = unpack(utils.get_file_info())
--- 	local created_heading_node = node_class["HeadingNode"]:new(file_name, rel_file_path)
--- 	found_graph:add_node(created_heading_node)
---
--- 	local _, _, node_text = ts_utils.get_heading_node_info(nearest_heading_title_node, 0)
--- 	ts_utils.replace_node_text(
--- 		node_text .. " %" .. string.format("%08d", #found_graph.nodes) .. "%",
--- 		nearest_heading_title_node,
--- 		0
--- 	)
--- end
---
+function M.MindmapAddVisualSelectionAsExcerptNode()
+	local found_graph =
+		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
+	local created_excerpt_node = found_graph.node_class["ExcerptNode"].create_using_latest_visual_selection()
+
+	found_graph:add_node(created_excerpt_node)
+end
+
+function M.MindmapAddNearestHeadingAsHeadingNode()
+	local found_graph =
+		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
+
+	local nearest_heading = ts_utils.get_nearest_heading_node()
+	if not nearest_heading then
+		return
+	end
+
+	-- Avoid adding the same heading node
+	local id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
+	if id then
+		return
+	end
+
+	local nearest_heading_title_node, _, _ = ts_utils.get_sub_nodes(nearest_heading)
+	if not nearest_heading_title_node then
+		return
+	end
+
+	local file_name, _, rel_file_path, _ = unpack(utils.get_file_info())
+	local created_heading_node = found_graph.node_class["HeadingNode"]:new(file_name, rel_file_path)
+
+	-- TODO: move this to the node class
+	local _, _, node_text = ts_utils.get_heading_node_info(nearest_heading_title_node, 0)
+	ts_utils.replace_node_text(
+		node_text .. " %" .. string.format("%08d", #found_graph.nodes + 1) .. "%",
+		nearest_heading_title_node,
+		0
+	)
+
+	found_graph:add_node(created_heading_node)
+end
+
 -- function M.MindmapRemoveNearestHeadingNode()
 -- 	local nearest_heading = ts_utils.get_nearest_heading_node()
 -- 	if not nearest_heading then
@@ -140,36 +147,28 @@ local plugin_database = Database:new()
 -- 		print(text)
 -- 	end
 -- end
---
--- function M.MindmapAddSelfLoopSubheadingEdgeFromNearestHeadingNodeToItself()
--- 	local nearest_heading = ts_utils.get_nearest_heading_node()
--- 	if not nearest_heading then
--- 		return
--- 	end
---
--- 	local id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
--- 	if not id then
--- 		M.MindmapAddNearestHeadingAsHeadingNode()
--- 		id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
--- 	end
---
--- 	if not id then
--- 		return
--- 	end
--- 	local created_self_loop_content_edge = edge_class["SelfLoopSubheadingEdge"]:new(id)
---
--- 	local found_graph =
--- 		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
--- 	found_graph:add_edge(created_self_loop_content_edge)
---
--- 	local front, back, _, _, _, _, _ = found_graph:get_card_info_from_edge(#found_graph.edges)
--- 	for _, text in ipairs(front) do
--- 		print(text)
--- 	end
--- 	for _, text in ipairs(back) do
--- 		print(text)
--- 	end
--- end
+
+function M.MindmapAddSelfLoopSubheadingEdgeFromNearestHeadingNodeToItself()
+	local found_graph =
+		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
+
+	local nearest_heading = ts_utils.get_nearest_heading_node()
+	if not nearest_heading then
+		return
+	end
+
+	local id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
+	if not id then
+		M.MindmapAddNearestHeadingAsHeadingNode()
+		id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
+		if not id then
+			return
+		end
+	end
+
+	local created_self_loop_subheading_edge = found_graph.edge_class["SelfLoopSubheadingEdge"]:new(id, id)
+	found_graph:add_edge(created_self_loop_subheading_edge)
+end
 
 ----------
 -- Database

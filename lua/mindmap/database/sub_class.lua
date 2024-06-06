@@ -20,7 +20,7 @@ local sub_node_cls_methods = {
 			version = self.version,
 			created_at = self.created_at,
 			incoming_edge_ids = self.incoming_edge_ids,
-			outgoing_edge_ids = self.outgoing_edge_ids,
+			outcoming_edge_ids = self.outcoming_edge_ids,
 		}
 	end,
 
@@ -36,7 +36,7 @@ local sub_node_cls_methods = {
 			table.version,
 			table.created_at,
 			table.incoming_edge_ids,
-			table.outgoing_edge_ids
+			table.outcoming_edge_ids
 		)
 	end,
 }
@@ -81,18 +81,18 @@ sub_node_cls.ExcerptNode = {
 		---@return ExcerptNode _ The created node.
 		---@diagnostic disable-next-line: unused-local
 		create_using_latest_visual_selection = function(cls, self)
+			-- FIXME: The first call will return { 0, 0 } for both marks
 			local start_row = vim.api.nvim_buf_get_mark(0, "<")[1]
 			local start_col = vim.api.nvim_buf_get_mark(0, "<")[2]
 			local end_row = vim.api.nvim_buf_get_mark(0, ">")[1]
 			local end_col = vim.api.nvim_buf_get_mark(0, ">")[2]
 
 			local file_name, _, rel_file_path, _ = unpack(utils.get_file_info())
-			-- TODO: Check if this is correct
 			return cls:new(file_name, rel_file_path, {
-				["start_row"] = start_row,
-				["start_col"] = start_col,
-				["end_row"] = end_row,
-				["end_col"] = end_col,
+				start_row = start_row,
+				start_col = start_col,
+				end_row = end_row,
+				end_col = end_col,
 			})
 		end,
 

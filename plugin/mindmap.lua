@@ -7,7 +7,8 @@
 ----------
 
 vim.api.nvim_create_user_command("MindmapAddVisualSelectionAsExcerptNode", function()
-	vim.api.nvim_input("<Esc>") -- TODO: remove this workaround
+	-- TODO: remove this workaround
+	vim.api.nvim_input("<Esc>")
 	require("mindmap").MindmapAddVisualSelectionAsExcerptNode()
 end, {})
 vim.api.nvim_set_keymap("v", "E", "<cmd>MindmapAddVisualSelectionAsExcerptNode<cr>", { noremap = true, silent = true })
