@@ -303,10 +303,10 @@ end
 ---Save a graph to a JSON file.
 function Graph:save()
 	local graph_tbl = {
-		save_path = self.save_path,
+		-- save_path = self.save_path,
 		--
-		log_level = self.log_level,
-		show_log_in_nvim = self.show_log_in_nvim,
+		-- log_level = self.log_level,
+		-- show_log_in_nvim = self.show_log_in_nvim,
 		--
 		nodes = {},
 		edges = {},

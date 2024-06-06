@@ -1,103 +1,112 @@
 {
-  "show_log_in_nvim": true,
-  "save_path": "/Users/jps/Git/mindmap.nvim",
-  "edges": [
-    {
-      "tag": [],
-      "from_node_id": 1,
-      "version": 4,
-      "updated_at": 1717658397,
-      "due_at": 0,
-      "data": [],
-      "created_at": 1717658397,
-      "type": "SelfLoopSubheadingEdge",
-      "to_node_id": 1,
-      "interval": 1,
-      "ease": 250
-    },
-    {
-      "tag": [],
-      "from_node_id": 2,
-      "version": 4,
-      "updated_at": 1717658401,
-      "due_at": 0,
-      "data": [],
-      "created_at": 1717658401,
-      "type": "SelfLoopSubheadingEdge",
-      "to_node_id": 2,
-      "interval": 1,
-      "ease": 250
-    },
-    {
-      "tag": [],
-      "from_node_id": 4,
-      "version": 4,
-      "updated_at": 1717658877,
-      "due_at": 0,
-      "data": [],
-      "created_at": 1717658877,
-      "type": "SimpleEdge",
-      "to_node_id": 5,
-      "interval": 1,
-      "ease": 250
-    }
-  ],
-  "log_level": "INFO",
   "nodes": [
     {
       "tag": [],
-      "version": 4,
+      "data": [],
       "outcoming_edge_ids": [1],
+      "state": "active",
       "created_at": 1717658397,
       "file_name": "test.norg",
       "type": "HeadingNode",
-      "data": [],
+      "version": 4,
       "rel_file_path": "tests",
       "incoming_edge_ids": [1]
     },
     {
       "tag": [],
-      "version": 4,
+      "data": [],
       "outcoming_edge_ids": [2],
+      "state": "active",
       "created_at": 1717658401,
       "file_name": "test.norg",
       "type": "HeadingNode",
-      "data": [],
+      "version": 4,
       "rel_file_path": "tests",
       "incoming_edge_ids": [2]
     },
     {
       "tag": [],
-      "version": 4,
+      "data": [],
       "outcoming_edge_ids": [],
+      "state": "active",
       "created_at": 1717658408,
       "file_name": "test.norg",
       "type": "HeadingNode",
-      "data": [],
+      "version": 4,
       "rel_file_path": "tests",
       "incoming_edge_ids": []
     },
     {
       "tag": [],
-      "version": 4,
+      "data": { "start_col": 45, "start_row": 4, "end_col": 45, "end_row": 5 },
       "outcoming_edge_ids": [3],
+      "state": "active",
       "created_at": 1717658864,
       "file_name": "ipsum.txt",
       "type": "ExcerptNode",
-      "data": { "start_col": 45, "start_row": 4, "end_col": 45, "end_row": 5 },
+      "version": 4,
       "rel_file_path": "tests",
       "incoming_edge_ids": []
     },
     {
       "tag": [],
-      "version": 4,
+      "data": [],
       "outcoming_edge_ids": [],
+      "state": "active",
       "created_at": 1717658877,
       "file_name": "test.norg",
       "type": "HeadingNode",
-      "data": [],
+      "version": 4,
       "rel_file_path": "tests",
       "incoming_edge_ids": [3]
     }
+  ],
+  "edges": [
+    {
+      "tag": [],
+      "from_node_id": 1,
+      "data": [],
+      "updated_at": 1717658397,
+      "algorithm": "sm-2",
+      "created_at": 1717658397,
+      "type": "SelfLoopSubheadingEdge",
+      "due_at": 0,
+      "state": "active",
+      "to_node_id": 1,
+      "version": 4,
+      "ease": 250,
+      "interval": 1
+    },
+    {
+      "tag": [],
+      "from_node_id": 2,
+      "data": [],
+      "updated_at": 1717658401,
+      "algorithm": "sm-2",
+      "created_at": 1717658401,
+      "type": "SelfLoopSubheadingEdge",
+      "due_at": 0,
+      "state": "active",
+      "to_node_id": 2,
+      "version": 4,
+      "ease": 250,
+      "interval": 1
+    },
+    {
+      "tag": [],
+      "from_node_id": 4,
+      "data": [],
+      "updated_at": 1717658877,
+      "algorithm": "sm-2",
+      "created_at": 1717658877,
+      "type": "SimpleEdge",
+      "due_at": 0,
+      "state": "active",
+      "to_node_id": 5,
+      "version": 4,
+      "ease": 250,
+      "interval": 1
+    }
   ]
 }
+
