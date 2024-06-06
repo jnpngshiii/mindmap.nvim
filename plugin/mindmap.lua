@@ -26,7 +26,7 @@ end, {})
 ----------
 
 vim.api.nvim_create_user_command("MindmapAddSimpleEdgeFromLatestAddedNodeToNearestHeadingNode", function()
-	require("mindmap").MindmapAddSimpleEdgeFromLatestAdd_edNodeToNearestHeadingNode()
+	require("mindmap").MindmapAddSimpleEdgeFromLatestAddedNodeToNearestHeadingNode()
 end, {})
 
 vim.api.nvim_create_user_command("MindmapAddSelfLoopContentEdgeFromNearestHeadingNodeToItself", function()

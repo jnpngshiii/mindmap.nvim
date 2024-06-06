@@ -7,10 +7,10 @@
       "from_node_id": 1,
       "version": 4,
       "updated_at": 1717658397,
+      "due_at": 0,
       "data": [],
       "created_at": 1717658397,
       "type": "SelfLoopSubheadingEdge",
-      "due_at": 0,
       "to_node_id": 1,
       "interval": 1,
       "ease": 250
@@ -20,22 +20,36 @@
       "from_node_id": 2,
       "version": 4,
       "updated_at": 1717658401,
+      "due_at": 0,
       "data": [],
       "created_at": 1717658401,
       "type": "SelfLoopSubheadingEdge",
-      "due_at": 0,
       "to_node_id": 2,
+      "interval": 1,
+      "ease": 250
+    },
+    {
+      "tag": [],
+      "from_node_id": 4,
+      "version": 4,
+      "updated_at": 1717658877,
+      "due_at": 0,
+      "data": [],
+      "created_at": 1717658877,
+      "type": "SimpleEdge",
+      "to_node_id": 5,
       "interval": 1,
       "ease": 250
     }
   ],
+  "log_level": "INFO",
   "nodes": [
     {
       "tag": [],
       "version": 4,
-      "file_name": "test.norg",
-      "created_at": 1717658397,
       "outcoming_edge_ids": [1],
+      "created_at": 1717658397,
+      "file_name": "test.norg",
       "type": "HeadingNode",
       "data": [],
       "rel_file_path": "tests",
@@ -44,9 +58,9 @@
     {
       "tag": [],
       "version": 4,
-      "file_name": "test.norg",
-      "created_at": 1717658401,
       "outcoming_edge_ids": [2],
+      "created_at": 1717658401,
+      "file_name": "test.norg",
       "type": "HeadingNode",
       "data": [],
       "rel_file_path": "tests",
@@ -55,15 +69,35 @@
     {
       "tag": [],
       "version": 4,
-      "file_name": "test.norg",
-      "created_at": 1717658408,
       "outcoming_edge_ids": [],
+      "created_at": 1717658408,
+      "file_name": "test.norg",
       "type": "HeadingNode",
       "data": [],
       "rel_file_path": "tests",
       "incoming_edge_ids": []
+    },
+    {
+      "tag": [],
+      "version": 4,
+      "outcoming_edge_ids": [3],
+      "created_at": 1717658864,
+      "file_name": "ipsum.txt",
+      "type": "ExcerptNode",
+      "data": { "start_col": 45, "start_row": 4, "end_col": 45, "end_row": 5 },
+      "rel_file_path": "tests",
+      "incoming_edge_ids": []
+    },
+    {
+      "tag": [],
+      "version": 4,
+      "outcoming_edge_ids": [],
+      "created_at": 1717658877,
+      "file_name": "test.norg",
+      "type": "HeadingNode",
+      "data": [],
+      "rel_file_path": "tests",
+      "incoming_edge_ids": [3]
     }
-  ],
-  "log_level": "INFO"
+  ]
 }
-
