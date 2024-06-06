@@ -42,6 +42,25 @@ local sub_node_cls_methods = {
 }
 
 ----------
+-- SimpleNode
+----------
+
+---@class SimpleNode : PrototypeNode
+
+sub_node_cls.SimpleNode = {
+	data = {
+		--
+	},
+	ins_methods = {
+		--
+	},
+	cls_methods = {
+		to_table = sub_node_cls_methods.to_table,
+		from_table = sub_node_cls_methods.from_table,
+	},
+}
+
+----------
 -- ExcerptNode
 ----------
 
