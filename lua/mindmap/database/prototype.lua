@@ -12,8 +12,9 @@
 ---Optional fields:
 ---@field data table Data of the node. Subclass should put there own data in this field.
 ---@field type NodeType Type of the node.
----@field tag string[] Tag of the node.
----@field version integer Version of the node.
+---@field tag string[] Tag of the node. Experimental.
+---@field state string State of the node. Default to "active". Can be "active", "removed", and "archived". Experimental.
+---@field version integer Version of the node. Experimental.
 ---@field created_at integer Created time of the node in UNIX timestemp format.
 ---@field incoming_edge_ids EdgeID[] Ids of incoming edges to this node.
 ---@field outcoming_edge_ids EdgeID[] Ids of outcoming edges from this node.
@@ -38,6 +39,7 @@ local prototype_node_version = 4
 ---@param data? table Data of the node. Subclass should put there own data in this field.
 ---@param type? NodeType Type of the node.
 ---@param tag? string[] Tag of the node.
+---@param state? string State of the node. Default to "active". Can be "active", "removed", and "archived".
 ---@param version? integer Version of the node.
 ---@param created_at? integer Created time of the node in UNIX timestemp format.
 ---@param incoming_edge_ids? EdgeID[] Ids of incoming edges to this node.
@@ -50,6 +52,7 @@ function PrototypeNode:new(
 	data,
 	type,
 	tag,
+	state,
 	version,
 	created_at,
 	incoming_edge_ids,
@@ -62,6 +65,7 @@ function PrototypeNode:new(
 		data = data or {},
 		type = type or "PrototypeNode",
 		tag = tag or {},
+		state = state or "active",
 		version = version or prototype_node_version,
 		created_at = created_at or tonumber(os.time()),
 		incoming_edge_ids = incoming_edge_ids or {},
@@ -152,8 +156,10 @@ end
 ---Optional fields:
 ---@field data table Data of the node. Subclass should put there own field in this field.
 ---@field type EdgeType Type of the edge. Auto generated.
----@field tag string[] Tag of the edge.
----@field version integer Version of the edge. Auto generated and updated.
+---@field algorithm string Algorithm of the edge used in space repetition. Default to "sm-2".
+---@field tag string[] Tag of the edge. Experimental.
+---@field state string State of the edge. Default to "active". Can be "active", "removed", and "archived". Experimental.
+---@field version integer Version of the edge. Auto generated and updated. Experimental.
 ---@field created_at integer Created time of the edge in UNIX timestemp format. Auto generated.
 ---@field updated_at integer Updated time of the edge in UNIX timestemp format. Used in space repetition. Auto generated and updated.
 ---@field due_at integer Due time of the edge in UNIX timestemp format. Used in space repetition. Auto generated and updated.
@@ -179,7 +185,9 @@ local prototype_edge_version = 4
 ---
 ---@param data? table Data of the edge.
 ---@param type? EdgeType Type of the edge.
+---@param algorithm? string Algorithm of the edge used in space repetition. Default to "sm-2".
 ---@param tag? string[] Tag of the edge.
+---@param state? string State of the edge. Default to "active". Can be "active", "removed", and "archived".
 ---@param version? integer Version of the edge.
 ---@param created_at? integer Created time of the edge.
 ---@param updated_at? integer Updated time of the edge.
@@ -193,7 +201,9 @@ function PrototypeEdge:new(
 	--
 	data,
 	type,
+	algorithm,
 	tag,
+	state,
 	version,
 	created_at,
 	updated_at,
@@ -207,7 +217,9 @@ function PrototypeEdge:new(
 		--
 		data = data or {},
 		type = type or "PrototypeEdge",
+		algorithm = algorithm or "sm-2",
 		tag = tag or {},
+		state = state or "active",
 		version = version or prototype_edge_version, -- TODO: add merge function
 		created_at = created_at or tonumber(os.time()),
 		updated_at = updated_at or tonumber(os.time()),

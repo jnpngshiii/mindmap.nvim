@@ -17,6 +17,7 @@ local sub_node_cls_methods = {
 			data = self.data,
 			type = self.type,
 			tag = self.tag,
+			state = self.state,
 			version = self.version,
 			created_at = self.created_at,
 			incoming_edge_ids = self.incoming_edge_ids,
@@ -25,18 +26,19 @@ local sub_node_cls_methods = {
 	end,
 
 	---@diagnostic disable-next-line: unused-local
-	from_table = function(cls, self, table)
+	from_table = function(cls, self, tbl)
 		return cls:new(
-			table.file_name,
-			table.rel_file_path,
+			tbl.file_name,
+			tbl.rel_file_path,
 			--
-			table.data,
-			table.type,
-			table.tag,
-			table.version,
-			table.created_at,
-			table.incoming_edge_ids,
-			table.outcoming_edge_ids
+			tbl.data,
+			tbl.type,
+			tbl.tag,
+			tbl.state,
+			tbl.version,
+			tbl.created_at,
+			tbl.incoming_edge_ids,
+			tbl.outcoming_edge_ids
 		)
 	end,
 }
@@ -204,7 +206,9 @@ local sub_edge_cls_methods = {
 			--
 			data = self.data,
 			type = self.type,
+      algorithm = self.algorithm,
 			tag = self.tag,
+      state = self.state,
 			version = self.version,
 			created_at = self.created_at,
 			updated_at = self.updated_at,
@@ -215,20 +219,22 @@ local sub_edge_cls_methods = {
 	end,
 
 	---@diagnostic disable-next-line: unused-local
-	from_table = function(cls, self, table)
+	from_table = function(cls, self, tbl)
 		return cls:new(
-			table.from_node_id,
-			table.to_node_id,
+			tbl.from_node_id,
+			tbl.to_node_id,
 			--
-			table.data,
-			table.type,
-			table.tag,
-			table.version,
-			table.created_at,
-			table.updated_at,
-			table.due_at,
-			table.ease,
-			table.interval
+			tbl.data,
+			tbl.type,
+      tbl.algorithm,
+			tbl.tag,
+      tbl.state,
+			tbl.version,
+			tbl.created_at,
+			tbl.updated_at,
+			tbl.due_at,
+			tbl.ease,
+			tbl.interval
 		)
 	end,
 }
