@@ -42,7 +42,7 @@ function M.get_nearest_heading_node(node_id)
 	local ok
 	while current_node and not current_node:type():match("^heading%d$") and not ok do
 		current_node = current_node:parent()
-		if node_id then
+		if node_id and current_node then
 			ok = node_id == M.get_heading_node_info(current_node, 0)
 		end
 	end

@@ -182,11 +182,6 @@ function M.get_bufnr(bufnr_or_file_path)
 	return 0, false
 end
 
---------------------
--- Deprecated functions
---------------------
-
----@deprecated
 ---Remove fields that are not string, number, or boolean in a table.
 ---@param tbl table
 ---@return table _
@@ -201,6 +196,10 @@ function M.remove_table_fields(tbl)
 	end
 	return proccessed_tbl
 end
+
+--------------------
+-- Deprecated functions
+--------------------
 
 --------------------
 

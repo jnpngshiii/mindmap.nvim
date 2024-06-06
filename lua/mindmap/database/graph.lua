@@ -2,9 +2,6 @@ local logger_class = require("mindmap.database.logger")
 
 local utils = require("mindmap.utils")
 
----@class SubNodeClass : PrototypeNode
----@class SubEdgeClass : PrototypeEdge
-
 ---@class Graph
 ---
 ---@field save_path string Path to load and save the graph. Default: {current_project_path}.
@@ -15,10 +12,10 @@ local utils = require("mindmap.utils")
 ---
 ---@field node_prototype PrototypeNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
 ---@field edge_prototype PrototypeEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
----@field node_class table<NodeType, SubNodeClass> Registered sub node classes.
----@field edge_class table<EdgeType, SubEdgeClass> Registered sub edge classes.
----@field nodes table<NodeID, SubEdgeClass> Nodes in the graph. Key is the ID of the node. If the value is nil, the node is removed.
----@field edges table<EdgeID, SubNodeClass> Edges in the graph. Key is the ID of the edge. If the value is nil, the edge is removed.
+---@field node_class table<NodeType, PrototypeNode> Registered sub node classes.
+---@field edge_class table<EdgeType, PrototypeEdge> Registered sub edge classes.
+---@field nodes table<NodeID, PrototypeNode> Nodes in the graph. Key is the ID of the node. If the value is nil, the node is removed.
+---@field edges table<EdgeID, PrototypeEdge> Edges in the graph. Key is the ID of the edge. If the value is nil, the edge is removed.
 local Graph = {}
 
 --------------------

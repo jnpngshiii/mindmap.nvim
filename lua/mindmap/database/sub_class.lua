@@ -8,6 +8,7 @@ local ts_utils = require("mindmap.ts_utils")
 local sub_node_cls = {}
 
 local sub_node_cls_methods = {
+	---@diagnostic disable-next-line: unused-local
 	to_table = function(cls, self)
 		return {
 			file_name = self.file_name,
@@ -23,6 +24,7 @@ local sub_node_cls_methods = {
 		}
 	end,
 
+	---@diagnostic disable-next-line: unused-local
 	from_table = function(cls, self, table)
 		return cls:new(
 			table.file_name,
@@ -77,6 +79,7 @@ sub_node_cls.ExcerptNode = {
 	cls_methods = {
 		---Create a new excerpt node using the latest visual selection.
 		---@return ExcerptNode _ The created node.
+		---@diagnostic disable-next-line: unused-local
 		create_using_latest_visual_selection = function(cls, self)
 			local start_row = vim.api.nvim_buf_get_mark(0, "<")[1]
 			local start_col = vim.api.nvim_buf_get_mark(0, "<")[2]
@@ -129,9 +132,14 @@ sub_node_cls.HeadingNode = {
 			end
 
 			local title_node, content_node, sub_heading_nodes = ts_utils.get_sub_nodes(heading_node)
-			local title_text = utils.split_string(vim.treesitter.get_node_text(title_node, bufnr), "\n")
-			local content_text = utils.split_string(vim.treesitter.get_node_text(content_node, bufnr), "\n")
-			local sub_heading_text = {}
+			local title_text, content_text, sub_heading_text = {}, {}, {}
+
+			if title_node then
+				title_text = utils.split_string(vim.treesitter.get_node_text(title_node, bufnr), "\n")
+			end
+			if content_node then
+				content_text = utils.split_string(vim.treesitter.get_node_text(content_node, bufnr), "\n")
+			end
 			for _, sub_heading_node in ipairs(sub_heading_nodes) do
 				table.insert(
 					sub_heading_text,
@@ -169,6 +177,7 @@ sub_node_cls.HeadingNode = {
 local sub_edge_cls = {}
 
 local sub_edge_cls_methods = {
+	---@diagnostic disable-next-line: unused-local
 	to_table = function(cls, self)
 		return {
 			from_node_id = self.from_node_id,
@@ -186,6 +195,7 @@ local sub_edge_cls_methods = {
 		}
 	end,
 
+	---@diagnostic disable-next-line: unused-local
 	from_table = function(cls, self, table)
 		return cls:new(
 			table.from_node_id,
