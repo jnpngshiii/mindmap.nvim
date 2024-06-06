@@ -1,4 +1,12 @@
-local graph_class = require("mindmap.graph.init")
+local Graph = require("mindmap.graph.init")
+
+local prototype = require("mindmap.graph.prototype")
+local PrototypeNode = prototype.node
+local PrototypeEdge = prototype.edge
+
+local sub_class = require("mindmap.graph.sub_class")
+local sub_node_cls = sub_class.node
+local sub_edge_cls = sub_class.edge
 
 ---@alias path string
 
@@ -31,17 +39,21 @@ end
 ---@param show_log_in_nvim? boolean Show log in Neovim when added.
 function Database:find_graph(save_path, log_level, show_log_in_nvim)
 	if not self.cache[save_path] then
-		local created_graph = graph_class["Graph"].load(save_path)
-		if not created_graph then
-			created_graph = graph_class["Graph"]:new(log_level, show_log_in_nvim, save_path)
-		end
-
+		local created_graph = Graph:new(
+			save_path,
+			--
+			log_level,
+			show_log_in_nvim,
+			--
+			PrototypeNode,
+			PrototypeEdge,
+			sub_node_cls,
+			sub_edge_cls
+		)
 		self:add_graph(created_graph)
 	end
 
 	return self.cache[save_path]
 end
 
-return {
-	["Database"] = Database,
-}
+return Database

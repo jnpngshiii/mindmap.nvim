@@ -1,42 +1,161 @@
-local node_class = require("mindmap.graph.node")
-local edge_class = require("mindmap.graph.edge")
 local logger_class = require("mindmap.graph.logger")
+
 local utils = require("mindmap.utils")
+
+---@class SubNodeClass : PrototypeNode
+---@class SubEdgeClass : PrototypeEdge
 
 ---@class Graph
 ---
----@field log_level string Logger log level of the graph. Default: "INFO".
----@field show_log_in_nvim boolean Show log in Neovim when added.
 ---@field save_path string Path to load and save the graph. Default: {current_project_path}.
----@field nodes table<NodeID, PrototypeNode|HeadingNode|ExcerptNode> Nodes in the graph. Key is the ID of the node. If the value is 0, the node is removed.
----@field edges table<EdgeID, PrototypeEdge|SelfLoopContentEdge|SelfLoopSubheadingEdge> Edges in the graph. Key is the ID of the edge. If the value is 0, the edge is removed.
+---
+---@field log_level string Log level of the graph. Default: "INFO".
+---@field show_log_in_nvim boolean Show log in Neovim. Default: false.
 ---@field logger Logger Logger of the graph.
+---
+---@field node_prototype PrototypeNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
+---@field edge_prototype PrototypeEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
+---@field node_class table<NodeType, SubNodeClass> Registered sub node classes.
+---@field edge_class table<EdgeType, SubEdgeClass> Registered sub edge classes.
+---@field nodes table<NodeID, SubEdgeClass> Nodes in the graph. Key is the ID of the node. If the value is nil, the node is removed.
+---@field edges table<EdgeID, SubNodeClass> Edges in the graph. Key is the ID of the edge. If the value is nil, the edge is removed.
 local Graph = {}
 
 --------------------
 -- Instance Method
 --------------------
 
+---Register sub classes.
+---@param sub_cls_category string Category of the sub class. Must be "node" or "edge".
+---@param sub_cls_info table<string, table> Information of the sub class.
+---Information must have `data`, `ins_methods` and `cls_methods` fields.
+---Method examples:
+---  `cls_method(cls, self)`
+---  `ins_method(self, ...)`
+---The `cls_methods` will be registered to a instance and converted to a instance method.
+function Graph:register_sub_class(sub_cls_category, sub_cls_info)
+	local sub_cls_category_tbl = self[sub_cls_category .. "_class"]
+
+	assert(
+		self[sub_cls_category .. "_prototype"],
+		"No prototype registered for sub `" .. sub_cls_category .. "` class."
+	)
+	local prototype = self[sub_cls_category .. "_prototype"]
+
+	for cls_type, cls_info in pairs(sub_cls_info) do
+		assert(type(cls_info) == "table", "Information of the sub class must be a table.")
+
+		-- Check if the class already exists.
+		if not sub_cls_category_tbl.cls_type then
+			---@diagnostic disable-next-line: missing-parameter
+			local sub_class = prototype:new() -- TODO: fix this
+
+			-- Add data in the sub class.
+			if cls_info.data then
+				for field, default in pairs(cls_info.data or {}) do
+					assert(type(default) ~= "function", "Data `" .. field .. "` is a function.")
+					sub_class.data[field] = default
+				end
+			end
+
+			-- Add instance methods in the sub class.
+			if cls_info.ins_methods then
+				for name, func in pairs(cls_info.ins_methods or {}) do
+					assert(type(func) == "function", "Instance method `" .. name .. "` is not a function.")
+					sub_class[name] = func
+				end
+			end
+
+			-- Add class methods in the sub class.
+			if cls_info.cls_methods then
+				for name, func in pairs(cls_info.cls_methods or {}) do
+					sub_class[name] = function(...)
+						return func(sub_class, ...) -- TODO: check this
+					end
+				end
+			end
+
+			---@diagnostic disable-next-line: duplicate-set-field
+			function sub_class:new(...)
+				local sub_class_instance = prototype:new(...)
+
+				sub_class_instance.type = cls_type
+
+				setmetatable(sub_class_instance, self)
+				self.__index = self
+
+				return sub_class_instance
+			end
+
+			-- Register the new class.
+			sub_cls_category_tbl[cls_type] = sub_class
+			self.logger:info(sub_cls_category, "Register Node type `" .. cls_type .. "`.")
+		end
+	end
+end
+
 ---Create a new graph.
----@param log_level? string Logger log level of the graph. Default: "INFO".
----@param show_log_in_nvim? boolean Show log in Neovim when added. Default: false.
 ---@param save_path? string Path to load and save the graph. Default: {current_project_path}.
----@param nodes? table<NodeID, PrototypeNode|HeadingNode|ExcerptNode> Nodes in the graph. Key is the ID of the node.
----@param edges? table<EdgeID, PrototypeEdge|SelfLoopContentEdge|SelfLoopSubheadingEdge> Edges in the graph. Key is the ID of the edge.
----@param logger? Logger Logger of the graph.
+---
+---@param log_level? string Log level of the graph. Default: "INFO".
+---@param show_log_in_nvim? boolean Show log in Neovim when added. Default: false.
+---
+---@param node_prototype PrototypeNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
+---@param edge_prototype PrototypeEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
+---@param node_cls_info table<NodeType, table> Node class information used to create sub node classes. Information table must have `data` and `ins_methods` fields.
+---@param edge_cls_info table<EdgeType, table> Edge class information used to create sub edge classes. Information table must have `data` and `ins_methods` fields.
 ---@return Graph _ The new graph.
-function Graph:new(log_level, show_log_in_nvim, save_path, nodes, edges, logger)
+function Graph:new(
+	save_path,
+	--
+	log_level,
+	show_log_in_nvim,
+	--
+	node_prototype,
+	edge_prototype,
+	node_cls_info,
+	edge_cls_info
+)
 	local graph = {
+		save_path = save_path or utils.get_file_info()[4],
+		--
 		log_level = log_level or "INFO",
 		show_log_in_nvim = show_log_in_nvim or false,
-		save_path = save_path or utils.get_file_info()[4],
-		nodes = nodes or {},
-		edges = edges or {},
-		logger = logger_class["Logger"]:new(log_level, show_log_in_nvim) or logger,
+		logger = logger_class["Logger"]:new(log_level, show_log_in_nvim),
+		--
+		node_prototype = node_prototype,
+		edge_prototype = edge_prototype,
+		node_class = {},
+		edge_class = {},
+		nodes = {},
+		edges = {},
 	}
 
 	setmetatable(graph, self)
 	self.__index = self
+
+	-- Register sub node and edge classes.
+	graph:register_sub_class("node", node_cls_info)
+	graph:register_sub_class("edge", edge_cls_info)
+
+	-- Load nodes and edges from the given information.
+	local json_path = graph.save_path .. "/" .. ".mindmap.json"
+	local json, _ = io.open(json_path, "r")
+	if not json then
+		graph.logger:error("Graph", "Can not open file `" .. json_path .. "`. Skip loading.")
+	else
+		local json_content = vim.fn.json_decode(json:read("*all"))
+		json:close()
+
+		for node_id, node in pairs(json_content.nodes) do
+			-- TODO: add check for node type
+			graph.nodes[node_id] = graph.node_class[node.type]:from_table(node)
+		end
+		for edge_id, edge in pairs(json_content.edges) do
+			-- TODO: add check for edge type
+			graph.edges[edge_id] = graph.edge_class[edge.type]:from_table(edge)
+		end
+	end
 
 	return graph
 end
@@ -184,97 +303,41 @@ function Graph:get_card_info_from_edge(edge_id)
 	return front, back, edge.created_at, edge.updated_at, edge.due_at, edge.ease, edge.interval
 end
 
---------------------
--- class Method
---------------------
-
----Convert a graph to a table.
----@param graph Graph Graph to be converted.
----@return table _ The converted table.
-function Graph.to_table(graph)
-	local nodes = {}
-	for node_id, node in ipairs(graph.nodes) do
-		nodes[node_id] = node:to_table()
-	end
-
-	local edges = {}
-	for edge_id, edge in ipairs(graph.edges) do
-		print("to")
-		print(edge.type)
-		edges[edge_id] = edge:to_table()
-	end
-
-	return {
-		log_level = graph.log_level,
-		show_log_in_nvim = graph.show_log_in_nvim,
-		save_path = graph.save_path,
-		nodes = nodes,
-		edges = edges,
-	}
-end
-
----Convert a table to a graph.
----@param table table Table to be converted.
----@return Graph _ The converted graph.
-function Graph.from_table(table)
-	local nodes = {}
-	for node_id, node in ipairs(table.nodes) do
-		nodes[node_id] = node_class[node.type]:from_table(node)
-	end
-
-	local edges = {}
-	for edge_id, edge in ipairs(table.edges) do
-		print("from")
-		print(edge.type)
-		edges[edge_id] = edge_class[edge.type]:from_table(edge)
-	end
-
-	return Graph:new(table.log_level, table.show_log_in_nvim, table.save_path, nodes, edges)
-end
-
 ---Save a graph to a JSON file.
----@param graph Graph Graph to be saved.
----@param save_path? string Path to save the graph.
----@return nil _ This function does not return anything.
-function Graph.save(graph, save_path)
-	local a = Graph.to_table(graph)
+function Graph:save()
+	local graph_tbl = {
+		save_path = self.save_path,
+		--
+		log_level = self.log_level,
+		show_log_in_nvim = self.show_log_in_nvim,
+		--
+		nodes = {},
+		edges = {},
+	}
 
-	print("save")
-	print(a.edges[1].type)
-	local json_content = vim.fn.json_encode(a)
-
-	local json, err = io.open(save_path or graph.save_path .. "/" .. ".mindmap.json", "w")
-	if not json then
-		error("[Graph] Could not open file: " .. err)
+	for node_id, node in ipairs(self.nodes) do
+		graph_tbl.nodes[node_id] = node:to_table()
+	end
+	for edge_id, edge in ipairs(self.edges) do
+		graph_tbl.edges[edge_id] = edge:to_table()
 	end
 
+	local json_path = self.save_path .. "/" .. ".mindmap.json"
+	local json, _ = io.open(json_path, "w")
+	if not json then
+		self.logger:error("Graph", "Can not open file `" .. json_path .. "`. Skip saving.")
+		return
+	end
+
+	local json_content = vim.fn.json_encode(graph_tbl)
 	json:write(json_content)
 	json:close()
 end
 
----Load a graph from a JSON file.
----@param save_path string Path to save the graph.
----@return Graph? _ The loaded graph. If the file does not exist, return nil.
-function Graph.load(save_path)
-	save_path = save_path .. "/" .. ".mindmap.json"
-
-	local json, _ = io.open(save_path, "r")
-	if not json then
-		return nil
-	end
-
-	local json_content = json:read("*all")
-	json:close()
-
-	if json_content then
-		return Graph.from_table(vim.fn.json_decode(json_content))
-	end
-
-	return nil
-end
+--------------------
+-- class Method
+--------------------
 
 --------------------
 
-return {
-	["Graph"] = Graph,
-}
+return Graph

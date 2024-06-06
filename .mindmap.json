@@ -1,22 +1,22 @@
 {
-  "show_log_in_nvim": true,
-  "save_path": "/Users/jpshi/Git/mindmap.nvim",
+  "log_level": "INFO",
+  "save_path": "/Users/jps/Git/mindmap.nvim",
   "edges": [
     {
       "tag": "SimpleEdge",
       "from_node_id": 3,
-      "version": [],
-      "updated_at": 1717506837,
-      "due_at": 1717506837,
       "data": [],
-      "created_at": 0,
+      "updated_at": 1717506837,
       "type": "SimpleEdge",
+      "created_at": 0,
+      "due_at": 1717506837,
       "to_node_id": 4,
-      "interval": 250,
-      "ease": 0
+      "version": [],
+      "ease": 0,
+      "interval": 250
     }
   ],
-  "log_level": "INFO",
+  "show_log_in_nvim": true,
   "nodes": [
     {
       "tag": [],
