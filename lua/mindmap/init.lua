@@ -27,7 +27,8 @@ local plugin_database = Database:new()
 function M.MindmapAddVisualSelectionAsExcerptNode()
 	local found_graph =
 		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
-	local created_excerpt_node = found_graph.node_class["ExcerptNode"].create_using_latest_visual_selection()
+	local created_excerpt_node =
+		found_graph.node_class["ExcerptNode"]:create_using_latest_visual_selection(#found_graph.nodes + 1)
 
 	found_graph:add_node(created_excerpt_node)
 end
@@ -47,15 +48,12 @@ function M.MindmapAddNearestHeadingAsHeadingNode()
 		return
 	end
 
-	local nearest_heading_title_node, _, _ = ts_utils.get_sub_nodes(nearest_heading)
-	if not nearest_heading_title_node then
-		return
-	end
-
 	local file_name, _, rel_file_path, _ = unpack(utils.get_file_info())
-	local created_heading_node = found_graph.node_class["HeadingNode"]:new(file_name, rel_file_path)
+	local created_heading_node =
+		found_graph.node_class["HeadingNode"]:new(#found_graph.nodes + 1, file_name, rel_file_path)
 
 	-- TODO: move this to the node class
+	local nearest_heading_title_node, _, _ = ts_utils.get_sub_nodes(nearest_heading)
 	local _, _, node_text = ts_utils.get_heading_node_info(nearest_heading_title_node, 0)
 	ts_utils.replace_node_text(
 		node_text .. " %" .. string.format("%08d", #found_graph.nodes + 1) .. "%",
@@ -83,10 +81,6 @@ function M.MindmapRemoveNearestHeadingNode()
 	found_graph:remove_node(id)
 
 	local nearest_heading_title_node, _, _ = ts_utils.get_sub_nodes(nearest_heading)
-	if not nearest_heading_title_node then
-		return
-	end
-
 	local _, _, node_text = ts_utils.get_heading_node_info(nearest_heading_title_node, 0)
 	ts_utils.replace_node_text(
 		string.gsub(node_text, " %%" .. string.format("%08d", id) .. "%%", ""),
@@ -117,7 +111,8 @@ function M.MindmapAddSimpleEdgeFromLatestAddedNodeToNearestHeadingNode()
 		end
 	end
 
-	local created_simple_edge = found_graph.edge_class["SimpleEdge"]:new(#found_graph.nodes - 1, id)
+	local created_simple_edge =
+		found_graph.edge_class["SimpleEdge"]:new(#found_graph.nodes + 1, #found_graph.nodes - 1, id)
 	found_graph:add_edge(created_simple_edge)
 end
 
@@ -139,7 +134,8 @@ function M.MindmapAddSelfLoopContentEdgeFromNearestHeadingNodeToItself()
 		end
 	end
 
-	local created_self_loop_content_edge = found_graph.edge_class["SelfLoopContentEdge"]:new(id, id)
+	local created_self_loop_content_edge =
+		found_graph.edge_class["SelfLoopContentEdge"]:new(#found_graph.nodes + 1, id, id)
 	found_graph:add_edge(created_self_loop_content_edge)
 end
 
@@ -161,7 +157,8 @@ function M.MindmapAddSelfLoopSubheadingEdgeFromNearestHeadingNodeToItself()
 		end
 	end
 
-	local created_self_loop_subheading_edge = found_graph.edge_class["SelfLoopSubheadingEdge"]:new(id, id)
+	local created_self_loop_subheading_edge =
+		found_graph.edge_class["SelfLoopSubheadingEdge"]:new(#found_graph.nodes + 1, id, id)
 	found_graph:add_edge(created_self_loop_subheading_edge)
 end
 

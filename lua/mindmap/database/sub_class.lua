@@ -11,6 +11,7 @@ local sub_node_cls_methods = {
 	---@diagnostic disable-next-line: unused-local
 	to_table = function(cls, self)
 		return {
+			id = self.id,
 			file_name = self.file_name,
 			rel_file_path = self.rel_file_path,
 			--
@@ -28,6 +29,7 @@ local sub_node_cls_methods = {
 	---@diagnostic disable-next-line: unused-local
 	from_table = function(cls, self, tbl)
 		return cls:new(
+			tbl.id,
 			tbl.file_name,
 			tbl.rel_file_path,
 			--
@@ -99,9 +101,10 @@ sub_node_cls.ExcerptNode = {
 	},
 	cls_methods = {
 		---Create a new excerpt node using the latest visual selection.
+		---@param id NodeID ID of the node.
 		---@return ExcerptNode _ The created node.
 		---@diagnostic disable-next-line: unused-local
-		create_using_latest_visual_selection = function(cls, self)
+		create_using_latest_visual_selection = function(cls, self, id)
 			-- FIXME: The first call will return { 0, 0 } for both marks
 			local start_row = vim.api.nvim_buf_get_mark(0, "<")[1]
 			local start_col = vim.api.nvim_buf_get_mark(0, "<")[2]
@@ -109,7 +112,7 @@ sub_node_cls.ExcerptNode = {
 			local end_col = vim.api.nvim_buf_get_mark(0, ">")[2]
 
 			local file_name, _, rel_file_path, _ = unpack(utils.get_file_info())
-			return cls:new(file_name, rel_file_path, {
+			return cls:new(id, file_name, rel_file_path, {
 				start_row = start_row,
 				start_col = start_col,
 				end_row = end_row,
@@ -201,14 +204,15 @@ local sub_edge_cls_methods = {
 	---@diagnostic disable-next-line: unused-local
 	to_table = function(cls, self)
 		return {
+			id = self.id,
 			from_node_id = self.from_node_id,
 			to_node_id = self.to_node_id,
 			--
 			data = self.data,
 			type = self.type,
-      algorithm = self.algorithm,
+			algorithm = self.algorithm,
 			tag = self.tag,
-      state = self.state,
+			state = self.state,
 			version = self.version,
 			created_at = self.created_at,
 			updated_at = self.updated_at,
@@ -221,14 +225,15 @@ local sub_edge_cls_methods = {
 	---@diagnostic disable-next-line: unused-local
 	from_table = function(cls, self, tbl)
 		return cls:new(
+			tbl.id,
 			tbl.from_node_id,
 			tbl.to_node_id,
 			--
 			tbl.data,
 			tbl.type,
-      tbl.algorithm,
+			tbl.algorithm,
 			tbl.tag,
-      tbl.state,
+			tbl.state,
 			tbl.version,
 			tbl.created_at,
 			tbl.updated_at,

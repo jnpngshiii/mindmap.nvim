@@ -132,7 +132,7 @@ end
 
 ---Get the title / content / sub heading nodes of the given heading node.
 ---@param heading_node TSNode The heading node.
----@return TSNode? title_node, TSNode? content_node, TSNode[] sub_heading_nodes The title node, content node, and sub heading nodes.
+---@return TSNode title_node, TSNode? content_node, TSNode[] sub_heading_nodes The title node, content node, and sub heading nodes.
 ---TODO: just process given heading node.
 function M.get_sub_nodes(heading_node)
 	local sub_heading_level = tonumber(string.match(heading_node:type(), "%d")) + 1

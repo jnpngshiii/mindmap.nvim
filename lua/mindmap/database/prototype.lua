@@ -7,6 +7,7 @@
 
 ---@class PrototypeNode
 ---Mandatory fields:
+---@field id NodeID ID of the node.
 ---@field file_name string Name of the file where the node is from.
 ---@field rel_file_path string Relative path to the project root of the file where the node is from.
 ---Optional fields:
@@ -21,18 +22,20 @@
 ---@field cache table<string, any> Cache of the node.
 local PrototypeNode = {}
 
-local prototype_node_version = 4
+local prototype_node_version = 5
 -- v0: Initial version.
 -- v1: Add `tag` field.
 -- v2: Remove `id` field.
 -- v3: Make `type` field auto generated.
 -- v4: Factory.
+-- v5: Add `id` field and `state` field.
 
 ----------
 -- Instance Method
 ----------
 
 ---Create a new node.
+---@param id NodeID ID of the node.
 ---@param file_name string Name of the file where the node is from.
 ---@param rel_file_path string Relative path to the project root of the file where the node is from.
 ---
@@ -46,6 +49,7 @@ local prototype_node_version = 4
 ---@param outcoming_edge_ids? EdgeID[] Ids of outcoming edges from this node.
 ---@return PrototypeNode _ The created node.
 function PrototypeNode:new(
+	id,
 	file_name,
 	rel_file_path,
 	--
@@ -59,6 +63,7 @@ function PrototypeNode:new(
 	outcoming_edge_ids
 )
 	local prototype_node = {
+		id = id,
 		file_name = file_name,
 		rel_file_path = rel_file_path,
 		--
@@ -168,18 +173,20 @@ end
 ---@field cache table Cache of the edge. Save temporary data to avoid recalculation. Auto generated and updated.
 local PrototypeEdge = {}
 
-local prototype_edge_version = 4
+local prototype_edge_version = 5
 -- v0: Initial version.
 -- v1: Add `tag` field.
 -- v2: Remove `id` field.
 -- v3: Make `type` field auto generated.
 -- v4: Factory.
+-- v5: Add `id` field, `algorithm` field, and `state` field.
 
 ----------
 -- Instance Method
 ----------
 
 ---Create a new edge.
+---@param id EdgeID ID of the edge.
 ---@param from_node_id NodeID Where this edge is from.
 ---@param to_node_id NodeID Where this edge is to.
 ---
@@ -196,6 +203,7 @@ local prototype_edge_version = 4
 ---@param interval? integer Interval of the edge.
 ---@return PrototypeEdge _ The created edge.
 function PrototypeEdge:new(
+	id,
 	from_node_id,
 	to_node_id,
 	--
@@ -212,6 +220,7 @@ function PrototypeEdge:new(
 	interval
 )
 	local prototype_edge = {
+		id = id,
 		from_node_id = from_node_id,
 		to_node_id = to_node_id,
 		--
