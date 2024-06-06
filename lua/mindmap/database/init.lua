@@ -1,10 +1,10 @@
-local Graph = require("mindmap.graph.init")
+local Graph = require("mindmap.database.graph")
 
-local prototype = require("mindmap.graph.prototype")
+local prototype = require("mindmap.database.prototype")
 local PrototypeNode = prototype.node
 local PrototypeEdge = prototype.edge
 
-local sub_class = require("mindmap.graph.sub_class")
+local sub_class = require("mindmap.database.sub_class")
 local sub_node_cls = sub_class.node
 local sub_edge_cls = sub_class.edge
 

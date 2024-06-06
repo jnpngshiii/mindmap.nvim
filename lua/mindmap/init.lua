@@ -1,4 +1,4 @@
-local Database = require("mindmap.database")
+local Database = require("mindmap.database.init")
 
 local utils = require("mindmap.utils")
 local ts_utils = require("mindmap.ts_utils")
