@@ -123,9 +123,10 @@ end
 
 ---@abstract
 ---Get the content of the node.
----@return any content Content of the node.
----@diagnostic disable-next-line: unused-vararg
-function PrototypeNode:get_content(...)
+---@param edge_type EdgeType Type of the edge.
+---@return string[] front ,string[] back Content of the node.
+---@diagnostic disable-next-line: unused-local
+function PrototypeNode:get_content(edge_type)
 	error("[PrototypeNode] Please implement function `get_content` in subclass.")
 end
 

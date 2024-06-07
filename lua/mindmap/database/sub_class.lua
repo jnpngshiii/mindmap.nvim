@@ -83,12 +83,14 @@ sub_node_cls.ExcerptNode = {
 	},
 	ins_methods = {
 		---Get the content of the node.
-		---@return string[] content
-		get_content = function(self)
+		---@param edge_type EdgeType Type of the edge.
+		---@return string[] front ,string[] back Content of the node.
+		---@diagnostic disable-next-line: unused-local
+		get_content = function(self, edge_type)
 			local abs_proj_path = utils.get_file_info()[4]
 			local abs_file_path = utils.get_abs_path(self.rel_file_path, abs_proj_path)
 
-			local content = utils.get_file_content(
+			local excerpt = utils.get_file_content(
 				abs_file_path .. "/" .. self.file_name,
 				self.data.start_row,
 				self.data.end_row,
@@ -96,7 +98,7 @@ sub_node_cls.ExcerptNode = {
 				self.data.end_col
 			)
 
-			return content
+			return excerpt, excerpt
 		end,
 	},
 	cls_methods = {
@@ -137,53 +139,41 @@ sub_node_cls.HeadingNode = {
 	},
 	ins_methods = {
 		---Get the content of the node.
-		---@param node_id NodeID ID of the node.
-		---@return string[] title_text, string[] content_text, string[] sub_heading_text
-		get_content = function(self, node_id)
-			local is_modified -- TODO: Only use cache if the file is not modified
-			if self.cache and self.cache.get_content and not is_modified then
-				return self.cache.get_content.title_text,
-					self.cache.get_content.content_text,
-					self.cache.get_content.sub_heading_text
-			end
+		---@param edge_type EdgeType Type of the edge.
+		---@return string[] front ,string[] back Content of the node.
+		---@diagnostic disable-next-line: unused-local
+		get_content = function(self, edge_type)
+			local front, back = {}, {}
 
 			local abs_proj_path = utils.get_file_info()[4]
 			local abs_file_path = utils.get_abs_path(self.rel_file_path, abs_proj_path)
 			local bufnr, is_temp_buf = utils.get_bufnr(abs_file_path .. "/" .. self.file_name)
-			local heading_node = ts_utils.get_heading_node_using_id(node_id, bufnr)
+			local heading_node = ts_utils.get_heading_node_using_id(self.node_id, bufnr)
 			if not heading_node then
-				return {}, {}, {}
+				return front, back
 			end
-
 			local title_node, content_node, sub_heading_nodes = ts_utils.get_sub_nodes(heading_node)
-			local title_text, content_text, sub_heading_text = {}, {}, {}
 
 			if title_node then
-				title_text = utils.split_string(vim.treesitter.get_node_text(title_node, bufnr), "\n")
+				front = utils.split_string(vim.treesitter.get_node_text(title_node, bufnr), "\n")
 			end
-			if content_node then
-				content_text = utils.split_string(vim.treesitter.get_node_text(content_node, bufnr), "\n")
-			end
-			for _, sub_heading_node in ipairs(sub_heading_nodes) do
-				table.insert(
-					sub_heading_text,
-					utils.split_string(vim.treesitter.get_node_text(sub_heading_node, bufnr), "\n")[1]
-				)
+
+			if content_node and edge_type == "SelfLoopContentEdge" then
+				back = utils.split_string(vim.treesitter.get_node_text(content_node, bufnr), "\n")
+			elseif content_node and edge_type == "SelfLoopSubheadingEdge" then
+				for _, sub_heading_node in ipairs(sub_heading_nodes) do
+					table.insert(
+						back,
+						utils.split_string(vim.treesitter.get_node_text(sub_heading_node, bufnr), "\n")[1]
+					)
+				end
 			end
 
 			if is_temp_buf then
 				vim.api.nvim_buf_delete(bufnr, { force = true })
 			end
 
-			if self.cache then
-				self.cache.get_content = {
-					title_text = title_text,
-					content_text = content_text,
-					sub_heading_text = sub_heading_text,
-				}
-			end
-
-			return title_text, content_text, sub_heading_text
+			return front, back
 		end,
 	},
 	cls_methods = {
