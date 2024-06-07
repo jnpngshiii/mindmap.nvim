@@ -254,48 +254,17 @@ function Graph:remove_edge(edge_id)
 	)
 end
 
----@deprecated
----Spaced repetition function: get card information from the given edge.
----@param edge_id EdgeID ID of the edge to be converted.
----@return string[] front, string[] back, integer created_at, integer updated_at, integer due_at, integer ease, integer interval The getted card information.
-function Graph:get_card_info_from_edge(edge_id)
+---Spaced repetition function: get spacd repetition information from the edge.
+---@param edge_id EdgeID ID of the edge.
+---@return string[] front, string[] back, integer created_at, integer updated_at, integer due_at, integer ease, integer interval The spaced repetition information.
+function Graph:get_sp_info_from_edge(edge_id)
 	local edge = self.edges[edge_id]
 
-	local front
-	local back
-	if edge.type == "SelfLoopContentEdge" then
-		local node = self.nodes[edge.from_node_id]
-		if node.type == "HeadingNode" then
-			local title_text, content_text, _ = node:get_content(edge.from_node_id)
+	local to_node = self.nodes[edge.to_node_id]
+	local front, _ = to_node:get_content(edge.type)
 
-			front = title_text
-			back = content_text
-		else
-			self.logger:error("Node", "Can not convert node type <" .. node.type .. "> to card.")
-		end
-	elseif edge.type == "SelfLoopSubheadingEdge" then
-		local node = self.nodes[edge.from_node_id]
-		if node.type == "HeadingNode" then
-			local title_text, _, sub_heading_text = node:get_content(edge.from_node_id)
-
-			front = title_text
-			back = sub_heading_text
-		else
-			self.logger:error("Node", "Can not convert node type <" .. node.type .. "> to card.")
-		end
-	elseif edge.type == "SimpleEdge" then
-		-- TODO: needs update
-		local from_node = self.nodes[edge.from_node_id]
-		if from_node.type == "ExcerptNode" then
-			back = from_node:get_content()
-		end
-		local to_node = self.nodes[edge.to_node_id]
-		if to_node.type == "HeadingNode" then
-			front, _, _ = to_node:get_content(edge.to_node_id)
-		end
-	else
-		self.logger:error("Edge", "Can not convert edge type <" .. edge.type .. "> to card.")
-	end
+	local from_node = self.nodes[edge.from_node_id]
+	local _, back = from_node:get_content(edge.type)
 
 	return front, back, edge.created_at, edge.updated_at, edge.due_at, edge.ease, edge.interval
 end

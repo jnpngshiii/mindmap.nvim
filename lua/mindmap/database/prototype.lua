@@ -157,6 +157,7 @@ end
 
 ---@class PrototypeEdge
 ---Mandatory fields:
+---@field id EdgeID ID of the edge.
 ---@field from_node_id NodeID Where this edge is from.
 ---@field to_node_id NodeID Where this edge is to.
 ---Optional fields:
@@ -242,13 +243,6 @@ function PrototypeEdge:new(
 	self.__index = self
 
 	return prototype_edge
-end
-
----@abstract
----Spaced repetition function: Get spaced repetition information of the edge.
----@return string[] _ Spaced repetition information of the edge.
-function PrototypeEdge:get_sp_info()
-	error("[PrototypeEdge] Please implement function `get_sp_info` in subclass.")
 end
 
 ---@abstract
