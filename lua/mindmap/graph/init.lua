@@ -122,8 +122,18 @@ function Graph:new(
 		--
 		node_prototype = node_prototype,
 		edge_prototype = edge_prototype,
-		node_class = {},
-		edge_class = {},
+		node_class = setmetatable({}, {
+			---@diagnostic disable-next-line: unused-local
+			__index = function(tbl, key)
+				vim.notify("Node sub class " .. key .. " not found.", vim.log.levels.ERROR)
+			end,
+		}),
+		edge_class = setmetatable({}, {
+			---@diagnostic disable-next-line: unused-local
+			__index = function(tbl, key)
+				vim.notify("Edge sub class " .. key .. " not found.", vim.log.levels.ERROR)
+			end,
+		}),
 		nodes = {},
 		edges = {},
 	}
