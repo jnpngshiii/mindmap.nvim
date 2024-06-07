@@ -14,6 +14,7 @@ local sub_edge_cls = sub_class.edge
 ---@field cache table<path, Graph> Cache of graphs in different repos.
 local Database = {}
 
+---@return Database database The created database.
 function Database:new()
 	local database = {
 		cache = {},

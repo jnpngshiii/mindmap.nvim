@@ -148,7 +148,7 @@ sub_node_cls.HeadingNode = {
 			local abs_proj_path = utils.get_file_info()[4]
 			local abs_file_path = utils.get_abs_path(self.rel_file_path, abs_proj_path)
 			local bufnr, is_temp_buf = utils.get_bufnr(abs_file_path .. "/" .. self.file_name)
-			local heading_node = ts_utils.get_heading_node_using_id(self.node_id, bufnr)
+			local heading_node = ts_utils.get_heading_node_using_id(self.id, bufnr)
 			if not heading_node then
 				return front, back
 			end

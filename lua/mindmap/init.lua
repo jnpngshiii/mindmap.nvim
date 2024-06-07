@@ -112,8 +112,18 @@ function M.MindmapAddSimpleEdgeFromLatestAddedNodeToNearestHeadingNode()
 	end
 
 	local created_simple_edge =
-		found_graph.edge_class["SimpleEdge"]:new(#found_graph.nodes + 1, #found_graph.nodes - 1, id)
+		found_graph.edge_class["SimpleEdge"]:new(#found_graph.edges + 1, #found_graph.nodes - 1, id)
 	found_graph:add_edge(created_simple_edge)
+
+	local front, back = found_graph:get_sp_info_from_edge(#found_graph.edges)
+	print("Front:")
+	for _, v in ipairs(front) do
+		print(v)
+	end
+	print("Back:")
+	for _, v in ipairs(back) do
+		print(v)
+	end
 end
 
 function M.MindmapAddSelfLoopContentEdgeFromNearestHeadingNodeToItself()
@@ -127,7 +137,7 @@ function M.MindmapAddSelfLoopContentEdgeFromNearestHeadingNodeToItself()
 
 	local id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
 	if not id then
-		M.MindmapAddTheNearestHeadingAsAnHeadingNodeToGraph()
+		M.MindmapAddNearestHeadingAsHeadingNode()
 		id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
 		if not id then
 			return
@@ -135,8 +145,18 @@ function M.MindmapAddSelfLoopContentEdgeFromNearestHeadingNodeToItself()
 	end
 
 	local created_self_loop_content_edge =
-		found_graph.edge_class["SelfLoopContentEdge"]:new(#found_graph.nodes + 1, id, id)
+		found_graph.edge_class["SelfLoopContentEdge"]:new(#found_graph.edges + 1, id, id)
 	found_graph:add_edge(created_self_loop_content_edge)
+
+	local front, back = found_graph:get_sp_info_from_edge(#found_graph.edges)
+	print("Front:")
+	for _, v in ipairs(front) do
+		print(v)
+	end
+	print("Back:")
+	for _, v in ipairs(back) do
+		print(v)
+	end
 end
 
 function M.MindmapAddSelfLoopSubheadingEdgeFromNearestHeadingNodeToItself()
@@ -158,8 +178,18 @@ function M.MindmapAddSelfLoopSubheadingEdgeFromNearestHeadingNodeToItself()
 	end
 
 	local created_self_loop_subheading_edge =
-		found_graph.edge_class["SelfLoopSubheadingEdge"]:new(#found_graph.nodes + 1, id, id)
+		found_graph.edge_class["SelfLoopSubheadingEdge"]:new(#found_graph.edges + 1, id, id)
 	found_graph:add_edge(created_self_loop_subheading_edge)
+
+	local front, back = found_graph:get_sp_info_from_edge(#found_graph.edges)
+	print("Front:")
+	for _, v in ipairs(front) do
+		print(v)
+	end
+	print("Back:")
+	for _, v in ipairs(back) do
+		print(v)
+	end
 end
 
 ----------
