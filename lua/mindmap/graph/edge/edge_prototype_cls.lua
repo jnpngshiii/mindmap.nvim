@@ -14,7 +14,7 @@
 ---@field data table Data of the node. Subclass should put there own field in this field.
 ---@field type EdgeType Type of the edge. Auto generated.
 ---@field algorithm string Algorithm of the edge used in space repetition. Default to "sm-2".
----@field tag string[] Tag of the edge. Experimental.
+---@field tag table<string, string> Tag of the edge. Experimental.
 ---@field state string State of the edge. Default to "active". Can be "active", "removed", and "archived". Experimental.
 ---@field version integer Version of the edge. Auto generated and updated. Experimental.
 ---@field created_at integer Created time of the edge in UNIX timestemp format. Auto generated.
@@ -45,7 +45,7 @@ local prototype_edge_version = 5
 ---@param data? table Data of the edge.
 ---@param type? EdgeType Type of the edge.
 ---@param algorithm? string Algorithm of the edge used in space repetition. Default to "sm-2".
----@param tag? string[] Tag of the edge.
+---@param tag? table<string, string> Tag of the edge.
 ---@param state? string State of the edge. Default to "active". Can be "active", "removed", and "archived".
 ---@param version? integer Version of the edge.
 ---@param created_at? integer Created time of the edge.

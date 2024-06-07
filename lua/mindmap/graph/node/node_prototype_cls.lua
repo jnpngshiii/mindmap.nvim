@@ -13,7 +13,7 @@
 ---Optional fields:
 ---@field data table Data of the node. Subclass should put there own data in this field.
 ---@field type NodeType Type of the node.
----@field tag string[] Tag of the node. Experimental.
+---@field tag table<string, string> Tag of the node. Experimental.
 ---@field state string State of the node. Default to "active". Can be "active", "removed", and "archived". Experimental.
 ---@field version integer Version of the node. Experimental.
 ---@field created_at integer Created time of the node in UNIX timestemp format.
@@ -41,7 +41,7 @@ local prototype_node_version = 5
 ---
 ---@param data? table Data of the node. Subclass should put there own data in this field.
 ---@param type? NodeType Type of the node.
----@param tag? string[] Tag of the node.
+---@param tag? table<string, string> Tag of the node.
 ---@param state? string State of the node. Default to "active". Can be "active", "removed", and "archived".
 ---@param version? integer Version of the node.
 ---@param created_at? integer Created time of the node in UNIX timestemp format.
