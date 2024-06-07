@@ -37,6 +37,7 @@ end
 ---@param save_path string Path to load and save the graph.
 ---@param log_level? string Logger log level of the graph.
 ---@param show_log_in_nvim? boolean Show log in Neovim when added.
+---@return Graph graph Found or created graph.
 function Database:find_graph(save_path, log_level, show_log_in_nvim)
 	if not self.cache[save_path] then
 		local created_graph = Graph:new(
