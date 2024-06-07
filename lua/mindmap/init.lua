@@ -13,10 +13,10 @@ local M = {}
 local plugin_config = {
 	log_level = "INFO",
 	show_log_in_nvim = true,
-	node_prototype_cls = require("mindmap.graph.node.prototype_node"),
-	edge_prototype_cls = require("mindmap.graph.edge.prototype_edge"),
-	sub_node_cls = require("mindmap.graph.node.default_sub_node_cls"),
-	sub_edge_cls = require("mindmap.graph.edge.default_sub_edge_cls"),
+	node_prototype_cls = require("mindmap.graph.node.node_prototype_cls"),
+	edge_prototype_cls = require("mindmap.graph.edge.edge_prototype_cls"),
+	node_sub_cls = require("mindmap.graph.node.node_sub_cls"),
+	edge_sub_cls = require("mindmap.graph.edge.edge_sub_cls"),
 }
 
 ---@class plugin_database
@@ -40,8 +40,8 @@ local function find_graph()
 			--
 			plugin_config.node_prototype_cls,
 			plugin_config.edge_prototype_cls,
-			plugin_config.sub_node_cls,
-			plugin_config.sub_edge_cls
+			plugin_config.node_sub_cls,
+			plugin_config.edge_sub_cls
 		)
 		plugin_database.cache[created_graph.save_path] = created_graph
 	end
