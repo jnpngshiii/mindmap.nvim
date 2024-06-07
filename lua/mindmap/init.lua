@@ -1,4 +1,10 @@
-local Database = require("mindmap.database.init")
+local Graph = require("mindmap.graph.init")
+
+local PrototypeNode = require("mindmap.graph.node.prototype_node")
+local PrototypeEdge = require("mindmap.graph.edge.prototype_edge")
+
+local default_sub_node_cls = require("mindmap.graph.node.default_sub_node_cls")
+local default_sub_edge_cls = require("mindmap.graph.edge.default_sub_edge_cls")
 
 local utils = require("mindmap.utils")
 local ts_utils = require("mindmap.ts_utils")
@@ -9,12 +15,42 @@ local M = {}
 -- Init plugin
 --------------------
 
+---@class plugin_config
 local plugin_config = {
 	log_level = "INFO",
 	show_log_in_nvim = true,
 }
 
-local plugin_database = Database:new()
+---@class plugin_database
+---@field cache table<string, Graph> Cache of graphs in different repos.
+local plugin_database = {
+	cache = {},
+}
+
+---Find a graph in the database using path.
+---If not found, add a new graph to the database.
+---@param save_path string Path to load and save the graph.
+---@param log_level? string Logger log level of the graph.
+---@param show_log_in_nvim? boolean Show log in Neovim when added.
+---@return Graph graph Found or created graph.
+function plugin_database:find_graph(save_path, log_level, show_log_in_nvim)
+	if not self.cache[save_path] then
+		local created_graph = Graph:new(
+			save_path,
+			--
+			log_level,
+			show_log_in_nvim,
+			--
+			PrototypeNode,
+			PrototypeEdge,
+			default_sub_node_cls,
+			default_sub_edge_cls
+		)
+		self.cache[created_graph.save_path] = created_graph
+	end
+
+	return self.cache[save_path]
+end
 
 --------------------
 -- User functions

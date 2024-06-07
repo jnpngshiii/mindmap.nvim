@@ -2,10 +2,10 @@ local utils = require("mindmap.utils")
 local ts_utils = require("mindmap.ts_utils")
 
 --------------------
--- Sub Node Class
+-- Default Sub Node Class
 --------------------
 
-local sub_node_cls = {}
+local default_sub_node_cls = {}
 
 local sub_node_cls_methods = {
 	---@diagnostic disable-next-line: unused-local
@@ -51,7 +51,7 @@ local sub_node_cls_methods = {
 
 ---@class SimpleNode : PrototypeNode
 
-sub_node_cls.SimpleNode = {
+default_sub_node_cls.SimpleNode = {
 	data = {
 		--
 	},
@@ -74,7 +74,7 @@ sub_node_cls.SimpleNode = {
 ---@field data.end_row integer End row of the excerpt.
 ---@field data.end_col integer End column of the excerpt.
 
-sub_node_cls.ExcerptNode = {
+default_sub_node_cls.ExcerptNode = {
 	data = {
 		start_row = 0,
 		end_row = 0,
@@ -133,7 +133,7 @@ sub_node_cls.ExcerptNode = {
 
 ---@class HeadingNode : PrototypeNode
 
-sub_node_cls.HeadingNode = {
+default_sub_node_cls.HeadingNode = {
 	data = {
 		--
 	},
@@ -184,116 +184,4 @@ sub_node_cls.HeadingNode = {
 
 --------------------
 
---------------------
--- Sub Edge Class
---------------------
-
-local sub_edge_cls = {}
-
-local sub_edge_cls_methods = {
-	---@diagnostic disable-next-line: unused-local
-	to_table = function(cls, self)
-		return {
-			id = self.id,
-			from_node_id = self.from_node_id,
-			to_node_id = self.to_node_id,
-			--
-			data = self.data,
-			type = self.type,
-			algorithm = self.algorithm,
-			tag = self.tag,
-			state = self.state,
-			version = self.version,
-			created_at = self.created_at,
-			updated_at = self.updated_at,
-			due_at = self.due_at,
-			ease = self.ease,
-			interval = self.interval,
-		}
-	end,
-
-	---@diagnostic disable-next-line: unused-local
-	from_table = function(cls, self, tbl)
-		return cls:new(
-			tbl.id,
-			tbl.from_node_id,
-			tbl.to_node_id,
-			--
-			tbl.data,
-			tbl.type,
-			tbl.algorithm,
-			tbl.tag,
-			tbl.state,
-			tbl.version,
-			tbl.created_at,
-			tbl.updated_at,
-			tbl.due_at,
-			tbl.ease,
-			tbl.interval
-		)
-	end,
-}
-
-----------
--- SimpleEdge
-----------
-
----@class SimpleEdge : PrototypeEdge
-
-sub_edge_cls.SimpleEdge = {
-	data = {
-		--
-	},
-	ins_methods = {
-		--
-	},
-	cls_methods = {
-		to_table = sub_edge_cls_methods.to_table,
-		from_table = sub_edge_cls_methods.from_table,
-	},
-}
-
-----------
--- SelfLoopContentEdge
-----------
-
----@class SelfLoopContentEdge : PrototypeEdge
-
-sub_edge_cls.SelfLoopContentEdge = {
-	data = {
-		--
-	},
-	ins_methods = {
-		--
-	},
-	cls_methods = {
-		to_table = sub_edge_cls_methods.to_table,
-		from_table = sub_edge_cls_methods.from_table,
-	},
-}
-
-----------
--- SelfLoopSubheadingEdge
-----------
-
----@class SelfLoopSubheadingEdge : PrototypeEdge
-
-sub_edge_cls.SelfLoopSubheadingEdge = {
-	data = {
-		--
-	},
-	ins_methods = {
-		--
-	},
-	cls_methods = {
-		to_table = sub_edge_cls_methods.to_table,
-		from_table = sub_edge_cls_methods.from_table,
-	},
-}
-
---------------------
-
-return {
-	node = sub_node_cls,
-	edge = sub_edge_cls,
-}
+return default_sub_node_cls

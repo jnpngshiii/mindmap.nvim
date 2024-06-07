@@ -1,4 +1,4 @@
-local logger_class = require("mindmap.database.logger")
+local logger_class = require("mindmap.graph.logger")
 
 local utils = require("mindmap.utils")
 
