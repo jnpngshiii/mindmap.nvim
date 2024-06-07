@@ -1,11 +1,5 @@
 local Graph = require("mindmap.graph.init")
 
-local PrototypeNode = require("mindmap.graph.node.prototype_node")
-local PrototypeEdge = require("mindmap.graph.edge.prototype_edge")
-
-local default_sub_node_cls = require("mindmap.graph.node.default_sub_node_cls")
-local default_sub_edge_cls = require("mindmap.graph.edge.default_sub_edge_cls")
-
 local utils = require("mindmap.utils")
 local ts_utils = require("mindmap.ts_utils")
 
@@ -19,6 +13,10 @@ local M = {}
 local plugin_config = {
 	log_level = "INFO",
 	show_log_in_nvim = true,
+	node_prototype_cls = require("mindmap.graph.node.prototype_node"),
+	edge_prototype_cls = require("mindmap.graph.edge.prototype_edge"),
+	sub_node_cls = require("mindmap.graph.node.default_sub_node_cls"),
+	sub_edge_cls = require("mindmap.graph.edge.default_sub_edge_cls"),
 }
 
 ---@class plugin_database
@@ -29,27 +27,26 @@ local plugin_database = {
 
 ---Find a graph in the database using path.
 ---If not found, add a new graph to the database.
----@param save_path string Path to load and save the graph.
----@param log_level? string Logger log level of the graph.
----@param show_log_in_nvim? boolean Show log in Neovim when added.
 ---@return Graph graph Found or created graph.
-function plugin_database:find_graph(save_path, log_level, show_log_in_nvim)
-	if not self.cache[save_path] then
+local function find_graph()
+	local graph_save_path = utils.get_file_info()[4]
+
+	if not plugin_database.cache[graph_save_path] then
 		local created_graph = Graph:new(
-			save_path,
+			graph_save_path,
 			--
-			log_level,
-			show_log_in_nvim,
+			plugin_config.log_level,
+			plugin_config.show_log_in_nvim,
 			--
-			PrototypeNode,
-			PrototypeEdge,
-			default_sub_node_cls,
-			default_sub_edge_cls
+			plugin_config.node_prototype_cls,
+			plugin_config.edge_prototype_cls,
+			plugin_config.sub_node_cls,
+			plugin_config.sub_edge_cls
 		)
-		self.cache[created_graph.save_path] = created_graph
+		plugin_database.cache[created_graph.save_path] = created_graph
 	end
 
-	return self.cache[save_path]
+	return plugin_database.cache[graph_save_path]
 end
 
 --------------------
@@ -61,8 +58,7 @@ end
 ----------
 
 function M.MindmapAddVisualSelectionAsExcerptNode()
-	local found_graph =
-		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
+	local found_graph = find_graph()
 	local created_excerpt_node =
 		found_graph.node_class["ExcerptNode"]:create_using_latest_visual_selection(#found_graph.nodes + 1)
 
@@ -70,8 +66,7 @@ function M.MindmapAddVisualSelectionAsExcerptNode()
 end
 
 function M.MindmapAddNearestHeadingAsHeadingNode()
-	local found_graph =
-		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
+	local found_graph = find_graph()
 
 	local nearest_heading = ts_utils.get_nearest_heading_node()
 	if not nearest_heading then
@@ -101,8 +96,7 @@ function M.MindmapAddNearestHeadingAsHeadingNode()
 end
 
 function M.MindmapRemoveNearestHeadingNode()
-	local found_graph =
-		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
+	local found_graph = find_graph()
 
 	local nearest_heading = ts_utils.get_nearest_heading_node()
 	if not nearest_heading then
@@ -130,8 +124,7 @@ end
 ----------
 
 function M.MindmapAddSimpleEdgeFromLatestAddedNodeToNearestHeadingNode()
-	local found_graph =
-		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
+	local found_graph = find_graph()
 
 	local nearest_heading = ts_utils.get_nearest_heading_node()
 	if not nearest_heading then
@@ -196,8 +189,7 @@ function M.MindmapAddSelfLoopContentEdgeFromNearestHeadingNodeToItself()
 end
 
 function M.MindmapAddSelfLoopSubheadingEdgeFromNearestHeadingNodeToItself()
-	local found_graph =
-		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
+	local found_graph = find_graph()
 
 	local nearest_heading = ts_utils.get_nearest_heading_node()
 	if not nearest_heading then
@@ -243,8 +235,7 @@ end
 --------------------
 
 function M.MindmapTest()
-	local graph =
-		plugin_database:find_graph(utils.get_file_info()[4], plugin_config.log_level, plugin_config.show_log_in_nvim)
+	local graph = find_graph()
 
 	graph:save()
 end
