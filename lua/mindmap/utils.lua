@@ -27,7 +27,7 @@ function M.match_pattern(content, pattern)
 	return match_list
 end
 
----Split a string using a separator.
+---Split a string using the given separator.
 ---@param str string
 ---@param sep string
 ---@return table _
@@ -37,6 +37,52 @@ function M.split_string(str, sep)
 		table.insert(parts, part)
 	end
 	return parts
+end
+
+---Get the indent of a line.
+---@param bufnr integer Buffer number.
+---@param line_num integer Line number.
+---@return string indent Indent of the line.
+function M.get_indent(bufnr, line_num)
+	local line = vim.api.nvim_buf_get_lines(bufnr, line_num - 1, line_num, false)[1]
+	local indent = line:match("^%s*")
+	return indent or ""
+end
+
+---Add virtual text in the given buffer in the given namespace.
+---@param bufnr integer Buffer number.
+---@param namespace number Namespace.
+---@param line_num integer Line number.
+---@param text string|string[] Text to be added as virtual text.
+---@return nil _ This function does not return anything.
+function M.add_virtual_text(bufnr, namespace, line_num, text)
+	if type(text) == "string" then
+		text = { text }
+	end
+
+	local indent = M.get_indent(bufnr, line_num)
+
+	local virt_text = {}
+	for _, t in ipairs(text) do
+		table.insert(virt_text, { indent .. t, "Comment" })
+	end
+
+	vim.api.nvim_buf_set_extmark(bufnr, namespace, line_num - 1, -1, {
+		-- TODO: use argument for virt_text_pos
+		virt_text_pos = "overlay",
+		virt_lines = {
+			virt_text,
+		},
+		hl_mode = "combine",
+	})
+end
+
+---Clear virtual text in the given buffer in the given namespace.
+---@param bufnr integer Buffer number.
+---@param namespace number Namespace.
+---@return nil _ This function does not return anything.
+function M.clear_virtual_text(bufnr, namespace)
+	vim.api.nvim_buf_clear_namespace(bufnr, namespace, 0, -1)
 end
 
 ---Convert relative path (target_path) to absolute path according to reference path (reference_path).

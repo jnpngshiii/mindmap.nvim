@@ -25,6 +25,14 @@ end, {})
 -- Edge
 ----------
 
+vim.api.nvim_create_user_command("MindmapShowExcerpt", function()
+	require("mindmap").MindmapShowExcerpt()
+end, {})
+
+vim.api.nvim_create_user_command("MindmapCleanExcerpt", function()
+	require("mindmap").MindmapCleanExcerpt()
+end, {})
+
 vim.api.nvim_create_user_command("MindmapAddSimpleEdgeFromLatestAddedNodeToNearestHeadingNode", function()
 	require("mindmap").MindmapAddSimpleEdgeFromLatestAddedNodeToNearestHeadingNode()
 end, {})
@@ -44,11 +52,11 @@ end, {})
 vim.api.nvim_create_user_command("MindmapSaveAllMindmaps", function()
 	require("mindmap").MindmapSaveAllMindmaps()
 end, {})
--- vim.api.nvim_create_autocmd("VimLeave", {
--- 	callback = function()
--- 		require("mindmap").MindmapSaveAllMindmaps()
--- 	end,
--- })
+vim.api.nvim_create_autocmd("VimLeave", {
+	callback = function()
+		require("mindmap").MindmapSaveAllMindmaps()
+	end,
+})
 
 --------------------
 -- Debug functions

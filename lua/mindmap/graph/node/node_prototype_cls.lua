@@ -75,6 +75,7 @@ function PrototypeNode:new(
 		created_at = created_at or tonumber(os.time()),
 		incoming_edge_ids = incoming_edge_ids or {},
 		outcoming_edge_ids = outcoming_edge_ids or {},
+		cache = {},
 	}
 
 	setmetatable(prototype_node, self)

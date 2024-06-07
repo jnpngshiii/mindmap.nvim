@@ -87,6 +87,7 @@ function PrototypeEdge:new(
 		due_at = due_at or 0,
 		ease = ease or 250,
 		interval = interval or 1,
+		cache = {},
 	}
 
 	setmetatable(prototype_edge, self)

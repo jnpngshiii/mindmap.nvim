@@ -10,9 +10,23 @@ local M = {}
 --------------------
 
 ---@class plugin_config
+---Logger configuration:
+---@field log_level string Log level of the plugin. Default to "INFO".
+---@field show_log_in_nvim boolean Show log in nvim. Default to true.
+---Other configuration:
+---@field excerpt_namespace integer Namespace for excerpt nodes.
+---@field sp_namespace integer Namespace for space repetition.
+---@field node_prototype_cls PrototypeNode Node prototype class.
+---@field edge_prototype_cls PrototypeEdge Edge prototype class.
+---@field node_sub_cls PrototypeNode Node sub class.
+---@field edge_sub_cls PrototypeEdge Edge sub class.
 local plugin_config = {
+	-- Logger configuration:
 	log_level = "INFO",
 	show_log_in_nvim = true,
+	-- Other configuration:
+	excerpt_namespace = vim.api.nvim_create_namespace("my_namespace"),
+	sp_namespace = vim.api.nvim_create_namespace("my_namespace"),
 	node_prototype_cls = require("mindmap.graph.node.node_prototype_cls"),
 	edge_prototype_cls = require("mindmap.graph.edge.edge_prototype_cls"),
 	node_sub_cls = require("mindmap.graph.node.node_sub_cls"),
@@ -122,6 +136,49 @@ end
 ----------
 -- Edge
 ----------
+
+function M.MindmapShowExcerpt()
+	local found_graph = find_graph()
+	local heading_nodes_with_inline_comment = ts_utils.get_all_heading_nodes_with_inline_comment()
+
+	local excerpt_nodes_in_found_graph = {}
+	for _, node in pairs(heading_nodes_with_inline_comment) do
+		local id, _, _ = ts_utils.get_heading_node_info(node, 0)
+
+		-- If `id` is not nil, this `HeadingNode` is register in the `found_graph`.
+		if id then
+			for _, incoming_edge_id in ipairs(found_graph.nodes[id].incoming_edge_ids) do
+				local incoming_edge = found_graph.edges[incoming_edge_id]
+				local from_node = found_graph.nodes[incoming_edge.from_node_id]
+
+				-- If `from_node.type` is `ExcerptNode`, add it to the list.
+				if from_node.type == "ExcerptNode" then
+					table.insert(excerpt_nodes_in_found_graph, from_node)
+					-- TODO: refactor this
+					from_node.cache.line_num = node:range() + 1
+				end
+
+				--
+			end
+
+			--
+		end
+
+		--
+	end
+
+	for _, node in ipairs(excerpt_nodes_in_found_graph) do
+		local line_num = node.cache.line_num
+		local text, _ = node:get_content()
+
+		text[1] = "Ex: " .. text[1]
+		utils.add_virtual_text(0, plugin_config.excerpt_namespace, line_num, text)
+	end
+end
+
+function M.MindmapCleanExcerpt()
+	utils.clear_virtual_text(0, plugin_config.excerpt_namespace)
+end
 
 -- TODO: Refactor this function
 function M.MindmapAddEdgeFromLatestAddedNodeToNearestHeadingNode(edge_cls)

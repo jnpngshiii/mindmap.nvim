@@ -123,16 +123,16 @@ function Graph:new(
 		node_prototype = node_prototype,
 		edge_prototype = edge_prototype,
 		node_class = setmetatable({}, {
-			---@diagnostic disable-next-line: unused-local
-			__index = function(tbl, key)
-				vim.notify("Node sub class " .. key .. " not found.", vim.log.levels.ERROR)
-			end,
+			--- ---@diagnostic disable-next-line: unused-local
+			--- __index = function(tbl, key)
+			---   vim.notify("Node sub class " .. key .. " not found.", vim.log.levels.ERROR)
+			--- end,
 		}),
 		edge_class = setmetatable({}, {
-			---@diagnostic disable-next-line: unused-local
-			__index = function(tbl, key)
-				vim.notify("Edge sub class " .. key .. " not found.", vim.log.levels.ERROR)
-			end,
+			--- ---@diagnostic disable-next-line: unused-local
+			--- __index = function(tbl, key)
+			---   vim.notify("Edge sub class " .. key .. " not found.", vim.log.levels.ERROR)
+			--- end,
 		}),
 		nodes = {},
 		edges = {},
@@ -264,11 +264,15 @@ function Graph:remove_edge(edge_id)
 	)
 end
 
----Spaced repetition function: get spacd repetition information from the edge.
+---Spaced repetition function: get spaced repetition information from the edge.
 ---@param edge_id EdgeID ID of the edge.
 ---@return string[] front, string[] back, integer created_at, integer updated_at, integer due_at, integer ease, integer interval The spaced repetition information.
 function Graph:get_sp_info_from_edge(edge_id)
 	local edge = self.edges[edge_id]
+
+	-- NOTE:
+	-- TO   : Front
+	-- From : Back
 
 	local to_node = self.nodes[edge.to_node_id]
 	local front, _ = to_node:get_content(edge.type)

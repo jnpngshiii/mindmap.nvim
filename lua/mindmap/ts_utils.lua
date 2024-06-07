@@ -1,3 +1,6 @@
+-- TODO: remove nts dependency
+-- TODO: remove bufnr_or_file_path
+
 local nts_utils = require("nvim-treesitter.ts_utils")
 
 local utils = require("mindmap.utils")
@@ -168,6 +171,34 @@ function M.get_sub_nodes(heading_node)
 	end
 
 	return title_node, content_node, sub_heading_nodes
+end
+
+---Get all the heading nodes with inline comment in the given buffer or file path.
+---@param bufnr_or_file_path? integer|string The buffer number or file path.
+---@return TSNode[] heading_nodes_with_inline_comment Heading nodes with inline comment.
+function M.get_all_heading_nodes_with_inline_comment(bufnr_or_file_path)
+	local root_node = M.get_tstree_root(bufnr_or_file_path)
+	if not root_node then
+		return {}
+	end
+
+	local parsed_query = vim.treesitter.query.parse(
+		"norg",
+		[[
+    (_
+      title: (paragraph_segment
+        (inline_comment)
+      )
+    ) @heading_node
+    ]]
+	)
+
+	local heading_nodes = {}
+	for _, heading_node in parsed_query:iter_captures(root_node, 0) do
+		table.insert(heading_nodes, heading_node)
+	end
+
+	return heading_nodes
 end
 
 --------------------
