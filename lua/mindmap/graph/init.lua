@@ -10,6 +10,8 @@ local utils = require("mindmap.utils")
 ---@field show_log_in_nvim boolean Show log in Neovim. Default: false.
 ---@field logger Logger Logger of the graph.
 ---
+---@field algorithm? string Algorithm of the edge used in space repetition. Default to "sm-2".
+---
 ---@field node_prototype_cls PrototypeNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
 ---@field edge_prototype_cls PrototypeEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
 ---@field node_sub_cls table<NodeType, PrototypeNode> Registered sub node classes.
@@ -20,7 +22,13 @@ local utils = require("mindmap.utils")
 ---@field default_edge_cls_method table<string, function> Default class method for edge. Example: `bar(cls, self, ...)`.
 ---@field nodes table<NodeID, PrototypeNode> Nodes in the graph. Key is the ID of the node.
 ---@field edges table<EdgeID, PrototypeEdge> Edges in the graph. Key is the ID of the edge.
+---
+---@field version integer Version of the graph.
 local Graph = {}
+
+local graph_version = 1
+-- v0: Initial version.
+-- v1: Add `algorithm` field.
 
 --------------------
 -- Instance Method
@@ -112,6 +120,8 @@ end
 ---@param log_level? string Log level of the graph. Default: "INFO".
 ---@param show_log_in_nvim? boolean Show log in Neovim when added. Default: false.
 ---
+---@param algorithm? string Algorithm of the edge used in space repetition. Default to "sm-2".
+---
 ---@param node_prototype_cls PrototypeNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
 ---@param edge_prototype_cls PrototypeEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
 ---@param node_sub_cls_info table<NodeType, table> Node class information used to create sub node classes. Information table must have `data` and `ins_methods` fields.
@@ -120,12 +130,16 @@ end
 ---@param default_edge_ins_method table<string, function> Default instance method for edge.
 ---@param default_node_cls_method table<string, function> Default class method for node
 ---@param default_edge_cls_method table<string, function> Default class method for edge.
+---
+---@param version? integer Version of the graph.
 ---@return Graph _ The new graph.
 function Graph:new(
 	save_path,
 	--
 	log_level,
 	show_log_in_nvim,
+	--
+	algorithm,
 	--
 	node_prototype_cls,
 	edge_prototype_cls,
@@ -134,7 +148,8 @@ function Graph:new(
 	default_node_ins_method,
 	default_edge_ins_method,
 	default_node_cls_method,
-	default_edge_cls_method
+	default_edge_cls_method,
+	version
 )
 	local graph = {
 		save_path = save_path or utils.get_file_info()[4],
@@ -142,6 +157,8 @@ function Graph:new(
 		log_level = log_level or "INFO",
 		show_log_in_nvim = show_log_in_nvim or false,
 		logger = logger_class["Logger"]:new(log_level, show_log_in_nvim),
+		--
+		algorithm = algorithm or "sm-2",
 		--
 		node_prototype_cls = node_prototype_cls,
 		edge_prototype_cls = edge_prototype_cls,
@@ -163,6 +180,8 @@ function Graph:new(
 		default_edge_cls_method = default_edge_cls_method or {},
 		nodes = {},
 		edges = {},
+		--
+		version = version or graph_version,
 	}
 
 	setmetatable(graph, self)
@@ -312,6 +331,7 @@ function Graph:get_sp_info_from_edge(edge_id)
 end
 
 ---Save a graph to a JSON file.
+-- TODO: update
 function Graph:save()
 	local graph_tbl = {
 		-- save_path = self.save_path,

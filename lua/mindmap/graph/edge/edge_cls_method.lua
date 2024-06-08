@@ -9,7 +9,6 @@ function edge_cls_method.to_table(cls, self)
 		--
 		data = self.data,
 		type = self.type,
-		algorithm = self.algorithm,
 		tag = self.tag,
 		state = self.state,
 		version = self.version,
@@ -30,7 +29,6 @@ function edge_cls_method.from_table(cls, self, tbl)
 		--
 		tbl.data,
 		tbl.type,
-		tbl.algorithm,
 		tbl.tag,
 		tbl.state,
 		tbl.version,

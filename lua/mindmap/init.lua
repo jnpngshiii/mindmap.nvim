@@ -13,6 +13,8 @@ local M = {}
 ---Logger configuration:
 ---@field log_level string Log level of the plugin. Default to "INFO".
 ---@field show_log_in_nvim boolean Show log in nvim. Default to true.
+---Spaced repetition configuration:
+---@field algorithm string Algorithm of spaced repetition. Default to "sm-2".
 ---Graph configuration:
 ---@field node_prototype_cls PrototypeNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
 ---@field edge_prototype_cls PrototypeEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
@@ -33,6 +35,8 @@ local plugin_config = {
 	-- Logger configuration:
 	log_level = "INFO",
 	show_log_in_nvim = true,
+	-- Spaced repetition configuration:
+	algorithm = "sm-2",
 	-- Graph configuration:
 	node_prototype_cls = require("mindmap.graph.node.node_prototype_cls"),
 	edge_prototype_cls = require("mindmap.graph.edge.edge_prototype_cls"),
@@ -68,6 +72,8 @@ local function find_graph()
 			--
 			plugin_config.log_level,
 			plugin_config.show_log_in_nvim,
+      --
+      plugin_config.algorithm,
 			--
 			plugin_config.node_prototype_cls,
 			plugin_config.edge_prototype_cls,

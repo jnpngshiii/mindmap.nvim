@@ -13,7 +13,6 @@
 ---Optional fields:
 ---@field data table Data of the node. Subclass should put there own field in this field.
 ---@field type EdgeType Type of the edge. Auto generated.
----@field algorithm string Algorithm of the edge used in space repetition. Default to "sm-2".
 ---@field tag table<string, string> Tag of the edge. Experimental.
 ---@field state string State of the edge. Default to "active". Can be "active", "removed", and "archived". Experimental.
 ---@field version integer Version of the edge. Auto generated and updated. Experimental.
@@ -25,13 +24,14 @@
 ---@field cache table Cache of the edge. Save temporary data to avoid recalculation. Auto generated and updated.
 local PrototypeEdge = {}
 
-local prototype_edge_version = 5
+local prototype_edge_version = 6
 -- v0: Initial version.
 -- v1: Add `tag` field.
 -- v2: Remove `id` field.
 -- v3: Make `type` field auto generated.
 -- v4: Factory.
 -- v5: Add `id` field, `algorithm` field, and `state` field.
+-- v6: Remove `algorithm` field.
 
 ----------
 -- Instance Method
@@ -44,7 +44,6 @@ local prototype_edge_version = 5
 ---
 ---@param data? table Data of the edge.
 ---@param type? EdgeType Type of the edge.
----@param algorithm? string Algorithm of the edge used in space repetition. Default to "sm-2".
 ---@param tag? table<string, string> Tag of the edge.
 ---@param state? string State of the edge. Default to "active". Can be "active", "removed", and "archived".
 ---@param version? integer Version of the edge.
@@ -61,7 +60,6 @@ function PrototypeEdge:new(
 	--
 	data,
 	type,
-	algorithm,
 	tag,
 	state,
 	version,
@@ -78,7 +76,6 @@ function PrototypeEdge:new(
 		--
 		data = data or {},
 		type = type or "PrototypeEdge",
-		algorithm = algorithm or "sm-2",
 		tag = tag or {},
 		state = state or "active",
 		version = version or prototype_edge_version, -- TODO: add merge function
