@@ -7,44 +7,6 @@ local ts_utils = require("mindmap.ts_utils")
 
 local default_node_sub_cls = {}
 
-local node_sub_cls_methods = {
-	---@diagnostic disable-next-line: unused-local
-	to_table = function(cls, self)
-		return {
-			id = self.id,
-			file_name = self.file_name,
-			rel_file_path = self.rel_file_path,
-			--
-			data = self.data,
-			type = self.type,
-			tag = self.tag,
-			state = self.state,
-			version = self.version,
-			created_at = self.created_at,
-			incoming_edge_ids = self.incoming_edge_ids,
-			outcoming_edge_ids = self.outcoming_edge_ids,
-		}
-	end,
-
-	---@diagnostic disable-next-line: unused-local
-	from_table = function(cls, self, tbl)
-		return cls:new(
-			tbl.id,
-			tbl.file_name,
-			tbl.rel_file_path,
-			--
-			tbl.data,
-			tbl.type,
-			tbl.tag,
-			tbl.state,
-			tbl.version,
-			tbl.created_at,
-			tbl.incoming_edge_ids,
-			tbl.outcoming_edge_ids
-		)
-	end,
-}
-
 ----------
 -- SimpleNode
 ----------
@@ -59,8 +21,7 @@ default_node_sub_cls.SimpleNode = {
 		--
 	},
 	cls_methods = {
-		to_table = node_sub_cls_methods.to_table,
-		from_table = node_sub_cls_methods.from_table,
+		--
 	},
 }
 
@@ -121,9 +82,6 @@ default_node_sub_cls.ExcerptNode = {
 				end_col = end_col,
 			})
 		end,
-
-		to_table = node_sub_cls_methods.to_table,
-		from_table = node_sub_cls_methods.from_table,
 	},
 }
 
@@ -177,8 +135,7 @@ default_node_sub_cls.HeadingNode = {
 		end,
 	},
 	cls_methods = {
-		to_table = node_sub_cls_methods.to_table,
-		from_table = node_sub_cls_methods.from_table,
+		--
 	},
 }
 

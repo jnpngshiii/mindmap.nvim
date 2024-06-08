@@ -12,10 +12,14 @@ local utils = require("mindmap.utils")
 ---
 ---@field node_prototype_cls PrototypeNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
 ---@field edge_prototype_cls PrototypeEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
----@field node_class table<NodeType, PrototypeNode> Registered sub node classes.
----@field edge_class table<EdgeType, PrototypeEdge> Registered sub edge classes.
----@field nodes table<NodeID, PrototypeNode> Nodes in the graph. Key is the ID of the node. If the value is nil, the node is removed.
----@field edges table<EdgeID, PrototypeEdge> Edges in the graph. Key is the ID of the edge. If the value is nil, the edge is removed.
+---@field node_sub_cls table<NodeType, PrototypeNode> Registered sub node classes.
+---@field edge_sub_cls table<EdgeType, PrototypeEdge> Registered sub edge classes.
+---@field default_node_ins_method table<string, function> Default instance method for node. Example: `foo(self, ...)`.
+---@field default_edge_ins_method table<string, function> Default instance method for edge. Example: `bar(self, ...)`.
+---@field default_node_cls_method table<string, function> Default class method for node. Example: `foo(cls, self, ...)`.
+---@field default_edge_cls_method table<string, function> Default class method for edge. Example: `bar(cls, self, ...)`.
+---@field nodes table<NodeID, PrototypeNode> Nodes in the graph. Key is the ID of the node.
+---@field edges table<EdgeID, PrototypeEdge> Edges in the graph. Key is the ID of the edge.
 local Graph = {}
 
 --------------------
@@ -31,11 +35,11 @@ local Graph = {}
 ---  `ins_method(self, ...)`
 ---The `cls_methods` will be registered to a instance and converted to a instance method.
 function Graph:register_sub_class(sub_cls_category, sub_cls_info)
-	local sub_cls_category_tbl = self[sub_cls_category .. "_class"]
+	local sub_cls_category_tbl = self[sub_cls_category .. "_sub_cls"]
 
 	assert(
 		self[sub_cls_category .. "_prototype_cls"],
-		"No prototype registered for sub `" .. sub_cls_category .. "` class."
+		"No prototype registered for `" .. sub_cls_category .. "` sub class."
 	)
 	local prototype = self[sub_cls_category .. "_prototype_cls"]
 
@@ -55,19 +59,30 @@ function Graph:register_sub_class(sub_cls_category, sub_cls_info)
 				end
 			end
 
-			-- Add instance methods in the sub class.
+			-- Add default instance methods.
+			for name, func in pairs(self["default_" .. sub_cls_category .. "_cls_method"]) do
+				assert(type(func) == "function", "Instance method `" .. name .. "` is not a function.")
+				sub_class[name] = func
+			end
+			-- Add specific instance methods.
 			if cls_info.ins_methods then
-				for name, func in pairs(cls_info.ins_methods or {}) do
+				for name, func in pairs(cls_info.ins_methods) do
 					assert(type(func) == "function", "Instance method `" .. name .. "` is not a function.")
 					sub_class[name] = func
 				end
 			end
 
-			-- Add class methods in the sub class.
+			-- Add default class methods.
+			for name, func in pairs(self["default_" .. sub_cls_category .. "_cls_method"]) do
+				sub_class[name] = function(...)
+					return func(sub_class, ...)
+				end
+			end
+			-- Add specific class methods.
 			if cls_info.cls_methods then
-				for name, func in pairs(cls_info.cls_methods or {}) do
+				for name, func in pairs(cls_info.cls_methods) do
 					sub_class[name] = function(...)
-						return func(sub_class, ...) -- TODO: check this
+						return func(sub_class, ...)
 					end
 				end
 			end
@@ -101,6 +116,10 @@ end
 ---@param edge_prototype_cls PrototypeEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
 ---@param node_sub_cls_info table<NodeType, table> Node class information used to create sub node classes. Information table must have `data` and `ins_methods` fields.
 ---@param edge_sub_cls_info table<EdgeType, table> Edge class information used to create sub edge classes. Information table must have `data` and `ins_methods` fields.
+---@param default_node_ins_method table<string, function> Default instance method for node.
+---@param default_edge_ins_method table<string, function> Default instance method for edge.
+---@param default_node_cls_method table<string, function> Default class method for node
+---@param default_edge_cls_method table<string, function> Default class method for edge.
 ---@return Graph _ The new graph.
 function Graph:new(
 	save_path,
@@ -111,7 +130,11 @@ function Graph:new(
 	node_prototype_cls,
 	edge_prototype_cls,
 	node_sub_cls_info,
-	edge_sub_cls_info
+	edge_sub_cls_info,
+	default_node_ins_method,
+	default_edge_ins_method,
+	default_node_cls_method,
+	default_edge_cls_method
 )
 	local graph = {
 		save_path = save_path or utils.get_file_info()[4],
@@ -122,18 +145,22 @@ function Graph:new(
 		--
 		node_prototype_cls = node_prototype_cls,
 		edge_prototype_cls = edge_prototype_cls,
-		node_class = setmetatable({}, {
+		node_sub_cls = setmetatable({}, {
 			--- ---@diagnostic disable-next-line: unused-local
 			--- __index = function(tbl, key)
 			---   vim.notify("Node sub class " .. key .. " not found.", vim.log.levels.ERROR)
 			--- end,
 		}),
-		edge_class = setmetatable({}, {
+		edge_sub_cls = setmetatable({}, {
 			--- ---@diagnostic disable-next-line: unused-local
 			--- __index = function(tbl, key)
 			---   vim.notify("Edge sub class " .. key .. " not found.", vim.log.levels.ERROR)
 			--- end,
 		}),
+		default_node_ins_method = default_node_ins_method or {},
+		default_edge_ins_method = default_edge_ins_method or {},
+		default_node_cls_method = default_node_cls_method or {},
+		default_edge_cls_method = default_edge_cls_method or {},
 		nodes = {},
 		edges = {},
 	}
@@ -156,11 +183,11 @@ function Graph:new(
 
 		for node_id, node in pairs(json_content.nodes) do
 			-- TODO: add check for node type
-			graph.nodes[node_id] = graph.node_class[node.type]:from_table(node)
+			graph.nodes[node_id] = graph.node_sub_cls[node.type]:from_table(node)
 		end
 		for edge_id, edge in pairs(json_content.edges) do
 			-- TODO: add check for edge type
-			graph.edges[edge_id] = graph.edge_class[edge.type]:from_table(edge)
+			graph.edges[edge_id] = graph.edge_sub_cls[edge.type]:from_table(edge)
 		end
 	end
 

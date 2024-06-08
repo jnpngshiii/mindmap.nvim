@@ -13,24 +13,34 @@ local M = {}
 ---Logger configuration:
 ---@field log_level string Log level of the plugin. Default to "INFO".
 ---@field show_log_in_nvim boolean Show log in nvim. Default to true.
+---Graph configuration:
+---@field node_prototype_cls PrototypeNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
+---@field edge_prototype_cls PrototypeEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
+---@field node_sub_cls table<NodeType, PrototypeNode> Registered sub node classes.
+---@field edge_sub_cls table<EdgeType, PrototypeEdge> Registered sub edge classes.
+---@field default_node_ins_method table<string, function> Default instance method for node. Example: `foo(self, ...)`.
+---@field default_edge_ins_method table<string, function> Default instance method for edge. Example: `bar(self, ...)`.
+---@field default_node_cls_method table<string, function> Default class method for node. Example: `foo(cls, self, ...)`.
+---@field default_edge_cls_method table<string, function> Default class method for edge. Example: `bar(cls, self, ...)`.
 ---Other configuration:
 ---@field excerpt_namespace integer Namespace for excerpt nodes.
 ---@field sp_namespace integer Namespace for space repetition.
----@field node_prototype_cls PrototypeNode Node prototype class.
----@field edge_prototype_cls PrototypeEdge Edge prototype class.
----@field node_sub_cls PrototypeNode Node sub class.
----@field edge_sub_cls PrototypeEdge Edge sub class.
 local plugin_config = {
 	-- Logger configuration:
 	log_level = "INFO",
 	show_log_in_nvim = true,
-	-- Other configuration:
-	excerpt_namespace = vim.api.nvim_create_namespace("my_namespace"),
-	sp_namespace = vim.api.nvim_create_namespace("my_namespace"),
+	-- Graph configuration:
 	node_prototype_cls = require("mindmap.graph.node.node_prototype_cls"),
 	edge_prototype_cls = require("mindmap.graph.edge.edge_prototype_cls"),
 	node_sub_cls = require("mindmap.graph.node.node_sub_cls"),
 	edge_sub_cls = require("mindmap.graph.edge.edge_sub_cls"),
+	default_node_ins_method = require("mindmap.graph.node.node_ins_method"),
+	default_edge_ins_method = require("mindmap.graph.edge.edge_ins_method"),
+	default_node_cls_method = require("mindmap.graph.node.node_cls_method"),
+	default_edge_cls_method = require("mindmap.graph.edge.edge_cls_method"),
+	-- Other configuration:
+	excerpt_namespace = vim.api.nvim_create_namespace("mindmap_excerpt"),
+	sp_namespace = vim.api.nvim_create_namespace("mindmap_sp"),
 }
 
 ---@class plugin_database
@@ -55,7 +65,11 @@ local function find_graph()
 			plugin_config.node_prototype_cls,
 			plugin_config.edge_prototype_cls,
 			plugin_config.node_sub_cls,
-			plugin_config.edge_sub_cls
+			plugin_config.edge_sub_cls,
+			plugin_config.default_node_ins_method,
+			plugin_config.default_edge_ins_method,
+			plugin_config.default_node_cls_method,
+			plugin_config.default_edge_cls_method
 		)
 		plugin_database.cache[created_graph.save_path] = created_graph
 	end
@@ -74,7 +88,7 @@ end
 function M.MindmapAddVisualSelectionAsExcerptNode()
 	local found_graph = find_graph()
 	local created_excerpt_node =
-		found_graph.node_class["ExcerptNode"]:create_using_latest_visual_selection(#found_graph.nodes + 1)
+		found_graph.node_sub_cls["ExcerptNode"]:create_using_latest_visual_selection(#found_graph.nodes + 1)
 
 	found_graph:add_node(created_excerpt_node)
 end
@@ -95,7 +109,7 @@ function M.MindmapAddNearestHeadingAsHeadingNode()
 
 	local file_name, _, rel_file_path, _ = unpack(utils.get_file_info())
 	local created_heading_node =
-		found_graph.node_class["HeadingNode"]:new(#found_graph.nodes + 1, file_name, rel_file_path)
+		found_graph.node_sub_cls["HeadingNode"]:new(#found_graph.nodes + 1, file_name, rel_file_path)
 
 	-- TODO: move this to the node class
 	local nearest_heading_title_node, _, _ = ts_utils.get_sub_nodes(nearest_heading)
@@ -297,7 +311,8 @@ function M.MindmapAddEdgeFromLatestAddedNodeToNearestHeadingNode(edge_cls)
 		end
 	end
 
-	local created_simple_edge = found_graph.edge_class[edge_cls]:new(#found_graph.edges + 1, #found_graph.nodes - 1, id)
+	local created_simple_edge =
+		found_graph.edge_sub_cls[edge_cls]:new(#found_graph.edges + 1, #found_graph.nodes - 1, id)
 	found_graph:add_edge(created_simple_edge)
 
 	local front, back = found_graph:get_sp_info_from_edge(#found_graph.edges)
@@ -328,7 +343,8 @@ function M.MindmapAddSimpleEdgeFromLatestAddedNodeToNearestHeadingNode()
 		end
 	end
 
-	local created_simple_edge = found_graph.edge_class["SimpleEdge"]:new(#found_graph.edges + 1, #found_graph.nodes, id)
+	local created_simple_edge =
+		found_graph.edge_sub_cls["SimpleEdge"]:new(#found_graph.edges + 1, #found_graph.nodes, id)
 	found_graph:add_edge(created_simple_edge)
 end
 
@@ -350,7 +366,7 @@ function M.MindmapAddSelfLoopContentEdgeFromNearestHeadingNodeToItself()
 	end
 
 	local created_self_loop_content_edge =
-		found_graph.edge_class["SelfLoopContentEdge"]:new(#found_graph.edges + 1, id, id)
+		found_graph.edge_sub_cls["SelfLoopContentEdge"]:new(#found_graph.edges + 1, id, id)
 	found_graph:add_edge(created_self_loop_content_edge)
 end
 
@@ -372,7 +388,7 @@ function M.MindmapAddSelfLoopSubheadingEdgeFromNearestHeadingNodeToItself()
 	end
 
 	local created_self_loop_subheading_edge =
-		found_graph.edge_class["SelfLoopSubheadingEdge"]:new(#found_graph.edges + 1, id, id)
+		found_graph.edge_sub_cls["SelfLoopSubheadingEdge"]:new(#found_graph.edges + 1, id, id)
 	found_graph:add_edge(created_self_loop_subheading_edge)
 end
 
