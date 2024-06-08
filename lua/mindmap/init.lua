@@ -139,6 +139,79 @@ end
 
 ---@param node? TSNode
 ---@param graph? Graph
+---@return table[] output
+local function get_sp_info(node, graph)
+	node = node or ts_utils.get_nearest_heading_node()
+	graph = graph or find_graph()
+
+	local id
+	local line_num
+	local output = {}
+	if node then
+		id, _, _ = ts_utils.get_heading_node_info(node, 0)
+		line_num, _, _, _ = node:range()
+		line_num = line_num + 1
+
+		-- If `id` is not nil, this `HeadingNode` is register in the `found_graph`.
+		if id then
+			for _, incoming_edge_id in ipairs(graph.nodes[id].incoming_edge_ids) do
+				local front, back, created_at, updated_at, due_at, ease, interval =
+					graph:get_sp_info_from_edge(incoming_edge_id)
+				table.insert(output, { front, back, created_at, updated_at, due_at, ease, interval, line_num })
+			end
+		end
+		-- EOIf id
+	end
+	-- EOIf node
+
+	return output
+end
+
+---@param node? TSNode
+---@param graph? Graph
+function M.MindmapShowSpInfo(node, graph)
+	node = node or ts_utils.get_nearest_heading_node()
+	graph = graph or find_graph()
+
+	local sp_info = get_sp_info(node, graph)
+	for _, info in pairs(sp_info) do
+		-- Avoid duplicate virtual text
+		M.MindmapCleanSpInfo(node)
+
+		local text = string.format("Due at: %d, Ease: %d, Int: %d", info[5], info[6], info[7])
+		utils.add_virtual_text(0, plugin_config.excerpt_namespace, info[8], text)
+	end
+end
+
+function M.MindmapShowAllSpInfo()
+	-- Avoid duplicate virtual text
+	M.MindmapCleanAllSpInfo()
+
+	local found_graph = find_graph()
+	local heading_nodes_with_inline_comment = ts_utils.get_all_heading_nodes_with_inline_comment()
+
+	for _, node in pairs(heading_nodes_with_inline_comment) do
+		M.MindmapShowSpInfo(node, found_graph)
+	end
+end
+
+---@param node? TSNode
+function M.MindmapCleanSpInfo(node)
+	-- TODO: node or ts node?
+	node = node or ts_utils.get_nearest_heading_node()
+
+	if node then
+		local start_row, _, _, _ = node:range()
+		utils.clear_virtual_text(0, plugin_config.sp_namespace, start_row, start_row + 1)
+	end
+end
+
+function M.MindmapCleanAllSpInfo()
+	utils.clear_virtual_text(0, plugin_config.sp_namespace)
+end
+
+---@param node? TSNode
+---@param graph? Graph
 function M.MindmapShowExcerpt(node, graph)
 	node = node or ts_utils.get_nearest_heading_node()
 	graph = graph or find_graph()

@@ -25,6 +25,22 @@ end, {})
 -- Edge
 ----------
 
+vim.api.nvim_create_user_command("MindmapShowSpInfo", function()
+	require("mindmap").MindmapShowSpInfo()
+end, {})
+
+vim.api.nvim_create_user_command("MindmapShowAllSpInfo", function()
+	require("mindmap").MindmapShowAllSpInfo()
+end, {})
+
+vim.api.nvim_create_user_command("MindmapCleanSpInfo", function()
+	require("mindmap").MindmapCleanSpInfo()
+end, {})
+
+vim.api.nvim_create_user_command("MindmapCleanAllSpInfo", function()
+	require("mindmap").MindmapCleanAllSpInfo()
+end, {})
+
 vim.api.nvim_create_user_command("MindmapShowExcerpt", function()
 	require("mindmap").MindmapShowExcerpt()
 end, {})

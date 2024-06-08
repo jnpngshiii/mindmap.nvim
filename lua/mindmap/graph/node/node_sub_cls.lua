@@ -152,7 +152,7 @@ default_node_sub_cls.HeadingNode = {
 			if not heading_node then
 				return front, back
 			end
-			local title_node, content_node, sub_heading_nodes = ts_utils.get_node_subs(heading_node)
+			local title_node, content_node, sub_heading_nodes = ts_utils.get_sub_nodes(heading_node)
 
 			if title_node then
 				front = utils.split_string(vim.treesitter.get_node_text(title_node, bufnr), "\n")
