@@ -2,9 +2,9 @@
 -- Default Sub Edge Class
 --------------------
 
-local default_sub_edge_cls = {}
+local default_edge_sub_cls = {}
 
-local sub_edge_cls_methods = {
+local edge_sub_cls_methods = {
 	---@diagnostic disable-next-line: unused-local
 	to_table = function(cls, self)
 		return {
@@ -54,7 +54,7 @@ local sub_edge_cls_methods = {
 
 ---@class SimpleEdge : PrototypeEdge
 
-default_sub_edge_cls.SimpleEdge = {
+default_edge_sub_cls.SimpleEdge = {
 	data = {
 		--
 	},
@@ -62,8 +62,8 @@ default_sub_edge_cls.SimpleEdge = {
 		--
 	},
 	cls_methods = {
-		to_table = sub_edge_cls_methods.to_table,
-		from_table = sub_edge_cls_methods.from_table,
+		to_table = edge_sub_cls_methods.to_table,
+		from_table = edge_sub_cls_methods.from_table,
 	},
 }
 
@@ -73,7 +73,7 @@ default_sub_edge_cls.SimpleEdge = {
 
 ---@class SelfLoopContentEdge : PrototypeEdge
 
-default_sub_edge_cls.SelfLoopContentEdge = {
+default_edge_sub_cls.SelfLoopContentEdge = {
 	data = {
 		--
 	},
@@ -81,8 +81,8 @@ default_sub_edge_cls.SelfLoopContentEdge = {
 		--
 	},
 	cls_methods = {
-		to_table = sub_edge_cls_methods.to_table,
-		from_table = sub_edge_cls_methods.from_table,
+		to_table = edge_sub_cls_methods.to_table,
+		from_table = edge_sub_cls_methods.from_table,
 	},
 }
 
@@ -92,7 +92,7 @@ default_sub_edge_cls.SelfLoopContentEdge = {
 
 ---@class SelfLoopSubheadingEdge : PrototypeEdge
 
-default_sub_edge_cls.SelfLoopSubheadingEdge = {
+default_edge_sub_cls.SelfLoopSubheadingEdge = {
 	data = {
 		--
 	},
@@ -100,11 +100,11 @@ default_sub_edge_cls.SelfLoopSubheadingEdge = {
 		--
 	},
 	cls_methods = {
-		to_table = sub_edge_cls_methods.to_table,
-		from_table = sub_edge_cls_methods.from_table,
+		to_table = edge_sub_cls_methods.to_table,
+		from_table = edge_sub_cls_methods.from_table,
 	},
 }
 
 --------------------
 
-return default_sub_edge_cls
+return default_edge_sub_cls

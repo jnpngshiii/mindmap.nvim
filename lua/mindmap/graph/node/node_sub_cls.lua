@@ -5,9 +5,9 @@ local ts_utils = require("mindmap.ts_utils")
 -- Default Sub Node Class
 --------------------
 
-local default_sub_node_cls = {}
+local default_node_sub_cls = {}
 
-local sub_node_cls_methods = {
+local node_sub_cls_methods = {
 	---@diagnostic disable-next-line: unused-local
 	to_table = function(cls, self)
 		return {
@@ -51,7 +51,7 @@ local sub_node_cls_methods = {
 
 ---@class SimpleNode : PrototypeNode
 
-default_sub_node_cls.SimpleNode = {
+default_node_sub_cls.SimpleNode = {
 	data = {
 		--
 	},
@@ -59,8 +59,8 @@ default_sub_node_cls.SimpleNode = {
 		--
 	},
 	cls_methods = {
-		to_table = sub_node_cls_methods.to_table,
-		from_table = sub_node_cls_methods.from_table,
+		to_table = node_sub_cls_methods.to_table,
+		from_table = node_sub_cls_methods.from_table,
 	},
 }
 
@@ -74,7 +74,7 @@ default_sub_node_cls.SimpleNode = {
 ---@field data.end_row integer End row of the excerpt.
 ---@field data.end_col integer End column of the excerpt.
 
-default_sub_node_cls.ExcerptNode = {
+default_node_sub_cls.ExcerptNode = {
 	data = {
 		start_row = 0,
 		end_row = 0,
@@ -122,8 +122,8 @@ default_sub_node_cls.ExcerptNode = {
 			})
 		end,
 
-		to_table = sub_node_cls_methods.to_table,
-		from_table = sub_node_cls_methods.from_table,
+		to_table = node_sub_cls_methods.to_table,
+		from_table = node_sub_cls_methods.from_table,
 	},
 }
 
@@ -133,7 +133,7 @@ default_sub_node_cls.ExcerptNode = {
 
 ---@class HeadingNode : PrototypeNode
 
-default_sub_node_cls.HeadingNode = {
+default_node_sub_cls.HeadingNode = {
 	data = {
 		--
 	},
@@ -152,7 +152,7 @@ default_sub_node_cls.HeadingNode = {
 			if not heading_node then
 				return front, back
 			end
-			local title_node, content_node, sub_heading_nodes = ts_utils.get_sub_nodes(heading_node)
+			local title_node, content_node, sub_heading_nodes = ts_utils.get_node_subs(heading_node)
 
 			if title_node then
 				front = utils.split_string(vim.treesitter.get_node_text(title_node, bufnr), "\n")
@@ -177,11 +177,11 @@ default_sub_node_cls.HeadingNode = {
 		end,
 	},
 	cls_methods = {
-		to_table = sub_node_cls_methods.to_table,
-		from_table = sub_node_cls_methods.from_table,
+		to_table = node_sub_cls_methods.to_table,
+		from_table = node_sub_cls_methods.from_table,
 	},
 }
 
 --------------------
 
-return default_sub_node_cls
+return default_node_sub_cls

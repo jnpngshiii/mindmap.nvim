@@ -10,8 +10,8 @@ local utils = require("mindmap.utils")
 ---@field show_log_in_nvim boolean Show log in Neovim. Default: false.
 ---@field logger Logger Logger of the graph.
 ---
----@field node_prototype PrototypeNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
----@field edge_prototype PrototypeEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
+---@field node_prototype_cls PrototypeNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
+---@field edge_prototype_cls PrototypeEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
 ---@field node_class table<NodeType, PrototypeNode> Registered sub node classes.
 ---@field edge_class table<EdgeType, PrototypeEdge> Registered sub edge classes.
 ---@field nodes table<NodeID, PrototypeNode> Nodes in the graph. Key is the ID of the node. If the value is nil, the node is removed.
@@ -34,10 +34,10 @@ function Graph:register_sub_class(sub_cls_category, sub_cls_info)
 	local sub_cls_category_tbl = self[sub_cls_category .. "_class"]
 
 	assert(
-		self[sub_cls_category .. "_prototype"],
+		self[sub_cls_category .. "_prototype_cls"],
 		"No prototype registered for sub `" .. sub_cls_category .. "` class."
 	)
-	local prototype = self[sub_cls_category .. "_prototype"]
+	local prototype = self[sub_cls_category .. "_prototype_cls"]
 
 	for cls_type, cls_info in pairs(sub_cls_info) do
 		assert(type(cls_info) == "table", "Information of the sub class must be a table.")
@@ -97,10 +97,10 @@ end
 ---@param log_level? string Log level of the graph. Default: "INFO".
 ---@param show_log_in_nvim? boolean Show log in Neovim when added. Default: false.
 ---
----@param node_prototype PrototypeNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
----@param edge_prototype PrototypeEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
----@param node_cls_info table<NodeType, table> Node class information used to create sub node classes. Information table must have `data` and `ins_methods` fields.
----@param edge_cls_info table<EdgeType, table> Edge class information used to create sub edge classes. Information table must have `data` and `ins_methods` fields.
+---@param node_prototype_cls PrototypeNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
+---@param edge_prototype_cls PrototypeEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
+---@param node_sub_cls_info table<NodeType, table> Node class information used to create sub node classes. Information table must have `data` and `ins_methods` fields.
+---@param edge_sub_cls_info table<EdgeType, table> Edge class information used to create sub edge classes. Information table must have `data` and `ins_methods` fields.
 ---@return Graph _ The new graph.
 function Graph:new(
 	save_path,
@@ -108,10 +108,10 @@ function Graph:new(
 	log_level,
 	show_log_in_nvim,
 	--
-	node_prototype,
-	edge_prototype,
-	node_cls_info,
-	edge_cls_info
+	node_prototype_cls,
+	edge_prototype_cls,
+	node_sub_cls_info,
+	edge_sub_cls_info
 )
 	local graph = {
 		save_path = save_path or utils.get_file_info()[4],
@@ -120,8 +120,8 @@ function Graph:new(
 		show_log_in_nvim = show_log_in_nvim or false,
 		logger = logger_class["Logger"]:new(log_level, show_log_in_nvim),
 		--
-		node_prototype = node_prototype,
-		edge_prototype = edge_prototype,
+		node_prototype_cls = node_prototype_cls,
+		edge_prototype_cls = edge_prototype_cls,
 		node_class = setmetatable({}, {
 			--- ---@diagnostic disable-next-line: unused-local
 			--- __index = function(tbl, key)
@@ -142,8 +142,8 @@ function Graph:new(
 	self.__index = self
 
 	-- Register sub node and edge classes.
-	graph:register_sub_class("node", node_cls_info)
-	graph:register_sub_class("edge", edge_cls_info)
+	graph:register_sub_class("node", node_sub_cls_info)
+	graph:register_sub_class("edge", edge_sub_cls_info)
 
 	-- Load nodes and edges from the given information.
 	local json_path = graph.save_path .. "/" .. ".mindmap.json"
@@ -206,7 +206,7 @@ end
 ---@param edge PrototypeEdge Edge to be added.
 ---@return nil _ This function does not return anything.
 function Graph:add_edge(edge)
-  -- TODO: add check for duplicate edge
+	-- TODO: add check for duplicate edge
 	local edge_id = #self.edges + 1
 	self.edges[edge_id] = edge
 
