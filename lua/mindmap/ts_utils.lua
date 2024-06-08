@@ -126,9 +126,25 @@ end
 ---@param bufnr integer The buffer number.
 ---@return EdgeID? id, integer? level, string text The id, level, and text of the heading node.
 function M.get_heading_node_info(heading_node, bufnr)
+	local parsed_query = vim.treesitter.query.parse(
+		"norg",
+		[[
+    (_
+      title: (paragraph_segment
+        (inline_comment) @inline_comment
+      )
+    )
+    ]]
+	)
+
+	local id
+	local level
+	for _, inline_comment_node in parsed_query:iter_captures(heading_node, 0) do
+		id = tonumber(string.match(vim.treesitter.get_node_text(inline_comment_node, bufnr), "%d%d%d%d%d%d%d%d"))
+		level = tonumber(string.match(heading_node:type(), "^heading(%d)$"))
+	end
+
 	local text = vim.treesitter.get_node_text(heading_node, bufnr)
-	local id = tonumber(string.match(text, "%d%d%d%d%d%d%d%d"))
-	local level = tonumber(string.match(heading_node:type(), "^heading(%d)$"))
 
 	return id, level, text
 end

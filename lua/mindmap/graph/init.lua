@@ -206,6 +206,7 @@ end
 ---@param edge PrototypeEdge Edge to be added.
 ---@return nil _ This function does not return anything.
 function Graph:add_edge(edge)
+  -- TODO: add check for duplicate edge
 	local edge_id = #self.edges + 1
 	self.edges[edge_id] = edge
 

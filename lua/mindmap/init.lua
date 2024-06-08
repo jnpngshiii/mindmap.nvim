@@ -137,46 +137,66 @@ end
 -- Edge
 ----------
 
-function M.MindmapShowExcerpt()
-	local found_graph = find_graph()
-	local heading_nodes_with_inline_comment = ts_utils.get_all_heading_nodes_with_inline_comment()
+---@param node? TSNode
+---@param graph? Graph
+function M.MindmapShowExcerpt(node, graph)
+	node = node or ts_utils.get_nearest_heading_node()
+	graph = graph or find_graph()
 
-	local excerpt_nodes_in_found_graph = {}
-	for _, node in pairs(heading_nodes_with_inline_comment) do
-		local id, _, _ = ts_utils.get_heading_node_info(node, 0)
+	local id
+	local line_num
+	if node then
+		-- Avoid duplicate virtual text
+		M.MindmapCleanExcerpt(node)
+
+		id, _, _ = ts_utils.get_heading_node_info(node, 0)
+		line_num, _, _, _ = node:range()
+		line_num = line_num + 1
 
 		-- If `id` is not nil, this `HeadingNode` is register in the `found_graph`.
 		if id then
-			for _, incoming_edge_id in ipairs(found_graph.nodes[id].incoming_edge_ids) do
-				local incoming_edge = found_graph.edges[incoming_edge_id]
-				local from_node = found_graph.nodes[incoming_edge.from_node_id]
+			for _, incoming_edge_id in ipairs(graph.nodes[id].incoming_edge_ids) do
+				local incoming_edge = graph.edges[incoming_edge_id]
+				local from_node = graph.nodes[incoming_edge.from_node_id]
 
 				-- If `from_node.type` is `ExcerptNode`, add it to the list.
+				-- TODO: exclude the `ExcerptNode` from the same file.
 				if from_node.type == "ExcerptNode" then
-					table.insert(excerpt_nodes_in_found_graph, from_node)
-					-- TODO: refactor this
-					from_node.cache.line_num = node:range() + 1
+					local text, _ = from_node:get_content(incoming_edge.type)
+
+					text[1] = "Ex: " .. text[1]
+					utils.add_virtual_text(0, plugin_config.excerpt_namespace, line_num, text)
 				end
-
-				--
 			end
-
-			--
 		end
-
-		--
+		-- EOIf id
 	end
+	-- EOIf node
+end
 
-	for _, node in ipairs(excerpt_nodes_in_found_graph) do
-		local line_num = node.cache.line_num
-		local text, _ = node:get_content()
+function M.MindmapShowAllExcerpt()
+	-- Avoid duplicate virtual text
+	M.MindmapCleanAllExcerpt()
 
-		text[1] = "Ex: " .. text[1]
-		utils.add_virtual_text(0, plugin_config.excerpt_namespace, line_num, text)
+	local found_graph = find_graph()
+	local heading_nodes_with_inline_comment = ts_utils.get_all_heading_nodes_with_inline_comment()
+
+	for _, node in pairs(heading_nodes_with_inline_comment) do
+		M.MindmapShowExcerpt(node, found_graph)
 	end
 end
 
-function M.MindmapCleanExcerpt()
+---@param node? TSNode
+function M.MindmapCleanExcerpt(node)
+	node = node or ts_utils.get_nearest_heading_node()
+
+	if node then
+		local start_row, _, _, _ = node:range()
+		utils.clear_virtual_text(0, plugin_config.excerpt_namespace, start_row, start_row + 1)
+	end
+end
+
+function M.MindmapCleanAllExcerpt()
 	utils.clear_virtual_text(0, plugin_config.excerpt_namespace)
 end
 
@@ -235,8 +255,7 @@ function M.MindmapAddSimpleEdgeFromLatestAddedNodeToNearestHeadingNode()
 		end
 	end
 
-	local created_simple_edge =
-		found_graph.edge_class["SimpleEdge"]:new(#found_graph.edges + 1, #found_graph.nodes - 1, id)
+	local created_simple_edge = found_graph.edge_class["SimpleEdge"]:new(#found_graph.edges + 1, #found_graph.nodes, id)
 	found_graph:add_edge(created_simple_edge)
 end
 

@@ -29,8 +29,16 @@ vim.api.nvim_create_user_command("MindmapShowExcerpt", function()
 	require("mindmap").MindmapShowExcerpt()
 end, {})
 
+vim.api.nvim_create_user_command("MindmapShowAllExcerpt", function()
+	require("mindmap").MindmapShowAllExcerpt()
+end, {})
+
 vim.api.nvim_create_user_command("MindmapCleanExcerpt", function()
 	require("mindmap").MindmapCleanExcerpt()
+end, {})
+
+vim.api.nvim_create_user_command("MindmapCleanAllExcerpt", function()
+	require("mindmap").MindmapCleanAllExcerpt()
 end, {})
 
 vim.api.nvim_create_user_command("MindmapAddSimpleEdgeFromLatestAddedNodeToNearestHeadingNode", function()

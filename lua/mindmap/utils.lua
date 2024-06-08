@@ -80,9 +80,11 @@ end
 ---Clear virtual text in the given buffer in the given namespace.
 ---@param bufnr integer Buffer number.
 ---@param namespace number Namespace.
+---@param start_row? integer Start of range of lines to clear
+---@param end_row? integer End of range of lines to clear (exclusive) or -1 to clear to end of buffer.
 ---@return nil _ This function does not return anything.
-function M.clear_virtual_text(bufnr, namespace)
-	vim.api.nvim_buf_clear_namespace(bufnr, namespace, 0, -1)
+function M.clear_virtual_text(bufnr, namespace, start_row, end_row)
+	vim.api.nvim_buf_clear_namespace(bufnr, namespace, start_row or 0, end_row or -1)
 end
 
 ---Convert relative path (target_path) to absolute path according to reference path (reference_path).
