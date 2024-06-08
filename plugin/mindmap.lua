@@ -86,6 +86,11 @@ vim.api.nvim_create_autocmd("VimLeave", {
 -- Debug functions
 --------------------
 
-vim.api.nvim_create_user_command("MindmapTest", function()
-	require("mindmap").MindmapTest()
-end, {})
+vim.api.nvim_create_user_command("MindmapTest", function(arg)
+  print(arg.args)
+end, {
+	nargs = 1,
+	complete = function()
+		return { "test1", "test2" }
+	end,
+})
