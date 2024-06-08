@@ -22,6 +22,10 @@ local M = {}
 ---@field default_edge_ins_method table<string, function> Default instance method for edge. Example: `bar(self, ...)`.
 ---@field default_node_cls_method table<string, function> Default class method for node. Example: `foo(cls, self, ...)`.
 ---@field default_edge_cls_method table<string, function> Default class method for edge. Example: `bar(cls, self, ...)`.
+---Behavior configuration:
+---@field show_excerpt_after_add boolean Show excerpt after adding a node. Default: true.
+---@field show_excerpt_after_bfread boolean ...
+---@field show_sp_info_after_bfread boolean ...
 ---Other configuration:
 ---@field excerpt_namespace integer Namespace for excerpt nodes.
 ---@field sp_namespace integer Namespace for space repetition.
@@ -38,6 +42,9 @@ local plugin_config = {
 	default_edge_ins_method = require("mindmap.graph.edge.edge_ins_method"),
 	default_node_cls_method = require("mindmap.graph.node.node_cls_method"),
 	default_edge_cls_method = require("mindmap.graph.edge.edge_cls_method"),
+	-- Behavior configuration:
+	show_excerpt_after_add = true,
+
 	-- Other configuration:
 	excerpt_namespace = vim.api.nvim_create_namespace("mindmap_excerpt"),
 	sp_namespace = vim.api.nvim_create_namespace("mindmap_sp"),
@@ -346,6 +353,10 @@ function M.MindmapAddSimpleEdgeFromLatestAddedNodeToNearestHeadingNode()
 	local created_simple_edge =
 		found_graph.edge_sub_cls["SimpleEdge"]:new(#found_graph.edges + 1, #found_graph.nodes, id)
 	found_graph:add_edge(created_simple_edge)
+
+	if plugin_config.show_excerpt_after_add and found_graph.nodes[#found_graph.nodes].type == "ExcerptNode" then
+		M.MindmapShowExcerpt(nearest_heading)
+	end
 end
 
 function M.MindmapAddSelfLoopContentEdgeFromNearestHeadingNodeToItself()
