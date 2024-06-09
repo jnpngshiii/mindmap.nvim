@@ -2,6 +2,34 @@
 -- User functions
 --------------------
 
+vim.api.nvim_create_user_command("MindmapShow", function(arg)
+	require("mindmap").MindmapShow(arg.fargs[1], arg.fargs[2])
+end, {
+	nargs = "*",
+	---@diagnostic disable-next-line: unused-local
+	complete = function(arg_lead, cmd_line, cursor_pos)
+		if cursor_pos == 12 then
+			return { "nearest", "buffer", "graph", "telescope" }
+		else
+			return { "card_back", "excerpt", "sp_info" }
+		end
+	end,
+})
+
+vim.api.nvim_create_user_command("MindmapClean", function(arg)
+	require("mindmap").MindmapClean(arg.fargs[1], arg.fargs[2])
+end, {
+	nargs = "*",
+	---@diagnostic disable-next-line: unused-local
+	complete = function(arg_lead, cmd_line, cursor_pos)
+		if cursor_pos == 12 then
+			return { "nearest", "buffer", "graph", "telescope" }
+		else
+			return { "card_back", "excerpt", "sp_info" }
+		end
+	end,
+})
+
 ----------
 -- Node
 ----------
@@ -24,38 +52,6 @@ end, {})
 ----------
 -- Edge
 ----------
-
-vim.api.nvim_create_user_command("MindmapShowSpInfo", function()
-	require("mindmap").MindmapShowSpInfo()
-end, {})
-
-vim.api.nvim_create_user_command("MindmapShowAllSpInfo", function()
-	require("mindmap").MindmapShowAllSpInfo()
-end, {})
-
-vim.api.nvim_create_user_command("MindmapCleanSpInfo", function()
-	require("mindmap").MindmapCleanSpInfo()
-end, {})
-
-vim.api.nvim_create_user_command("MindmapCleanAllSpInfo", function()
-	require("mindmap").MindmapCleanAllSpInfo()
-end, {})
-
-vim.api.nvim_create_user_command("MindmapShowExcerpt", function()
-	require("mindmap").MindmapShowExcerpt()
-end, {})
-
-vim.api.nvim_create_user_command("MindmapShowAllExcerpt", function()
-	require("mindmap").MindmapShowAllExcerpt()
-end, {})
-
-vim.api.nvim_create_user_command("MindmapCleanExcerpt", function()
-	require("mindmap").MindmapCleanExcerpt()
-end, {})
-
-vim.api.nvim_create_user_command("MindmapCleanAllExcerpt", function()
-	require("mindmap").MindmapCleanAllExcerpt()
-end, {})
 
 vim.api.nvim_create_user_command("MindmapAddSimpleEdgeFromLatestAddedNodeToNearestHeadingNode", function()
 	require("mindmap").MindmapAddSimpleEdgeFromLatestAddedNodeToNearestHeadingNode()
@@ -87,7 +83,7 @@ vim.api.nvim_create_autocmd("VimLeave", {
 --------------------
 
 vim.api.nvim_create_user_command("MindmapTest", function(arg)
-  print(arg.args)
+	print(arg.args)
 end, {
 	nargs = 1,
 	complete = function()

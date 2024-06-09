@@ -45,7 +45,7 @@ end
 ---@return string indent Indent of the line.
 function M.get_indent(bufnr, line_num)
 	local line = vim.api.nvim_buf_get_lines(bufnr, line_num - 1, line_num, false)[1]
-	local indent = line:match("^%s*")
+	local indent = line:match("^[%*%s]*"):gsub("[%*%s]", " ")
 	return indent or ""
 end
 

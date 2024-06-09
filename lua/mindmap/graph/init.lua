@@ -120,7 +120,7 @@ function Graph:register_sub_class(sub_cls_category, sub_cls_info)
 
 			-- Register the new class.
 			sub_cls[cls_type] = sub_class
-			self.logger:info(sub_cls_category, "Register `" .. sub_cls_category .. "` sub class `" .. cls_type .. "`.")
+			self.logger:debug(sub_cls_category, "Register `" .. sub_cls_category .. "` sub class `" .. cls_type .. "`.")
 		end
 	end
 end
