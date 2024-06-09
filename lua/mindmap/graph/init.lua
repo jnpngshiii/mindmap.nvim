@@ -8,42 +8,53 @@ local utils = require("mindmap.utils")
 ---
 ---@field log_level string Log level of the graph. Default: "INFO".
 ---@field show_log_in_nvim boolean Show log in Neovim. Default: false.
----@field logger Logger Logger of the graph.
 ---
----@field algorithm? string Algorithm of the edge used in space repetition. Default to "sm-2".
----
+---@field default_node_type string Default type of the node. Default: "SimpleNode".
 ---@field node_prototype_cls PrototypeNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
+---@field node_sub_cls_info table<NodeType, table> Information of the sub node classes. Must have `data`, `ins_methods` and `cls_methods` fields.
+---@field default_node_ins_method table<string, function> Default instance method for all nodes. Example: `foo(self, ...)`.
+---@field default_node_cls_method table<string, function> Default class method for all nodes. Example: `foo(cls, self, ...)`.
+---
+---@field default_edge_type string Default type of the edge. Default: "SimpleEdge".
 ---@field edge_prototype_cls PrototypeEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
----@field node_sub_cls table<NodeType, PrototypeNode> Registered sub node classes.
----@field edge_sub_cls table<EdgeType, PrototypeEdge> Registered sub edge classes.
----@field default_node_ins_method table<string, function> Default instance method for node. Example: `foo(self, ...)`.
----@field default_edge_ins_method table<string, function> Default instance method for edge. Example: `bar(self, ...)`.
----@field default_node_cls_method table<string, function> Default class method for node. Example: `foo(cls, self, ...)`.
----@field default_edge_cls_method table<string, function> Default class method for edge. Example: `bar(cls, self, ...)`.
----@field nodes table<NodeID, PrototypeNode> Nodes in the graph. Key is the ID of the node.
----@field edges table<EdgeID, PrototypeEdge> Edges in the graph. Key is the ID of the edge.
+---@field edge_sub_cls_info table<EdgeType, table> Information of the sub node classes. Must have `data`, `ins_methods` and `cls_methods` fields.
+---@field default_edge_ins_method table<string, function> Default instance method for all edges. Example: `bar(self, ...)`.
+---@field default_edge_cls_method table<string, function> Default class method for all edges. Example: `bar(cls, self, ...)`.
+---
+---@field alg_type string Type of the algorithm used in space repetition. Default to "sm-2".
+---@field alg_prototype_cls PrototypeAlg Prototype of the algorithm. Used to create sub algorithm classes. Must have a `new` method and a `data` field.
+---@field alg_sub_cls_info table<AlgType, PrototypeAlg> Information of the sub algorithm classes. Must have `data`, `ins_methods` and `cls_methods` fields.
+---@field default_alg_ins_method table<string, function> Default instance method for all algorithms. Example: `baz(self, ...)`.
+---@field default_alg_cls_method table<string, function> Default class method for all algorithms. Example: `baz(cls, self, ...)`.
 ---
 ---@field version integer Version of the graph.
+---
+---@field logger Logger Logger of the graph.
+---@field node_sub_cls table<NodeType, PrototypeNode> Registered sub node classes of the graph.
+---@field edge_sub_cls table<EdgeType, PrototypeEdge> Registered sub edge classes of the graph.
+---@field nodes table<NodeID, PrototypeNode> Nodes in the graph.
+---@field edges table<EdgeID, PrototypeEdge> Edges in the graph.
+---@field alg PrototypeAlg Algorithm of the graph.
 local Graph = {}
 
 local graph_version = 1
 -- v0: Initial version.
--- v1: Add `algorithm` field.
+-- v1: Add `alg` field.
 
 --------------------
 -- Instance Method
 --------------------
 
 ---Register sub classes.
----@param sub_cls_category string Category of the sub class. Must be "node" or "edge".
+---@param sub_cls_category string Category of the sub class. Must be "node", "edge" or "alg".
 ---@param sub_cls_info table<string, table> Information of the sub class.
 ---Information must have `data`, `ins_methods` and `cls_methods` fields.
----Method examples:
----  `cls_method(cls, self)`
----  `ins_method(self, ...)`
----The `cls_methods` will be registered to a instance and converted to a instance method.
+---
+---Examples:
+---  `cls.ins_method(self, ...)` -> `cls:ins_method(...)`
+---  `cls_method(cls, self, ...)` -> `cls:ins_method(...)`
 function Graph:register_sub_class(sub_cls_category, sub_cls_info)
-	local sub_cls_category_tbl = self[sub_cls_category .. "_sub_cls"]
+	local sub_cls = self[sub_cls_category .. "_sub_cls"]
 
 	assert(
 		self[sub_cls_category .. "_prototype_cls"],
@@ -55,7 +66,7 @@ function Graph:register_sub_class(sub_cls_category, sub_cls_info)
 		assert(type(cls_info) == "table", "Information of the sub class must be a table.")
 
 		-- Check if the class already exists.
-		if not sub_cls_category_tbl.cls_type then
+		if not sub_cls.cls_type then
 			---@diagnostic disable-next-line: missing-parameter
 			local sub_class = prototype:new() -- TODO: fix this
 
@@ -108,28 +119,35 @@ function Graph:register_sub_class(sub_cls_category, sub_cls_info)
 			end
 
 			-- Register the new class.
-			sub_cls_category_tbl[cls_type] = sub_class
-			self.logger:info(sub_cls_category, "Register Node type `" .. cls_type .. "`.")
+			sub_cls[cls_type] = sub_class
+			self.logger:info(sub_cls_category, "Register `" .. sub_cls_category .. "` sub class `" .. cls_type .. "`.")
 		end
 	end
 end
 
 ---Create a new graph.
----@param save_path? string Path to load and save the graph. Default: {current_project_path}.
+---@param save_path string Path to load and save the graph. Default: {current_project_path}.
 ---
----@param log_level? string Log level of the graph. Default: "INFO".
----@param show_log_in_nvim? boolean Show log in Neovim when added. Default: false.
+---@param log_level string Log level of the graph. Default: "INFO".
+---@param show_log_in_nvim boolean Show log in Neovim. Default: false.
 ---
----@param algorithm? string Algorithm of the edge used in space repetition. Default to "sm-2".
----
+---@param default_node_type string Default type of the node. Default: "SimpleNode".
 ---@param node_prototype_cls PrototypeNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
+---@param node_sub_cls_info table<NodeType, table> Information of the sub node classes. Must have `data`, `ins_methods` and `cls_methods` fields.
+---@param default_node_ins_method table<string, function> Default instance method for all nodes. Example: `foo(self, ...)`.
+---@param default_node_cls_method table<string, function> Default class method for all nodes. Example: `foo(cls, self, ...)`.
+---
+---@param default_edge_type string Default type of the edge. Default: "SimpleEdge".
 ---@param edge_prototype_cls PrototypeEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
----@param node_sub_cls_info table<NodeType, table> Node class information used to create sub node classes. Information table must have `data` and `ins_methods` fields.
----@param edge_sub_cls_info table<EdgeType, table> Edge class information used to create sub edge classes. Information table must have `data` and `ins_methods` fields.
----@param default_node_ins_method table<string, function> Default instance method for node.
----@param default_edge_ins_method table<string, function> Default instance method for edge.
----@param default_node_cls_method table<string, function> Default class method for node
----@param default_edge_cls_method table<string, function> Default class method for edge.
+---@param edge_sub_cls_info table<EdgeType, table> Information of the sub node classes. Must have `data`, `ins_methods` and `cls_methods` fields.
+---@param default_edge_ins_method table<string, function> Default instance method for all edges. Example: `bar(self, ...)`.
+---@param default_edge_cls_method table<string, function> Default class method for all edges. Example: `bar(cls, self, ...)`.
+---
+---@param alg_type string Type of the algorithm used in space repetition. Default to "sm-2".
+---@param alg_prototype_cls PrototypeAlg Prototype of the algorithm. Used to create sub algorithm classes. Must have a `new` method and a `data` field.
+---@param alg_sub_cls_info table<AlgType, PrototypeAlg> Information of the sub algorithm classes. Must have `data`, `ins_methods` and `cls_methods` fields.
+---@param default_alg_ins_method table<string, function> Default instance method for all algorithms. Example: `baz(self, ...)`.
+---@param default_alg_cls_method table<string, function> Default class method for all algorithms. Example: `baz(cls, self, ...)`.
 ---
 ---@param version? integer Version of the graph.
 ---@return Graph _ The new graph.
@@ -139,16 +157,24 @@ function Graph:new(
 	log_level,
 	show_log_in_nvim,
 	--
-	algorithm,
-	--
+	default_node_type,
 	node_prototype_cls,
-	edge_prototype_cls,
 	node_sub_cls_info,
-	edge_sub_cls_info,
 	default_node_ins_method,
-	default_edge_ins_method,
 	default_node_cls_method,
+	--
+	default_edge_type,
+	edge_prototype_cls,
+	edge_sub_cls_info,
+	default_edge_ins_method,
 	default_edge_cls_method,
+	--
+	alg_type,
+	alg_prototype_cls,
+	alg_sub_cls_info,
+	default_alg_ins_method,
+	default_alg_cls_method,
+	--
 	version
 )
 	local graph = {
@@ -156,30 +182,78 @@ function Graph:new(
 		--
 		log_level = log_level or "INFO",
 		show_log_in_nvim = show_log_in_nvim or false,
-		logger = logger_class["Logger"]:new(log_level, show_log_in_nvim),
 		--
-		algorithm = algorithm or "sm-2",
-		--
+		default_node_type = default_node_type or "SimpleNode",
 		node_prototype_cls = node_prototype_cls,
-		edge_prototype_cls = edge_prototype_cls,
 		node_sub_cls = setmetatable({}, {
-			--- ---@diagnostic disable-next-line: unused-local
-			--- __index = function(tbl, key)
-			---   vim.notify("Node sub class " .. key .. " not found.", vim.log.levels.ERROR)
-			--- end,
-		}),
-		edge_sub_cls = setmetatable({}, {
-			--- ---@diagnostic disable-next-line: unused-local
-			--- __index = function(tbl, key)
-			---   vim.notify("Edge sub class " .. key .. " not found.", vim.log.levels.ERROR)
-			--- end,
+			__index = function(tbl, key)
+				if tbl[key] then
+					return tbl[key]
+				else
+					if tbl[default_node_type] then
+						vim.notify(
+							"Node sub class `"
+								.. key
+								.. "` not registered. Using default node sub class `"
+								.. default_node_type
+								.. "` instead.",
+							vim.log.levels.WARN
+						)
+						return tbl[key]
+					end
+				end
+			end,
 		}),
 		default_node_ins_method = default_node_ins_method or {},
-		default_edge_ins_method = default_edge_ins_method or {},
 		default_node_cls_method = default_node_cls_method or {},
+		--
+		default_edge_type = default_edge_type or "SimpleEdge",
+		edge_prototype_cls = edge_prototype_cls,
+		edge_sub_cls = setmetatable({}, {
+			__index = function(tbl, key)
+				if tbl[key] then
+					return tbl[key]
+				else
+					if tbl[default_edge_type] then
+						vim.notify(
+							"Edge sub class `"
+								.. key
+								.. "` not registered. Using default edge sub class `"
+								.. default_edge_type
+								.. "` instead.",
+							vim.log.levels.WARN
+						)
+						return tbl[key]
+					end
+				end
+			end,
+		}),
+		default_edge_ins_method = default_edge_ins_method or {},
 		default_edge_cls_method = default_edge_cls_method or {},
-		nodes = {},
-		edges = {},
+		--
+		alg_type = alg_type or "sm-2",
+		alg_prototype_cls = alg_prototype_cls,
+		alg_sub_cls_info = setmetatable(alg_sub_cls_info, {
+			__index = function(tbl, key)
+				if tbl[key] then
+					return tbl[key]
+				else
+					if tbl[alg_type] then
+						vim.notify(
+							"Algorithm sub class `"
+								.. key
+								.. "` not registered. Using default alg sub class `"
+								.. alg_type
+								.. "` instead.",
+							vim.log.levels.WARN
+						)
+						return tbl[key]
+					end
+				end
+			end,
+		}),
+		default_alg_ins_method = default_alg_ins_method or {},
+		default_alg_cls_method = default_alg_cls_method or {},
 		--
 		version = version or graph_version,
 	}
@@ -187,11 +261,31 @@ function Graph:new(
 	setmetatable(graph, self)
 	self.__index = self
 
-	-- Register sub node and edge classes.
+	-----
+	-- Initialize logger.
+	-----
+
+	graph.logger = logger_class["Logger"]:new(log_level, show_log_in_nvim)
+
+	-----
+	-- Register node / edge / algorithm sub classes.
+	-----
+
+	graph.node_sub_cls = {}
 	graph:register_sub_class("node", node_sub_cls_info)
+
+	graph.edge_sub_cls = {}
 	graph:register_sub_class("edge", edge_sub_cls_info)
 
-	-- Load nodes and edges from the given information.
+	graph.alg_sub_cls = {}
+	graph:register_sub_class("alg", alg_sub_cls_info)
+
+	-----
+	-- Load nodes and edges
+	-----
+
+	graph.nodes = {}
+	graph.edges = {}
 	local json_path = graph.save_path .. "/" .. ".mindmap.json"
 	local json, _ = io.open(json_path, "r")
 	if not json then
@@ -209,6 +303,13 @@ function Graph:new(
 			graph.edges[edge_id] = graph.edge_sub_cls[edge.type]:from_table(edge)
 		end
 	end
+
+	-----
+	-- Initialize algorithm.
+	-----
+
+	-- TODO: using args
+	graph.alg = graph.alg_sub_cls[alg_type]:new()
 
 	return graph
 end

@@ -11,19 +11,27 @@ local M = {}
 
 ---@class plugin_config
 ---Logger configuration:
----@field log_level string Log level of the plugin. Default to "INFO".
----@field show_log_in_nvim boolean Show log in nvim. Default to true.
----Spaced repetition configuration:
----@field algorithm string Algorithm of spaced repetition. Default to "sm-2".
+---@field log_level string Log level of the graph. Default: "INFO".
+---@field show_log_in_nvim boolean Show log in Neovim. Default: false.
 ---Graph configuration:
+---Node:
+---@field default_node_type string Default type of the node. Default: "SimpleNode".
 ---@field node_prototype_cls PrototypeNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
+---@field node_sub_cls_info table<NodeType, table> Information of the sub node classes. Must have `data`, `ins_methods` and `cls_methods` fields.
+---@field default_node_ins_method table<string, function> Default instance method for all nodes. Example: `foo(self, ...)`.
+---@field default_node_cls_method table<string, function> Default class method for all nodes. Example: `foo(cls, self, ...)`.
+---Edge:
+---@field default_edge_type string Default type of the edge. Default: "SimpleEdge".
 ---@field edge_prototype_cls PrototypeEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
----@field node_sub_cls table<NodeType, PrototypeNode> Registered sub node classes.
----@field edge_sub_cls table<EdgeType, PrototypeEdge> Registered sub edge classes.
----@field default_node_ins_method table<string, function> Default instance method for node. Example: `foo(self, ...)`.
----@field default_edge_ins_method table<string, function> Default instance method for edge. Example: `bar(self, ...)`.
----@field default_node_cls_method table<string, function> Default class method for node. Example: `foo(cls, self, ...)`.
----@field default_edge_cls_method table<string, function> Default class method for edge. Example: `bar(cls, self, ...)`.
+---@field edge_sub_cls_info table<EdgeType, table> Information of the sub node classes. Must have `data`, `ins_methods` and `cls_methods` fields.
+---@field default_edge_ins_method table<string, function> Default instance method for all edges. Example: `bar(self, ...)`.
+---@field default_edge_cls_method table<string, function> Default class method for all edges. Example: `bar(cls, self, ...)`.
+---Space repetition configuration:
+---@field alg_type string Type of the algorithm used in space repetition. Default to "sm-2".
+---@field alg_prototype_cls PrototypeAlg Prototype of the algorithm. Used to create sub algorithm classes. Must have a `new` method and a `data` field.
+---@field alg_sub_cls_info table<AlgType, PrototypeAlg> Information of the sub algorithm classes. Must have `data`, `ins_methods` and `cls_methods` fields.
+---@field default_alg_ins_method table<string, function> Default instance method for all algorithms. Example: `baz(self, ...)`.
+---@field default_alg_cls_method table<string, function> Default class method for all algorithms. Example: `baz(cls, self, ...)`.
 ---Behavior configuration:
 ---@field show_excerpt_after_add boolean Show excerpt after adding a node. Default: true.
 ---@field show_excerpt_after_bfread boolean ...
@@ -35,20 +43,27 @@ local plugin_config = {
 	-- Logger configuration:
 	log_level = "INFO",
 	show_log_in_nvim = true,
-	-- Spaced repetition configuration:
-	algorithm = "sm-2",
 	-- Graph configuration:
+	-- Node:
+	default_node_type = "SimpleNode",
 	node_prototype_cls = require("mindmap.graph.node.node_prototype_cls"),
-	edge_prototype_cls = require("mindmap.graph.edge.edge_prototype_cls"),
-	node_sub_cls = require("mindmap.graph.node.node_sub_cls"),
-	edge_sub_cls = require("mindmap.graph.edge.edge_sub_cls"),
+	node_sub_cls_info = require("mindmap.graph.node.node_sub_cls_info"),
 	default_node_ins_method = require("mindmap.graph.node.node_ins_method"),
-	default_edge_ins_method = require("mindmap.graph.edge.edge_ins_method"),
 	default_node_cls_method = require("mindmap.graph.node.node_cls_method"),
+	-- Edge:
+	default_edge_type = "SimpleEdge",
+	edge_prototype_cls = require("mindmap.graph.edge.edge_prototype_cls"),
+	edge_sub_cls_info = require("mindmap.graph.edge.edge_sub_cls_info"),
+	default_edge_ins_method = require("mindmap.graph.edge.edge_ins_method"),
 	default_edge_cls_method = require("mindmap.graph.edge.edge_cls_method"),
+	-- Space repetitionconfiguration:
+	alg_type = "sm-2",
+	alg_prototype_cls = require("mindmap.graph.alg.alg_prototype_cls"),
+	alg_sub_cls_info = require("mindmap.graph.alg.alg_sub_cls_info"),
+	default_alg_ins_method = require("mindmap.graph.alg.alg_ins_method"),
+	default_alg_cls_method = require("mindmap.graph.alg.alg_cls_method"),
 	-- Behavior configuration:
 	show_excerpt_after_add = true,
-
 	-- Other configuration:
 	excerpt_namespace = vim.api.nvim_create_namespace("mindmap_excerpt"),
 	sp_namespace = vim.api.nvim_create_namespace("mindmap_sp"),
@@ -68,21 +83,28 @@ local function find_graph()
 
 	if not plugin_database.cache[graph_save_path] then
 		local created_graph = Graph:new(
-			graph_save_path,
+      graph_save_path,
 			--
 			plugin_config.log_level,
 			plugin_config.show_log_in_nvim,
-      --
-      plugin_config.algorithm,
 			--
+			plugin_config.default_node_type,
 			plugin_config.node_prototype_cls,
-			plugin_config.edge_prototype_cls,
-			plugin_config.node_sub_cls,
-			plugin_config.edge_sub_cls,
+			plugin_config.node_sub_cls_info,
 			plugin_config.default_node_ins_method,
-			plugin_config.default_edge_ins_method,
 			plugin_config.default_node_cls_method,
-			plugin_config.default_edge_cls_method
+			--
+			plugin_config.default_edge_type,
+			plugin_config.edge_prototype_cls,
+			plugin_config.edge_sub_cls_info,
+			plugin_config.default_edge_ins_method,
+			plugin_config.default_edge_cls_method,
+			--
+			plugin_config.alg_type,
+			plugin_config.alg_prototype_cls,
+			plugin_config.alg_sub_cls_info,
+			plugin_config.default_alg_ins_method,
+			plugin_config.default_alg_cls_method
 		)
 		plugin_database.cache[created_graph.save_path] = created_graph
 	end
