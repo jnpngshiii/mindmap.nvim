@@ -87,10 +87,14 @@ function Logger:new(log_level, show_log_in_nvim, save_path, messages, timestamp,
 		["ERROR"] = 4,
 	}
 
-	if log_level and logger.log_level_tbl[log_level] then
-		logger.log_level = log_level
-	else
-		logger.log_level = "INFO"
+	if log_level then
+		log_level = log_level:upper()
+
+		if logger.log_level_tbl[log_level] then
+			logger.log_level = log_level
+		else
+			logger.log_level = "INFO"
+		end
 	end
 
 	logger.show_log_in_nvim = show_log_in_nvim or false
