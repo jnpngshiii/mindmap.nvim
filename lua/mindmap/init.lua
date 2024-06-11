@@ -188,6 +188,8 @@ local function find_nodes(location)
 end
 
 function M.setup(user_config)
+	user_config = user_config or {}
+
 	plugin_config = vim.tbl_extend("force", plugin_config, user_config)
 end
 

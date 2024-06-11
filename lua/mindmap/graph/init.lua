@@ -1,4 +1,4 @@
-local logger_class = require("mindmap.graph.logger")
+local Logger = require("mindmap.graph.logger")
 
 local utils = require("mindmap.utils")
 
@@ -129,7 +129,7 @@ end
 ---@param save_path string Path to load and save the graph. Default: {current_project_path}.
 ---
 ---@param log_level string Log level of the graph. Default: "INFO".
----@param show_log_in_nvim boolean Show log in Neovim. Default: false.
+---@param show_log_in_nvim boolean Show log in Neovim. Default: true.
 ---
 ---@param default_node_type string Default type of the node. Default: "SimpleNode".
 ---@param node_prototype_cls PrototypeNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
@@ -181,7 +181,7 @@ function Graph:new(
 		save_path = save_path or utils.get_file_info()[4],
 		--
 		log_level = log_level or "INFO",
-		show_log_in_nvim = show_log_in_nvim or false,
+		show_log_in_nvim = show_log_in_nvim or true,
 		--
 		default_node_type = default_node_type or "SimpleNode",
 		node_prototype_cls = node_prototype_cls,
@@ -265,7 +265,7 @@ function Graph:new(
 	-- Initialize logger.
 	-----
 
-	graph.logger = logger_class["Logger"]:new(log_level, show_log_in_nvim)
+	graph.logger = Logger:new(log_level, show_log_in_nvim)
 
 	-----
 	-- Register node / edge / algorithm sub classes.

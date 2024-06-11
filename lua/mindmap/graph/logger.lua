@@ -8,7 +8,7 @@ local utils = require("mindmap.utils")
 
 ---@class Message
 ---@field type string Message type (DEBUG, INFO, WARN, ERROR). Default: "INFO".
----@field source string Message source (Database, Main, Security, etc.). Default: "Unknown".
+---@field source string Message source (DATABASE, MAIN, SECURITY, etc.). Default: "UNKNOWN".
 ---@field content string Message content. Default: "Unknown Content.".
 ---@field timestamp Timestamp Message timestamp.
 ---@field str string Message string.
@@ -25,7 +25,7 @@ local Message = {}
 
 ---Create a new message.
 ---@param type string Message type (DEBUG, INFO, WARN, ERROR). Default: "INFO".
----@param source string Message source (Database, Main, Security, etc.). Default: "Unknown".
+---@param source string Message source (DATABASE, MAIN, SECURITY, etc.). Default: "UNKNOWN".
 ---@param content string Message content. Default: "Unknown Content.".
 ---@param timestamp? Timestamp Message timestamp.
 ---@param str? string Message string.
@@ -33,8 +33,8 @@ local Message = {}
 function Message:new(type, source, content, timestamp, str)
 	local message = {}
 
-	message.type = type or "INFO"
-	message.source = source or "Unknown"
+	message.type = type:upper() or "INFO"
+	message.source = source:upper() or "UNKNOWN"
 	message.content = content or "Unknown Content."
 	message.timestamp = timestamp or os.date("%Y-%m-%d %H:%M:%S")
 	message.str = str
@@ -119,7 +119,7 @@ function Logger:add(msg)
 end
 
 ---Add a [DEBUG] message to the logger.
----@param source string Message source (Database, Main, Security, etc.). Default: "Unknown".
+---@param source string Message source (DATABASE, MAIN, SECURITY, etc.). Default: "UNKNOWN".
 ---@param content string Message content.
 function Logger:debug(source, content)
 	if self.log_level_tbl["DEBUG"] < self.log_level_tbl[self.log_level] then
@@ -131,12 +131,12 @@ function Logger:debug(source, content)
 	self:save()
 
 	if self.show_log_in_nvim then
-		vim.notify(msg.str, vim.log.levels.DEBUG)
+		vim.notify(msg.str, vim.log.levels.INFO) -- TODO: Change to DEBUG
 	end
 end
 
 ---Add a [INFO] message to the logger.
----@param source string Message source (Database, Main, Security, etc.). Default: "Unknown".
+---@param source string Message source (DATABASE, MAIN, SECURITY, etc.). Default: "UNKNOWN".
 ---@param content string Message content.
 function Logger:info(source, content)
 	if self.log_level_tbl["INFO"] < self.log_level_tbl[self.log_level] then
@@ -153,7 +153,7 @@ function Logger:info(source, content)
 end
 
 ---Add a [WARN] message to the logger.
----@param source string Message source (Database, Main, Security, etc.). Default: "Unknown".
+---@param source string Message source (DATABASE, MAIN, SECURITY, etc.). Default: "UNKNOWN".
 ---@param content string Message content.
 function Logger:warn(source, content)
 	if self.log_level_tbl["WARN"] < self.log_level_tbl[self.log_level] then
@@ -170,7 +170,7 @@ function Logger:warn(source, content)
 end
 
 ---Add a [ERROR] message to the logger.
----@param source string Message source (Database, Main, Security, etc.). Default: "Unknown".
+---@param source string Message source (DATABASE, MAIN, SECURITY, etc.). Default: "UNKNOWN".
 ---@param content string Message content.
 function Logger:error(source, content)
 	if self.log_level_tbl["ERROR"] < self.log_level_tbl[self.log_level] then
@@ -208,14 +208,4 @@ end
 
 --------------------
 
-if false then
-	local lg = Logger:new("DEBUG", true)
-	lg:debug("Main", "This is a debug message")
-	lg:info("Main", "This is an info message")
-	lg:warn("Main", "This is a warn message")
-	lg:error("Main", "This is an error message")
-end
-
-return {
-	["Logger"] = Logger,
-}
+return Logger
