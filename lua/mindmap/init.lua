@@ -38,7 +38,9 @@ local M = {}
 ---@field show_excerpt_after_bfread boolean ...
 ---@field show_sp_info_after_bfread boolean ...
 ---  Default behavior:
+---@field keymap_prefix string Prefix of the keymap. Default: "<localleader>m".
 ---@field enable_default_keymap boolean Enable default keymap. Default: true.
+---@field enable_default_autocmd boolean Enable default atuocmd. Default: true.
 local plugin_config = {
 	-- Logger configuration:
 	log_level = "INFO",
@@ -66,7 +68,9 @@ local plugin_config = {
 	--   Automatic behavior:
 	show_excerpt_after_add = true,
 	--   Default behavior:
+	keymap_prefix = "<localleader>m",
 	enable_default_keymap = true,
+	enable_default_autocmd = true,
 }
 
 ---@class plugin_database
@@ -127,15 +131,19 @@ local function find_graph(save_path)
 end
 
 ---Find nodes and tree-sitter nodes in the given location.
----@param location string|TSNode Location to find nodes. Location must be `nearest`, `buffer`, `graph` or `telescope`.
+---@param location string|TSNode Location to find nodes. Location must be `lastest`, `nearest`, `buffer`, `graph` or `telescope`.
+---@param return_ts_nodes boolean Whether to return tree-sitter nodes.
 ---@return table<NodeID, PrototypeNode> nodes, table<NodeID, TSNode> ts_nodes Found nodes and tree-sitter nodes.
-local function find_nodes(location)
+local function find_nodes(location, return_ts_nodes)
 	local found_graph = find_graph()
-	local ts_nodes
+	local ts_nodes = {}
 
 	if type(location) == "userdata" then
 		-- TODO: allow multiple locations
 		ts_nodes = { location }
+	elseif location == "lastest" then
+		-- TODO: Needs update
+		return { #found_graph, found_graph.nodes[#found_graph.nodes] }, {}
 	elseif location == "nearest" then
 		local nearest_heading = ts_utils.get_nearest_heading_node()
 		local id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
@@ -156,7 +164,7 @@ local function find_nodes(location)
 			found_graph:add_node(created_heading_node)
 		end
 
-		ts_nodes = { nearest_heading }
+		table.insert(ts_nodes, nearest_heading)
 	elseif location == "buffer" then
 		ts_nodes = ts_utils.get_all_heading_nodes_with_inline_comment()
 	elseif location == "graph" then
@@ -169,7 +177,7 @@ local function find_nodes(location)
 		vim.notify(
 			"[find_nodes] Invalid location `"
 				.. location
-				.. "`. Location must be `nearest`, `buffer`, `graph` or `telescope`.",
+				.. "`. Location must be `lastest`, `nearest`, `buffer`, `graph` or `telescope`.",
 			vim.log.levels.ERROR
 		)
 	end
@@ -178,9 +186,12 @@ local function find_nodes(location)
 	local output_ts_nodes = {}
 	for _, ts_node in pairs(ts_nodes) do
 		local id, _, _ = ts_utils.get_heading_node_info(ts_node, 0)
-		if id then
+		if id and found_graph.nodes[id].state == "active" then
+			print(id)
 			output_nodes[id] = found_graph.nodes[id]
-			output_ts_nodes[id] = ts_node
+			if return_ts_nodes then
+				output_ts_nodes[id] = ts_node
+			end
 		end
 	end
 
@@ -197,8 +208,214 @@ end
 -- User functions
 --------------------
 
-function M.MindmapShow(location, type)
-	if type ~= "card_back" and type ~= "excerpt" and type ~= "sp_info" then
+----------
+-- MindmapAdd
+----------
+
+-- TODO: Merge into `MindmapAdd`
+function M.MindmapAddVisualSelectionAsExcerptNode()
+	local found_graph = find_graph()
+	local created_excerpt_node =
+		found_graph.node_sub_cls["ExcerptNode"]:create_using_latest_visual_selection(#found_graph.nodes + 1)
+
+	found_graph:add_node(created_excerpt_node)
+end
+
+vim.api.nvim_create_user_command("MindmapAddVisualSelectionAsExcerptNode", function()
+	M.MindmapAddVisualSelectionAsExcerptNode()
+end, {
+	nargs = "*",
+	complete = function() end,
+})
+
+if plugin_config.enable_default_keymap then
+	vim.api.nvim_set_keymap(
+		"v",
+		"E",
+		"<cmd>MindmapAddVisualSelectionAsExcerptNode<cr>",
+		{ noremap = true, silent = true, desc = "Add visual selection as excerpt node" }
+	)
+end
+
+function M.MindmapAdd(edge_type, from_node_type, to_node_type)
+	local found_graph = find_graph()
+	if not found_graph.edge_sub_cls[edge_type] then
+		vim.notify("[MindmapAdd] Invalid `edge_type`. Type must register in graph first.", vim.log.levels.ERROR)
+	end
+
+	if
+		from_node_type ~= "lastest"
+		and from_node_type ~= "nearest"
+		and from_node_type ~= "telescope"
+		and from_node_type ~= "buffer"
+	then
+		vim.notify(
+			"[MindmapAdd] Invalid `from_node_type`. Type must be `lastest`, `nearest` or `buffer`.",
+			vim.log.levels.ERROR
+		)
+		return
+	end
+	if
+		to_node_type ~= "lastest"
+		and to_node_type ~= "nearest"
+		and to_node_type ~= "telescope"
+		and to_node_type ~= "buffer"
+	then
+		vim.notify(
+			"[MindmapAdd] Invalid `to_node_type`. Type must be `lastest`, `nearest` or `buffer`.",
+			vim.log.levels.ERROR
+		)
+		return
+	end
+
+	local from_nodes, _ = find_nodes(from_node_type, false)
+	local to_nodes, _ = find_nodes(to_node_type, false)
+	print(1)
+	for _, from_node in pairs(from_nodes) do
+		print(from_nodes[_])
+		print(2)
+		for _, to_node in pairs(to_nodes) do
+			print(1111)
+			print(from_node.id)
+			print(to_node.id)
+			local created_edge =
+				found_graph.edge_sub_cls[edge_type]:new(#found_graph.edges + 1, from_node.id, to_node.id)
+			found_graph:add_edge(created_edge)
+		end
+	end
+end
+
+vim.api.nvim_create_user_command("MindmapAdd", function(arg)
+	M.MindmapAdd(arg.fargs[1], arg.fargs[2], arg.fargs[3])
+end, {
+	nargs = "*",
+	---@diagnostic disable-next-line: unused-local
+	complete = function(arg_lead, cmd_line, cursor_pos)
+		return { "lastest", "nearest", "telescope", "buffer" }
+	end,
+})
+
+if plugin_config.enable_default_keymap then
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "aln",
+		"<cmd>MindmapAdd SimpleEdge lastest nearest<cr>",
+		{ noremap = true, silent = true, desc = "Add SimpleEdge from lastest node to nearest node" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "ann",
+		"<cmd>MindmapAdd SelfLoopSubheadingEdge nearest nearest<cr>",
+		{ noremap = true, silent = true, desc = "Add SelfLoopSubheadingEdge from nearest node to nearest node" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "anN",
+		"<cmd>MindmapAdd SelfLoopContentEdge nearest nearest<cr>",
+		{ noremap = true, silent = true, desc = "Add SelfLoopContentEdge from nearest node to nearest node" }
+	)
+end
+
+----------
+-- MindmapRemove
+----------
+
+function M.MindmapRemove(location, node_or_edge_type)
+	node_or_edge_type = node_or_edge_type or ""
+
+	local found_graph = find_graph()
+	local nodes, ts_nodes = find_nodes(location)
+
+	if node_or_edge_type == "node" or found_graph.node_sub_cls[node_or_edge_type] then
+		for id, ts_node in pairs(ts_nodes) do
+			local node = nodes[id]
+
+			if node_or_edge_type == "node" or node.type == node_or_edge_type then
+				-- First, remove the node from the graph
+				found_graph:remove_node(id)
+
+				-- Second, remove the node id from the text
+				local ts_node_title, _, _ = ts_utils.get_sub_nodes(ts_node)
+				local node_text = vim.treesitter.get_node_text(ts_node_title, 0)
+				ts_utils.replace_node_text(
+					string.gsub(node_text, " %%" .. string.format("%08d", id) .. "%%", ""),
+					ts_node_title,
+					0
+				)
+			end
+		end
+	elseif node_or_edge_type == "edge" or found_graph.edge_sub_cls[node_or_edge_type] then
+		for _, node in pairs(nodes) do
+			for _, edge_id in ipairs(node.incoming_edge_ids) do
+				local edge = found_graph.edges[edge_id]
+				if node_or_edge_type == "edge" or edge.type == node_or_edge_type then
+					found_graph:remove_edge(edge_id)
+				end
+			end
+			-- TODO: Don not handle outgoing edge here.
+			for _, edge_id in ipairs(node.outcoming_edge_ids) do
+				local edge = found_graph.edges[edge_id]
+				if node_or_edge_type == "edge" or edge.type == node_or_edge_type then
+					found_graph:remove_edge(edge_id)
+				end
+			end
+		end
+	else
+		vim.notify(
+			"[MindmapRemove] Invalid type `" .. node_or_edge_type .. "`. Type must register in graph first.",
+			vim.log.levels.WARN
+		)
+		return
+	end
+end
+
+vim.api.nvim_create_user_command("MindmapRemove", function(arg)
+	M.MindmapRemove(arg.fargs[1], arg.fargs[2])
+end, {
+	nargs = "*",
+	---@diagnostic disable-next-line: unused-local
+	complete = function(arg_lead, cmd_line, cursor_pos)
+		if cursor_pos == 14 then
+			return { "nearest", "buffer", "*graph", "*telescope" }
+		else
+			return { "node", "edge" }
+		end
+	end,
+})
+
+if plugin_config.enable_default_keymap then
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "rn",
+		"<cmd>MindmapRemove nearest node<cr>",
+		{ noremap = true, silent = true, desc = "Remove nearest node" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "rN",
+		"<cmd>MindmapRemove buffer node<cr>",
+		{ noremap = true, silent = true, desc = "Remove buffer node" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "re",
+		"<cmd>MindmapRemove nearest edge<cr>",
+		{ noremap = true, silent = true, desc = "Remove nearest edge" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "rE",
+		"<cmd>MindmapRemove buffer edge<cr>",
+		{ noremap = true, silent = true, desc = "Remove buffer edge" }
+	)
+end
+
+----------
+-- MindmapShow
+----------
+
+function M.MindmapShow(location, show_type)
+	if show_type ~= "card_back" and show_type ~= "excerpt" and show_type ~= "sp_info" then
 		vim.notify(
 			"[MindmapShow] Invalid `type`. Type must be `card_back`, `excerpt` or `sp_info`.",
 			vim.log.levels.ERROR
@@ -206,50 +423,107 @@ function M.MindmapShow(location, type)
 		return
 	end
 
-	local graph = find_graph()
+	local found_graph = find_graph()
 	local _, ts_nodes = find_nodes(location)
 
 	for id, ts_node in pairs(ts_nodes) do
 		-- Avoid duplicate virtual text
-		M.MindmapClean(ts_node, type)
+		M.MindmapClean(ts_node, show_type)
 
 		local line_num, _, _, _ = ts_node:range()
 		line_num = line_num + 1
 
-		for index, incoming_edge_id in ipairs(graph.nodes[id].incoming_edge_ids) do
-			if type == "card_back" then
-				local incoming_edge = graph.edges[incoming_edge_id]
-				local from_node = graph.nodes[incoming_edge.from_node_id]
+		for index, incoming_edge_id in ipairs(found_graph.nodes[id].incoming_edge_ids) do
+			if show_type == "card_back" then
+				local incoming_edge = found_graph.edges[incoming_edge_id]
+				local from_node = found_graph.nodes[incoming_edge.from_node_id]
 				local _, back = from_node:get_content(incoming_edge.type)
 
 				local text = index .. ": " .. back[1]
-				utils.add_virtual_text(0, find_namespace(type), line_num, text)
+				utils.add_virtual_text(0, find_namespace(show_type), line_num, text)
 			end
 
-			if type == "excerpt" then
-				local incoming_edge = graph.edges[incoming_edge_id]
-				local from_node = graph.nodes[incoming_edge.from_node_id]
+			if show_type == "excerpt" then
+				local incoming_edge = found_graph.edges[incoming_edge_id]
+				local from_node = found_graph.nodes[incoming_edge.from_node_id]
 				if from_node.type == "ExcerptNode" then
 					local _, back = from_node:get_content(incoming_edge.type)
 
 					local text = "│ " .. table.concat(back, " ")
-					utils.add_virtual_text(0, find_namespace(type), line_num, text)
+					utils.add_virtual_text(0, find_namespace(show_type), line_num, text)
 				end
 			end
 
-			if type == "sp_info" then
+			if show_type == "sp_info" then
 				local front, back, created_at, updated_at, due_at, ease, interval =
-					graph:get_sp_info_from_edge(incoming_edge_id)
+					found_graph:get_sp_info_from_edge(incoming_edge_id)
 
 				local text = string.format("Due at: %d, Ease: %d, Int: %d", due_at, ease, interval)
-				utils.add_virtual_text(0, find_namespace(type), line_num, text)
+				utils.add_virtual_text(0, find_namespace(show_type), line_num, text)
 			end
 		end
 	end
 end
 
-function M.MindmapClean(location, type)
-	if type ~= "card_back" and type ~= "excerpt" and type ~= "sp_info" then
+vim.api.nvim_create_user_command("MindmapShow", function(arg)
+	M.MindmapShow(arg.fargs[1], arg.fargs[2])
+end, {
+	nargs = "*",
+	---@diagnostic disable-next-line: unused-local
+	complete = function(arg_lead, cmd_line, cursor_pos)
+		if cursor_pos == 12 then
+			return { "nearest", "buffer", "*graph", "*telescope" }
+		else
+			return { "card_back", "excerpt", "sp_info" }
+		end
+	end,
+})
+
+if plugin_config.enable_default_keymap then
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "sc",
+		"<cmd>MindmapShow nearest card_back<cr>",
+		{ noremap = true, silent = true, desc = "Show nearest card back" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "sC",
+		"<cmd>MindmapShow buffer card_back<cr>",
+		{ noremap = true, silent = true, desc = "Show buffer card back" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "se",
+		"<cmd>MindmapShow nearest excerpt<cr>",
+		{ noremap = true, silent = true, desc = "Show nearest excerpt" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "sE",
+		"<cmd>MindmapShow buffer excerpt<cr>",
+		{ noremap = true, silent = true, desc = "Show buffer excerpt" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "ss",
+		"<cmd>MindmapShow nearest sp_info<cr>",
+		{ noremap = true, silent = true, desc = "Show nearest sp info" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "sS",
+		"<cmd>MindmapShow buffer sp_info<cr>",
+		{ noremap = true, silent = true, desc = "Show buffer sp info" }
+	)
+end
+
+----------
+-- MindmapClean
+----------
+
+function M.MindmapClean(location, clean_type)
+	if clean_type ~= "card_back" and clean_type ~= "excerpt" and clean_type ~= "sp_info" then
 		vim.notify(
 			"[MindmapClean] Invalid `type`. Type must be `card_back`, `excerpt` or `sp_info`.",
 			vim.log.levels.ERROR
@@ -261,31 +535,106 @@ function M.MindmapClean(location, type)
 
 	for _, ts_node in pairs(ts_nodes) do
 		local start_row, _, _, _ = ts_node:range()
-		utils.clear_virtual_text(0, find_namespace(type), start_row, start_row + 1)
+		utils.clear_virtual_text(0, find_namespace(clean_type), start_row, start_row + 1)
 	end
 end
 
-function M.MindmapSave(type)
-	if type ~= "buffer" and type ~= "all" then
+vim.api.nvim_create_user_command("MindmapClean", function(arg)
+	M.MindmapClean(arg.fargs[1], arg.fargs[2])
+end, {
+	nargs = "*",
+	---@diagnostic disable-next-line: unused-local
+	complete = function(arg_lead, cmd_line, cursor_pos)
+		if cursor_pos == 13 then
+			return { "nearest", "buffer", "*graph", "*telescope" }
+		else
+			return { "card_back", "excerpt", "sp_info" }
+		end
+	end,
+})
+
+if plugin_config.enable_default_keymap then
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "cc",
+		"<cmd>MindmapClean nearest card_back<cr>",
+		{ noremap = true, silent = true, desc = "Clean nearest card back" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "cC",
+		"<cmd>MindmapClean buffer card_back<cr>",
+		{ noremap = true, silent = true, desc = "Clean buffer card back" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "ce",
+		"<cmd>MindmapClean nearest excerpt<cr>",
+		{ noremap = true, silent = true, desc = "Clean nearest excerpt" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "cE",
+		"<cmd>MindmapClean buffer excerpt<cr>",
+		{ noremap = true, silent = true, desc = "Clean buffer excerpt" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "cs",
+		"<cmd>MindmapClean nearest sp_info<cr>",
+		{ noremap = true, silent = true, desc = "Clean nearest sp info" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "cS",
+		"<cmd>MindmapClean buffer sp_info<cr>",
+		{ noremap = true, silent = true, desc = "Clean buffer sp info" }
+	)
+end
+
+----------
+-- MindmapSave
+----------
+
+function M.MindmapSave(save_type)
+	if save_type ~= "buffer" and save_type ~= "all" then
 		vim.notify("[MindmapSave] Invalid `type`. Type must be `buffer` or `all`.", vim.log.levels.ERROR)
 		return
 	end
 
-	if type == "all" then
+	if save_type == "all" then
 		for _, graph in pairs(plugin_database.graphs) do
 			graph:save()
 		end
 	end
 
-	if type == "buffer" then
+	if save_type == "buffer" then
 		local found_graph = find_graph()
 		found_graph:save()
 	end
 end
 
---------------------
--- Debug functions
---------------------
+vim.api.nvim_create_user_command("MindmapSave", function(arg)
+	M.MindmapSave(arg.fargs[1])
+end, {
+	nargs = "*",
+	---@diagnostic disable-next-line: unused-local
+	complete = function(arg_lead, cmd_line, cursor_pos)
+		return { "buffer", "all" }
+	end,
+})
+
+if plugin_config.enable_default_autocmd then
+	vim.api.nvim_create_autocmd("VimLeave", {
+		callback = function()
+			M.MindmapSave("all")
+		end,
+	})
+end
+
+----------
+-- MindmapTest
+----------
 
 function M.MindmapTest()
 	local graph = find_graph()
@@ -293,119 +642,12 @@ function M.MindmapTest()
 	graph:save()
 end
 
-----------
--- Node
-----------
-
-function M.MindmapAddVisualSelectionAsExcerptNode()
-	local found_graph = find_graph()
-	local created_excerpt_node =
-		found_graph.node_sub_cls["ExcerptNode"]:create_using_latest_visual_selection(#found_graph.nodes + 1)
-
-	found_graph:add_node(created_excerpt_node)
-end
-
-function M.MindmapAddNearestHeadingAsHeadingNode()
-	find_nodes("nearest")
-end
-
-function M.MindmapRemoveNearestHeadingNode()
-	local found_graph = find_graph()
-
-	local nearest_heading = ts_utils.get_nearest_heading_node()
-	if not nearest_heading then
-		return
-	end
-
-	local id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
-	if not id then
-		vim.notify("Do not find the nearest heading title node. Abort removing the heading node.", vim.log.levels.WARN)
-		return
-	end
-	found_graph:remove_node(id)
-
-	local nearest_heading_title_node, _, _ = ts_utils.get_sub_nodes(nearest_heading)
-	local _, _, node_text = ts_utils.get_heading_node_info(nearest_heading_title_node, 0)
-	ts_utils.replace_node_text(
-		string.gsub(node_text, " %%" .. string.format("%08d", id) .. "%%", ""),
-		nearest_heading_title_node,
-		0
-	)
-end
-
-----------
--- Edge
-----------
-
-function M.MindmapAddSimpleEdgeFromLatestAddedNodeToNearestHeadingNode()
-	local found_graph = find_graph()
-
-	local nearest_heading = ts_utils.get_nearest_heading_node()
-	if not nearest_heading then
-		return
-	end
-
-	local id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
-	if not id then
-		M.MindmapAddNearestHeadingAsHeadingNode()
-		id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
-		if not id then
-			return
-		end
-	end
-
-	local created_simple_edge =
-		found_graph.edge_sub_cls["SimpleEdge"]:new(#found_graph.edges + 1, #found_graph.nodes, id)
-	found_graph:add_edge(created_simple_edge)
-
-	if plugin_config.show_excerpt_after_add and found_graph.nodes[#found_graph.nodes].type == "ExcerptNode" then
-		M.MindmapShowExcerpt(nearest_heading)
-	end
-end
-
-function M.MindmapAddSelfLoopContentEdgeFromNearestHeadingNodeToItself()
-	local found_graph = find_graph()
-
-	local nearest_heading = ts_utils.get_nearest_heading_node()
-	if not nearest_heading then
-		return
-	end
-
-	local id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
-	if not id then
-		M.MindmapAddNearestHeadingAsHeadingNode()
-		id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
-		if not id then
-			return
-		end
-	end
-
-	local created_self_loop_content_edge =
-		found_graph.edge_sub_cls["SelfLoopContentEdge"]:new(#found_graph.edges + 1, id, id)
-	found_graph:add_edge(created_self_loop_content_edge)
-end
-
-function M.MindmapAddSelfLoopSubheadingEdgeFromNearestHeadingNodeToItself()
-	local found_graph = find_graph()
-
-	local nearest_heading = ts_utils.get_nearest_heading_node()
-	if not nearest_heading then
-		return
-	end
-
-	local id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
-	if not id then
-		M.MindmapAddNearestHeadingAsHeadingNode()
-		id, _, _ = ts_utils.get_heading_node_info(nearest_heading, 0)
-		if not id then
-			return
-		end
-	end
-
-	local created_self_loop_subheading_edge =
-		found_graph.edge_sub_cls["SelfLoopSubheadingEdge"]:new(#found_graph.edges + 1, id, id)
-	found_graph:add_edge(created_self_loop_subheading_edge)
-end
+vim.api.nvim_create_user_command("MindmapTest", function()
+	M.MindmapTest()
+end, {
+	nargs = "*",
+	complete = function() end,
+})
 
 --------------------
 
