@@ -1,0 +1,104 @@
+{
+  "nodes": [
+    {
+      "tag": [],
+      "id": 1,
+      "data": [],
+      "file_name": "mindmap.norg",
+      "outcoming_edge_ids": [],
+      "created_at": 1718195295,
+      "state": "active",
+      "type": "HeadingNode",
+      "version": 5,
+      "rel_file_path": "doc",
+      "incoming_edge_ids": [1, 2]
+    },
+    {
+      "tag": [],
+      "id": 2,
+      "data": [],
+      "file_name": "mindmap.norg",
+      "outcoming_edge_ids": [],
+      "created_at": 1718195302,
+      "state": "active",
+      "type": "HeadingNode",
+      "version": 5,
+      "rel_file_path": "doc",
+      "incoming_edge_ids": [3]
+    },
+    {
+      "tag": [],
+      "id": 3,
+      "data": { "start_col": 16, "start_row": 2, "end_col": 18, "end_row": 4 },
+      "file_name": "extra_info.txt",
+      "outcoming_edge_ids": [1, 2],
+      "created_at": 1718195324,
+      "state": "active",
+      "type": "ExcerptNode",
+      "version": 5,
+      "rel_file_path": "doc",
+      "incoming_edge_ids": []
+    },
+    {
+      "tag": [],
+      "id": 4,
+      "data": { "start_col": 21, "start_row": 5, "end_col": 34, "end_row": 6 },
+      "file_name": "extra_info.txt",
+      "outcoming_edge_ids": [3],
+      "created_at": 1718197966,
+      "state": "active",
+      "type": "ExcerptNode",
+      "version": 5,
+      "rel_file_path": "doc",
+      "incoming_edge_ids": []
+    }
+  ],
+  "edges": [
+    {
+      "tag": [],
+      "from_node_id": 3,
+      "data": [],
+      "updated_at": 1718197113,
+      "version": 6,
+      "type": "SimpleEdge",
+      "id": 1,
+      "created_at": 1718197113,
+      "state": "active",
+      "due_at": 0,
+      "to_node_id": 1,
+      "interval": 1,
+      "ease": 250
+    },
+    {
+      "tag": [],
+      "from_node_id": 3,
+      "data": [],
+      "updated_at": 1718197935,
+      "version": 6,
+      "type": "SimpleEdge",
+      "id": 2,
+      "created_at": 1718197935,
+      "state": "active",
+      "due_at": 0,
+      "to_node_id": 1,
+      "interval": 1,
+      "ease": 250
+    },
+    {
+      "tag": [],
+      "from_node_id": 4,
+      "data": [],
+      "updated_at": 1718197979,
+      "version": 6,
+      "type": "SimpleEdge",
+      "id": 3,
+      "created_at": 1718197979,
+      "state": "active",
+      "due_at": 0,
+      "to_node_id": 2,
+      "interval": 1,
+      "ease": 250
+    }
+  ]
+}
+

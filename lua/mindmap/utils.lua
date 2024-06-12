@@ -208,28 +208,6 @@ function M.get_file_content(bufnr_or_file_path, start_row, end_row, start_col, e
 	return range_content
 end
 
----Get the buffer number, or get the temp buffer number.
----@param bufnr_or_file_path? integer|string Buffer number or file path.
----@return integer bufnr, boolean is_temp_buf Buffer number and whether it is a temp buffer. Default: 0, false.
-function M.get_bufnr(bufnr_or_file_path)
-	if type(bufnr_or_file_path) == "number" then
-		return bufnr_or_file_path, false
-	elseif type(bufnr_or_file_path) == "string" then
-		local bufnr = vim.fn.bufnr(bufnr_or_file_path)
-		if bufnr == -1 then
-			local content = vim.fn.readfile(bufnr_or_file_path)
-			local temp_bufnr = vim.api.nvim_create_buf(false, true)
-			vim.api.nvim_buf_set_lines(temp_bufnr, 0, -1, false, content)
-
-			return temp_bufnr, true
-		end
-
-		return bufnr, false
-	end
-
-	return 0, false
-end
-
 ---Get the buffer number from the buffer number or file path.
 ---@param bufnr_or_file_path integer|string Buffer number or file path.
 ---@param create_buf_if_not_exist? boolean|string Create a new buffer if the buffer does not exist, and how to create it. Can be nil, true, false, "h" or "v". Default: nil.

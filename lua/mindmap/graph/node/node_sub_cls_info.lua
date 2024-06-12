@@ -97,6 +97,7 @@ default_node_sub_cls.HeadingNode = {
 	},
 	ins_methods = {
 		---Manage the id of the node in the text.
+		---@param self PrototypeNode
 		---@param action string Action to be taken. Can be 'add' or 'remove'.
 		---@return nil _ This function does not return anything.
 		manage_text_id = function(self, action)
@@ -139,7 +140,7 @@ default_node_sub_cls.HeadingNode = {
 
 			local abs_proj_path = utils.get_file_info()[4]
 			local abs_file_path = utils.get_abs_path(self.rel_file_path, abs_proj_path)
-			local bufnr, is_temp_buf = utils.get_bufnr(abs_file_path .. "/" .. self.file_name)
+			local bufnr, is_temp_buf = utils.giiit_bufnr(abs_file_path .. "/" .. self.file_name)
 			local heading_node = ts_utils.get_heading_node_by_id(self.id, bufnr)
 
 			if not heading_node then

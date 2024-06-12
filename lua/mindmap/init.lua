@@ -133,46 +133,105 @@ local function find_graph(save_path)
 end
 
 ---Find nodes and its corresponding tree-sitter nodes in the given location.
----@param location string|TSNode Location to find nodes. Location must be `nearest`, `telescope` or `buffer`.
+---@param location string|TSNode Location to find nodes. Location must be TSNode, "lastest", "nearest", "telescope" or "buffer".
 ---@return table<NodeID, PrototypeNode> nodes, table<NodeID, TSNode> ts_nodes Found nodes and its corresponding tree-sitter nodes.
 local function find_heading_nodes(graph, location)
-	if location ~= "nearest" and location ~= "telescope" and location ~= "buffer" then
+	if
+		type(location) ~= "userdata"
+		and location ~= "lastest"
+		and location ~= "nearest"
+		and location ~= "telescope"
+		and location ~= "buffer"
+	then
 		vim.notify(
-			"[find_nodes] Invalid location `" .. location .. "`. Location must be `nearest`, `telescope` or `buffer`.",
+			"[find_heading_nodes] Invalid location `"
+				.. location
+				.. '`. Location must be TSNode, "lastest", "nearest", "telescope" or "buffer"',
 			vim.log.levels.ERROR
 		)
+		return {}, {}
 	end
 
-	local found_ts_nodes
-	if location == "nearest" then
-		local current_node = nts_utils.get_node_at_cursor()
-		while current_node and not current_node:type():match("^heading%d$") do
-			current_node = current_node:parent()
-		end
+	if type(location) == "userdata" then
+		local title_ts_node, _, _ = ts_utils.parse_heading_node(location)
+		local title_ts_node_text = vim.treesitter.get_node_text(title_ts_node, 0)
+		local nearest_node_id = tonumber(string.match(title_ts_node_text, "%d%d%d%d%d%d%d%d"))
 
-		if current_node then
-			local title_node, _, _ = M.parse_heading_node(current_node)
-			local title_node_text = vim.treesitter.get_node_text(title_node, 0)
-			found_ts_nodes = { tonumber(string.match(title_node_text, "%d%d%d%d%d%d%d%d")), current_node }
+		local nearest_node
+		if nearest_node_id then
+			nearest_node = graph.nodes[nearest_node_id]
 		else
-			-- TODO: auto add
-			found_ts_nodes = {}
+			-- TODO: auto add node if not exist
 		end
-	elseif location == "telescope" then
+
+		if nearest_node and nearest_node.state == "active" then
+			return { [nearest_node.id] = nearest_node }, { [nearest_node.id] = nearest_ts_node }
+		else
+			return {}, {}
+		end
+	end
+
+	if location == "lastest" then
+		-- The process here is a littel bit different.
+		local lastest_node = graph.nodes[#graph.nodes]
+		-- local lastest_ts_node, _, _ = lastest_node:get_corresponding_ts_node()
+		-- FIXME: -1 bufnr
+		local lastest_ts_node
+
+		if lastest_node.state == "active" then
+			return { [lastest_node.id] = lastest_node }, { [lastest_node.id] = lastest_ts_node }
+		else
+			return {}, {}
+		end
+	end
+
+	if location == "nearest" then
+		local nearest_ts_node = nts_utils.get_node_at_cursor()
+		while nearest_ts_node and not nearest_ts_node:type():match("^heading%d$") do
+			nearest_ts_node = nearest_ts_node:parent()
+		end
+
+		if not nearest_ts_node then
+			return {}, {}
+		end
+
+		local title_ts_node, _, _ = ts_utils.parse_heading_node(nearest_ts_node)
+		local title_ts_node_text = vim.treesitter.get_node_text(title_ts_node, 0)
+		local nearest_node_id = tonumber(string.match(title_ts_node_text, "%d%d%d%d%d%d%d%d"))
+
+		local nearest_node
+		if nearest_node_id then
+			nearest_node = graph.nodes[nearest_node_id]
+		else
+			-- TODO: auto add node if not exist
+		end
+
+		if nearest_node and nearest_node.state == "active" then
+			return { [nearest_node.id] = nearest_node }, { [nearest_node.id] = nearest_ts_node }
+		else
+			return {}, {}
+		end
+	end
+
+	if location == "telescope" then
 		-- TODO: implement this
-		vim.notify("[find_nodes] Location `telescope` is not implemented yet.", vim.log.levels.ERROR)
-	elseif location == "buffer" then
-		found_ts_nodes = ts_utils.get_heading_node()
+		vim.notify("[find_heading_nodes] Location `telescope` is not implemented yet.", vim.log.levels.ERROR)
 	end
 
-	local found_nodes = {}
-	for id, _ in pairs(found_ts_nodes) do
-		if graph.nodes[id].state == "active" then
-			found_nodes[id] = graph.nodes[id]
+	if location == "buffer" then
+		local found_ts_nodes = ts_utils.get_heading_node_in_buf()
+
+		local found_nodes = {}
+		for id, _ in pairs(found_ts_nodes or {}) do
+			if graph.nodes[id].state == "active" then
+				found_nodes[id] = graph.nodes[id]
+			end
 		end
+
+		return found_nodes, found_ts_nodes
 	end
 
-	return found_nodes, found_ts_nodes
+	return {}, {}
 end
 
 function M.setup(user_config)
@@ -189,6 +248,57 @@ end
 -- MindmapAdd
 ----------
 
+---@deprecated
+-- TODO: Merge into `MindmapAdd`
+function M.MindmapAddNearestHeadingAsHeadingNode()
+	local found_graph = find_graph()
+
+	local nearest_heading_ts_node = nts_utils.get_node_at_cursor()
+	while nearest_heading_ts_node and not nearest_heading_ts_node:type():match("^heading%d$") do
+		nearest_heading_ts_node = nearest_heading_ts_node:parent()
+	end
+
+	if not nearest_heading_ts_node then
+		return
+	end
+
+	-- Avoid adding the same heading node
+	local title_node, _, _ = ts_utils.parse_heading_node(nearest_heading_ts_node)
+	local id = tonumber(string.match(vim.treesitter.get_node_text(title_node, 0), "%d%d%d%d%d%d%d%d"))
+	if id then
+		return
+	end
+
+	local file_name, _, rel_file_path, _ = unpack(utils.get_file_info())
+	local created_heading_node =
+		found_graph.node_sub_cls["HeadingNode"]:new(#found_graph.nodes + 1, file_name, rel_file_path)
+
+	local nearest_heading_title_node, _, _ = ts_utils.parse_heading_node(nearest_heading_ts_node)
+	local node_text = vim.treesitter.get_node_text(nearest_heading_title_node, 0)
+	ts_utils.replace_node_text(
+		node_text .. " %" .. string.format("%08d", #found_graph.nodes + 1) .. "%",
+		nearest_heading_title_node,
+		0
+	)
+	found_graph:add_node(created_heading_node)
+end
+
+vim.api.nvim_create_user_command("MindmapAddNearestHeadingAsHeadingNode", function()
+	M.MindmapAddNearestHeadingAsHeadingNode()
+end, {
+	nargs = 0,
+})
+
+if plugin_config.enable_default_keymap then
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "An",
+		"<cmd>MindmapAddNearestHeadingAsHeadingNode<cr>",
+		{ noremap = true, silent = true, desc = "Add nearest heading as heading node" }
+	)
+end
+
+---@deprecated
 -- TODO: Merge into `MindmapAdd`
 function M.MindmapAddVisualSelectionAsExcerptNode()
 	local found_graph = find_graph()
@@ -206,6 +316,12 @@ end, {
 
 if plugin_config.enable_default_keymap then
 	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "Ae",
+		"<cmd>MindmapAddVisualSelectionAsExcerptNode<cr>",
+		{ noremap = true, silent = true, desc = "Add visual selection as excerpt node" }
+	)
+	vim.api.nvim_set_keymap(
 		"v",
 		"E",
 		"<cmd>MindmapAddVisualSelectionAsExcerptNode<cr>",
@@ -213,52 +329,22 @@ if plugin_config.enable_default_keymap then
 	)
 end
 
+---@param from_node_location string
 ---@param edge_type string
----@param from_node_type string
----@param to_node_type? string
-function M.MindmapAddEdge(edge_type, from_node_type, to_node_type)
+---@param to_node_location? string
+function M.MindmapAddEdge(from_node_location, edge_type, to_node_location)
 	local found_graph = find_graph()
 	if not found_graph.edge_sub_cls[edge_type] then
 		vim.notify("[MindmapAdd] Invalid `edge_type`. Type must register in graph first.", vim.log.levels.ERROR)
-	end
-	if
-		from_node_type ~= "lastest"
-		and from_node_type ~= "nearest"
-		and from_node_type ~= "telescope"
-		and from_node_type ~= "buffer"
-	then
-		vim.notify(
-			"[MindmapAdd] Invalid `from_node_type`. Type must be `lastest`, `nearest`, `telescope` or `buffer`.",
-			vim.log.levels.ERROR
-		)
-		return
-	end
-	if
-		to_node_type
-		and to_node_type ~= "lastest"
-		and to_node_type ~= "nearest"
-		and to_node_type ~= "telescope"
-		and to_node_type ~= "buffer"
-	then
-		vim.notify(
-			"[MindmapAdd] Invalid `to_node_type`. Type must be nil, `lastest`, `nearest`, `telescope` or `buffer`.",
-			vim.log.levels.ERROR
-		)
 		return
 	end
 
-	local from_nodes
-	if from_node_type == "lastest" then
-		from_nodes = { #found_graph.nodes, found_graph.nodes[#found_graph.nodes] }
-	else
-		from_nodes, _ = find_heading_nodes(found_graph, from_node_type)
-	end
-
+	local from_nodes, _ = find_heading_nodes(found_graph, from_node_location)
 	local to_nodes
-	if to_node_type == "lastest" then
-		to_nodes = { #found_graph.nodes, found_graph.nodes[#found_graph.nodes] }
+	if to_node_location then
+		to_nodes, _ = find_heading_nodes(found_graph, to_node_location)
 	else
-		to_nodes, _ = find_heading_nodes(found_graph, to_node_type)
+		to_nodes = from_nodes
 	end
 
 	for _, from_node in pairs(from_nodes) do
@@ -277,12 +363,14 @@ end, {
 	---@diagnostic disable-next-line: unused-local
 	complete = function(arg_lead, cmd_line, cursor_pos)
 		if cursor_pos == 15 then
-			return { "lastest", "nearest", "telescope", "buffer" }
-		else
+			-- FIXME: nil
 			local tbl = {}
-			for _, edge_cls_type in plugin_config.edge_sub_cls_info do
+			for _, edge_cls_type in pairs(plugin_config.edge_sub_cls_info) do
 				table.insert(tbl, edge_cls_type)
 			end
+			return tbl
+		else
+			return { "lastest", "nearest", "telescope", "buffer" }
 		end
 	end,
 })
@@ -291,19 +379,19 @@ if plugin_config.enable_default_keymap then
 	vim.api.nvim_set_keymap(
 		"n",
 		plugin_config.keymap_prefix .. "aln",
-		"<cmd>MindmapAdd SimpleEdge lastest nearest<cr>",
+		"<cmd>MindmapAddEdge lastest SimpleEdge nearest<cr>",
 		{ noremap = true, silent = true, desc = "Add SimpleEdge from lastest node to nearest node" }
 	)
 	vim.api.nvim_set_keymap(
 		"n",
 		plugin_config.keymap_prefix .. "ann",
-		"<cmd>MindmapAdd SelfLoopSubheadingEdge nearest nearest<cr>",
+		"<cmd>MindmapAddEdge nearest SelfLoopSubheadingEdge nearest<cr>",
 		{ noremap = true, silent = true, desc = "Add SelfLoopSubheadingEdge from nearest node to nearest node" }
 	)
 	vim.api.nvim_set_keymap(
 		"n",
 		plugin_config.keymap_prefix .. "anN",
-		"<cmd>MindmapAdd SelfLoopContentEdge nearest nearest<cr>",
+		"<cmd>MindmapAddEdge nearest SelfLoopContentEdge nearest<cr>",
 		{ noremap = true, silent = true, desc = "Add SelfLoopContentEdge from nearest node to nearest node" }
 	)
 end
@@ -316,27 +404,21 @@ function M.MindmapRemove(location, node_or_edge_type)
 	node_or_edge_type = node_or_edge_type or ""
 
 	local found_graph = find_graph()
-	local nodes, ts_nodes = find_nodes(location)
+	local nodes, _ = find_heading_nodes(found_graph, location)
 
 	if node_or_edge_type == "node" or found_graph.node_sub_cls[node_or_edge_type] then
-		for id, ts_node in pairs(ts_nodes) do
-			local node = nodes[id]
-
+		for id, node in pairs(nodes) do
 			if node_or_edge_type == "node" or node.type == node_or_edge_type then
 				-- First, remove the node from the graph
 				found_graph:remove_node(id)
-
-				-- Second, remove the node id from the text
-				local ts_node_title, _, _ = ts_utils.get_sub_nodes(ts_node)
-				local node_text = vim.treesitter.get_node_text(ts_node_title, 0)
-				ts_utils.replace_node_text(
-					string.gsub(node_text, " %%" .. string.format("%08d", id) .. "%%", ""),
-					ts_node_title,
-					0
-				)
+				-- Second, remove the node from the text
+				-- TODO: abstract this
+				node:manage_text_id("remove")
 			end
 		end
-	elseif node_or_edge_type == "edge" or found_graph.edge_sub_cls[node_or_edge_type] then
+	end
+
+	if node_or_edge_type == "edge" or found_graph.edge_sub_cls[node_or_edge_type] then
 		for _, node in pairs(nodes) do
 			for _, edge_id in ipairs(node.incoming_edge_ids) do
 				local edge = found_graph.edges[edge_id]
@@ -352,13 +434,12 @@ function M.MindmapRemove(location, node_or_edge_type)
 				end
 			end
 		end
-	else
-		vim.notify(
-			"[MindmapRemove] Invalid type `" .. node_or_edge_type .. "`. Type must register in graph first.",
-			vim.log.levels.WARN
-		)
-		return
 	end
+
+	vim.notify(
+		"[MindmapRemove] Invalid type `" .. node_or_edge_type .. "`. Type must register in graph first.",
+		vim.log.levels.WARN
+	)
 end
 
 vim.api.nvim_create_user_command("MindmapRemove", function(arg)
@@ -416,7 +497,7 @@ function M.MindmapShow(location, show_type)
 	end
 
 	local found_graph = find_graph()
-	local _, ts_nodes = find_nodes(location)
+	local _, ts_nodes = find_heading_nodes(found_graph, location)
 
 	for id, ts_node in pairs(ts_nodes) do
 		-- Avoid duplicate virtual text
@@ -464,7 +545,7 @@ end, {
 	---@diagnostic disable-next-line: unused-local
 	complete = function(arg_lead, cmd_line, cursor_pos)
 		if cursor_pos == 12 then
-			return { "nearest", "buffer", "*graph", "*telescope" }
+			return { "lastest", "nearest", "telescope", "buffer" }
 		else
 			return { "card_back", "excerpt", "sp_info" }
 		end
@@ -523,7 +604,7 @@ function M.MindmapClean(location, clean_type)
 		return
 	end
 
-	local _, ts_nodes = find_nodes(location)
+	local _, ts_nodes = find_heading_nodes(find_graph(), location)
 
 	for _, ts_node in pairs(ts_nodes) do
 		local start_row, _, _, _ = ts_node:range()
@@ -538,7 +619,7 @@ end, {
 	---@diagnostic disable-next-line: unused-local
 	complete = function(arg_lead, cmd_line, cursor_pos)
 		if cursor_pos == 13 then
-			return { "nearest", "buffer", "*graph", "*telescope" }
+			return { "lastest", "nearest", "telescope", "buffer" }
 		else
 			return { "card_back", "excerpt", "sp_info" }
 		end

@@ -127,7 +127,7 @@ end
 
 ---Get the absolute path of the file where the node is from.
 function PrototypeNode:get_abs_path()
-	return utils.get_abs_path(self.rel_file_path, utils.get_project_root()) .. "/" .. self.file_name
+	return utils.get_abs_path(self.rel_file_path, utils.get_file_info()[4]) .. "/" .. self.file_name
 end
 
 ---Get the corresponding tree-sitter node of the node.
