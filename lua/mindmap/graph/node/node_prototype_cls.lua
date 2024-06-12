@@ -136,7 +136,7 @@ end
 function PrototypeNode:get_corresponding_ts_node(create_buf_if_not_exist)
 	local abs_path = self:get_abs_path()
 	local bufnr, is_temp_buf = utils.giiit_bufnr(abs_path, create_buf_if_not_exist)
-	local ts_node = ts_utils.get_heading_node(bufnr, self.id)[1]
+	local ts_node = ts_utils.get_heading_node(bufnr, self.id)
 	return ts_node, bufnr, is_temp_buf
 end
 

@@ -1,15 +1,11 @@
--- TODO: remove nts dependency
-
-local nts_utils = require("nvim-treesitter.ts_utils")
-
-local utils = require("mindmap.utils")
-
 local M = {}
 
 ---Get the root node in the given buffer.
----@param bufnr integer The buffer number.
+---@param bufnr? integer The buffer number.
 ---@return TSNode? _ The root node in the given buffer.
 function M.get_root_node(bufnr)
+	bufnr = bufnr or 0
+
 	local lang_tree = vim.treesitter.get_parser(bufnr, "norg")
 	if not lang_tree then
 		vim.notify("Can not get norg tree in the given buffer", vim.log.levels.ERROR)
@@ -66,11 +62,11 @@ function M.parse_heading_node(heading_node)
 end
 
 ---Get all heading nodes in the given buffer.
----If `id` is given, only return the heading node with the id.
----@param bufnr integer The buffer number.
----@param id? NodeID The id of the heading node. Default: nil.
----@return table<NodeID, TSNode> _ The heading nodes.
-function M.get_heading_node(bufnr, id)
+---@param bufnr? integer The buffer number.
+---@return table<NodeID, TSNode> heading_nodes The heading nodes.
+function M.get_heading_node(bufnr)
+	bufnr = bufnr or 0
+
 	local root_node = M.get_root_node(bufnr)
 	if not root_node then
 		return {}
@@ -95,37 +91,25 @@ function M.get_heading_node(bufnr, id)
 		-- Just handle the first match now.
 		local heading_node_id = tonumber(string.match(title_node_text, "%d%d%d%d%d%d%d%d"))
 		if heading_node_id then
-			if not id or heading_node_id == id then
-				heading_nodes[heading_node_id] = heading_node
-			end
+			heading_nodes[heading_node_id] = heading_node
 		end
 	end
 
 	return heading_nodes
 end
 
----Get the nearest heading node according to the cursor.
----@return TSNode? _ The nearest heading node according to the cursor.
-function M.get_nearest_heading_node()
-	local current_node = nts_utils.get_node_at_cursor()
-
-	while current_node and not current_node:type():match("^heading%d$") do
-		current_node = current_node:parent()
-	end
-
-	return current_node
-end
-
 ---Replace the text of the given tree-sitter node.
 ---@param text string|string[] The new text. Each element is a line.
 ---@param node TSNode The tree-sitter node.
----@param bufnr integer The buffer number.
+---@param bufnr? integer The buffer number.
 ---@return nil _ This function does not return anything.
 function M.replace_node_text(text, node, bufnr)
 	if type(text) == "string" then
 		text = { text }
 	end
 	-- table.insert(text, "") -- TODO: Remove this workaround.
+
+	bufnr = bufnr or 0
 
 	local start_row, start_col, end_row, end_col = node:range()
 	vim.api.nvim_buf_set_text(bufnr, start_row, start_col, end_row, end_col, text)
