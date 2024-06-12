@@ -230,6 +230,36 @@ function M.get_bufnr(bufnr_or_file_path)
 	return 0, false
 end
 
+---Get the buffer number from the buffer number or file path.
+---@param bufnr_or_file_path integer|string Buffer number or file path.
+---@param create_buf_if_not_exist? boolean|string Create a new buffer if the buffer does not exist, and how to create it. Can be true, false, "h" or "v". Default: false.
+---@return integer bufnr, boolean is_temp_buf Buffer number and whether it is a temp buffer.
+function M.giiit_bufnr(bufnr_or_file_path, create_buf_if_not_exist)
+	local bufnr = vim.fn.bufnr(bufnr_or_file_path)
+	local is_temp_buf = false
+
+	if bufnr == -1 and create_buf_if_not_exist and type(bufnr_or_file_path) == "string" then
+		local ok, content = pcall(vim.api.readfile, bufnr_or_file_path)
+
+		if ok then
+			bufnr = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(bufnr, 0, -1, true, content)
+
+			if create_buf_if_not_exist == "h" then
+				vim.cmd("new")
+			elseif create_buf_if_not_exist == "v" then
+				vim.cmd("vnew")
+			else
+				is_temp_buf = true
+			end
+
+			vim.api.nvim_win_set_buf(0, bufnr)
+		end
+	end
+
+	return bufnr, is_temp_buf
+end
+
 ---Remove fields that are not string, number, or boolean in a table.
 ---@param tbl table
 ---@return table _
