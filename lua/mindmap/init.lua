@@ -167,7 +167,7 @@ local function find_heading_nodes(graph, location)
 		end
 
 		if nearest_node and nearest_node.state == "active" then
-			return { [nearest_node.id] = nearest_node }, { [nearest_node.id] = nearest_ts_node }
+			return { [nearest_node.id] = nearest_node }, { [nearest_node.id] = location }
 		else
 			return {}, {}
 		end
