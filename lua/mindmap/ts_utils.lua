@@ -64,7 +64,7 @@ end
 ---Get all heading nodes in the given buffer.
 ---@param bufnr? integer The buffer number.
 ---@return table<NodeID, TSNode> heading_nodes The heading nodes.
-function M.get_heading_node(bufnr)
+function M.get_heading_node_in_buf(bufnr)
 	bufnr = bufnr or 0
 
 	local root_node = M.get_root_node(bufnr)
@@ -96,6 +96,17 @@ function M.get_heading_node(bufnr)
 	end
 
 	return heading_nodes
+end
+
+---Get the heading node by the given id.
+---@param id NodeID The id of the heading node.
+---@param bufnr? integer The buffer number.
+---@return TSNode? _ The heading node.
+function M.get_heading_node_by_id(id, bufnr)
+	bufnr = bufnr or 0
+
+	local heading_nodes = M.get_heading_node_in_buf(bufnr)
+	return heading_nodes[id]
 end
 
 ---Replace the text of the given tree-sitter node.
