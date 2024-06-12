@@ -1,5 +1,4 @@
 -- TODO: remove nts dependency
--- TODO: remove bufnr_or_file_path
 
 local nts_utils = require("nvim-treesitter.ts_utils")
 
@@ -105,81 +104,17 @@ function M.get_heading_node(bufnr, id)
 	return heading_nodes
 end
 
---------------------
--- Functions that return tree-sitter nodes.
---------------------
-
 ---Get the nearest heading node according to the cursor.
----If node_id is given, return the nearest heading node with the id.
----If node_id is not given, return the nearest heading node.
----@param node_id? NodeID The id of the heading node.
 ---@return TSNode? _ The nearest heading node according to the cursor.
-function M.get_nearest_heading_node(node_id)
+function M.get_nearest_heading_node()
 	local current_node = nts_utils.get_node_at_cursor()
 
-	local ok
-	while current_node and not current_node:type():match("^heading%d$") and not ok do
+	while current_node and not current_node:type():match("^heading%d$") do
 		current_node = current_node:parent()
-		if node_id and current_node then
-			ok = node_id == M.get_heading_node_info(current_node, 0)
-		end
 	end
 
 	return current_node
 end
-
----Get the heading node with id in the given buffer or file path.
----@param node_id NodeID The id of the heading node.
----@param bufnr_or_file_path? integer|string The buffer number or file path.
----@return TSNode? _ The heading node with id in the given buffer or file path.
-function M.get_heading_node_using_id(node_id, bufnr_or_file_path)
-	local bufnr, is_temp_buf = utils.get_bufnr(bufnr_or_file_path)
-	local root_node = M.get_tstree_root(bufnr)
-	if not root_node then
-		return nil
-	end
-
-	local parsed_heading_node_query = vim.treesitter.query.parse(
-		"norg",
-		[[
-    (_
-      title: (paragraph_segment
-        (inline_comment)
-      )
-    ) @heading_node
-    ]]
-	)
-
-	local parsed_inline_comment_query = vim.treesitter.query.parse(
-		"norg",
-		[[
-    title: (paragraph_segment
-      (inline_comment) @inline_comment
-    )
-    ]]
-	)
-
-	-- Get heading nodes.
-	for _, heading_node in parsed_heading_node_query:iter_captures(root_node, 0) do
-		-- Get inline comment nodes.
-		for _, inline_comment_node in parsed_inline_comment_query:iter_captures(heading_node, 0) do
-			local inline_comment = vim.treesitter.get_node_text(inline_comment_node, bufnr)
-			if string.match(inline_comment, string.format("%08d", node_id)) then
-				return heading_node
-			end
-		end
-	end
-
-	if is_temp_buf then
-		vim.api.nvim_buf_delete(bufnr, { force = true })
-	end
-
-	return nil
-end
-
---------------------
--- Functions that process tree-sitter nodes.
---------------------
 
 ---Replace the text of the given tree-sitter node.
 ---@param text string|string[] The new text. Each element is a line.
@@ -194,37 +129,6 @@ function M.replace_node_text(text, node, bufnr)
 
 	local start_row, start_col, end_row, end_col = node:range()
 	vim.api.nvim_buf_set_text(bufnr, start_row, start_col, end_row, end_col, text)
-end
-
----Get the information of the given heading node.
----@param heading_node TSNode The heading node.
----@param bufnr integer The buffer number.
----@return EdgeID? id, integer? level, string text The id, level, and text of the heading node.
-function M.get_heading_node_info(heading_node, bufnr)
-	local level = tonumber(string.match(heading_node:type(), "^heading(%d)$"))
-
-	local parsed_query = vim.treesitter.query.parse(
-		"norg",
-		string.format(
-			[[
-        (heading%d
-          title: (paragraph_segment
-            (inline_comment)? @inline_comment
-          )
-        )
-      ]],
-			level
-		)
-	)
-
-	local id
-	for _, inline_comment_node in parsed_query:iter_captures(heading_node, 0) do
-		id = tonumber(string.match(vim.treesitter.get_node_text(inline_comment_node, bufnr), "%d%d%d%d%d%d%d%d"))
-	end
-
-	local text = vim.treesitter.get_node_text(heading_node, bufnr)
-
-	return id, level, text
 end
 
 --------------------

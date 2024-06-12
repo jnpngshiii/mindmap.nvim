@@ -113,7 +113,7 @@ default_node_sub_cls.HeadingNode = {
 				ts_utils.replace_node_text(
 					string.gsub(node_text, "%$", " %%" .. string.format("%08d", self.id) .. "%%"),
 					ts_node_title,
-					0
+					bufnr
 				)
 			end
 			if action == "remove" then
@@ -121,7 +121,7 @@ default_node_sub_cls.HeadingNode = {
 				ts_utils.replace_node_text(
 					string.gsub(node_text, " %%" .. string.format("%08d", self.id) .. "%%", ""),
 					ts_node_title,
-					0
+					bufnr
 				)
 			end
 
@@ -140,11 +140,11 @@ default_node_sub_cls.HeadingNode = {
 			local abs_proj_path = utils.get_file_info()[4]
 			local abs_file_path = utils.get_abs_path(self.rel_file_path, abs_proj_path)
 			local bufnr, is_temp_buf = utils.get_bufnr(abs_file_path .. "/" .. self.file_name)
-			local heading_node = ts_utils.get_heading_node_using_id(self.id, bufnr)
+			local heading_node = ts_utils.get_heading_node(bufnr, self.id)[1]
 			if not heading_node then
 				return front, back
 			end
-			local title_node, content_node, sub_heading_nodes = ts_utils.get_sub_nodes(heading_node)
+			local title_node, content_node, sub_heading_nodes = ts_utils.parse_heading_node(heading_node)
 
 			if title_node then
 				front = utils.split_string(vim.treesitter.get_node_text(title_node, bufnr), "\n")
