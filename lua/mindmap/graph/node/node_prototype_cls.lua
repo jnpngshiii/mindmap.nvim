@@ -1,4 +1,5 @@
 local utils = require("mindmap.utils")
+local ts_utils = require("mindmap.ts_utils")
 
 --------------------
 -- Class PrototypeNode
@@ -127,6 +128,16 @@ end
 ---Get the absolute path of the file where the node is from.
 function PrototypeNode:get_abs_path()
 	return utils.get_abs_path(self.rel_file_path, utils.get_project_root()) .. "/" .. self.file_name
+end
+
+---Get the corresponding TS node of the node.
+---@param create_buf_if_not_exist? boolean|string Create a new buffer if the buffer does not exist, and how to create it. Can be nil, true, false, "h" or "v". Default: nil.
+---@return TSNode ts_node, integer bufnr, boolean is_temp_buf The corresponding TS node, buffer number, and whether the buffer is a temp buffer.
+function PrototypeNode:get_corresponding_ts_node(create_buf_if_not_exist)
+	local abs_path = self:get_abs_path()
+	local bufnr, is_temp_buf = utils.giiit_bufnr(abs_path, create_buf_if_not_exist)
+	local ts_node = ts_utils.get_heading_node(bufnr, self.id)[1]
+	return ts_node, bufnr, is_temp_buf
 end
 
 ---@abstract
