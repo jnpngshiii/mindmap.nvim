@@ -96,6 +96,40 @@ default_node_sub_cls.HeadingNode = {
 		--
 	},
 	ins_methods = {
+		---Manage the id of the node in the text.
+		---@param action string Action to be taken. Can be 'add' or 'remove'.
+		---@return nil _ This function does not return anything.
+		manage_text_id = function(self, action)
+			if action ~= "add" and action ~= "remove" then
+				vim.notify("Invalid action: " .. action .. ". Action must be 'add' or 'remove'.")
+				return
+			end
+
+			local ts_node, bufnr, is_temp_buf = self:get_corresponding_ts_node()
+			local ts_node_title, _, _ = ts_utils.parse_heading_node(ts_node)
+
+			if action == "add" then
+				local node_text = vim.treesitter.get_node_text(ts_node_title, 0)
+				ts_utils.replace_node_text(
+					string.gsub(node_text, "%$", " %%" .. string.format("%08d", self.id) .. "%%"),
+					ts_node_title,
+					0
+				)
+			end
+			if action == "remove" then
+				local node_text = vim.treesitter.get_node_text(ts_node_title, 0)
+				ts_utils.replace_node_text(
+					string.gsub(node_text, " %%" .. string.format("%08d", self.id) .. "%%", ""),
+					ts_node_title,
+					0
+				)
+			end
+
+			if is_temp_buf then
+				vim.api.nvim_buf_delete(bufnr, { force = true })
+			end
+		end,
+
 		---Get the content of the node.
 		---@param edge_type EdgeType Type of the edge.
 		---@return string[] front ,string[] back Content of the node.
