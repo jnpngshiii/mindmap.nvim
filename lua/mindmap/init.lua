@@ -311,6 +311,7 @@ function M.MindmapAddVisualSelectionAsExcerptNode()
 end
 
 vim.api.nvim_create_user_command("MindmapAddVisualSelectionAsExcerptNode", function()
+	vim.api.nvim_input("<Esc>")
 	M.MindmapAddVisualSelectionAsExcerptNode()
 end, {
 	nargs = 0,
