@@ -5,6 +5,8 @@ local Graph = require("mindmap.graph.init")
 local utils = require("mindmap.utils")
 local ts_utils = require("mindmap.ts_utils")
 
+require("mindmap.html.init")
+
 local M = {}
 
 --------------------
