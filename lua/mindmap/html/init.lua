@@ -1,18 +1,14 @@
 local parsers = require("nvim-treesitter.parsers")
 
-parsers.get_parser_configs().html = {
-	install_info = {
-		url = "https://github.com/tree-sitter/tree-sitter-html",
-		files = { "src/parser.c" },
-		branch = "main",
+require("nvim-treesitter.configs").setup({
+	modules = {},
+	sync_install = true,
+	ignore_install = {},
+	auto_install = true,
+	ensure_installed = { "html" },
+	highlight = {
+		enable = true,
 	},
-	filetype = "html",
-	used_by = { "html" },
-	queries = {
-		highlights = {
-			os.getenv("HOME") .. "/html.scm",
-		},
-	},
-}
+})
 
 print("html parser installed")
