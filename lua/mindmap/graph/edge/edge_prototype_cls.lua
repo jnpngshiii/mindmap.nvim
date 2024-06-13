@@ -21,10 +21,12 @@
 ---@field due_at integer Due time of the edge in UNIX timestemp format. Used in space repetition. Auto generated and updated.
 ---@field ease integer Ease of the edge. Used in space repetition. Auto generated and updated.
 ---@field interval integer Interval of the edge. Used in space repetition. Auto generated and updated.
+---@field answer_count integer Count of answer of the edge. Used in space repetition. Auto generated and updated.
+---@field again_count integer Count of answer of the edge. Used in space repetition. Auto generated and updated.
 ---@field cache table Cache of the edge. Save temporary data to avoid recalculation. Auto generated and updated.
 local PrototypeEdge = {}
 
-local prototype_edge_version = 6
+local prototype_edge_version = 7
 -- v0: Initial version.
 -- v1: Add `tag` field.
 -- v2: Remove `id` field.
@@ -32,6 +34,7 @@ local prototype_edge_version = 6
 -- v4: Factory.
 -- v5: Add `id` field, `algorithm` field, and `state` field.
 -- v6: Remove `algorithm` field.
+-- v7: Add `answer_count` field and `again_count` field.
 
 ----------
 -- Instance Method
@@ -52,6 +55,8 @@ local prototype_edge_version = 6
 ---@param due_at? integer Due time of the edge.
 ---@param ease? integer Ease of the edge.
 ---@param interval? integer Interval of the edge.
+---@param answer_count? integer Count of answer of the edge.
+---@param again_count? integer Count of answer of the edge.
 ---@return PrototypeEdge _ The created edge.
 function PrototypeEdge:new(
 	id,
@@ -67,7 +72,9 @@ function PrototypeEdge:new(
 	updated_at,
 	due_at,
 	ease,
-	interval
+	interval,
+	answer_count,
+	again_count
 )
 	local prototype_edge = {
 		id = id,
@@ -84,6 +91,8 @@ function PrototypeEdge:new(
 		due_at = due_at or 0,
 		ease = ease or 250,
 		interval = interval or 1,
+    answer_count = answer_count or 0,
+    again_count = again_count or 0,
 		cache = {},
 	}
 

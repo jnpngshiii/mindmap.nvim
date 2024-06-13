@@ -17,6 +17,8 @@ function edge_cls_method.to_table(cls, self)
 		due_at = self.due_at,
 		ease = self.ease,
 		interval = self.interval,
+		answer_count = self.answer_count,
+		again_count = self.again_count,
 	}
 end
 
@@ -36,7 +38,9 @@ function edge_cls_method.from_table(cls, self, tbl)
 		tbl.updated_at,
 		tbl.due_at,
 		tbl.ease,
-		tbl.interval
+		tbl.interval,
+		tbl.answer_count,
+		tbl.again_count
 	)
 end
 
