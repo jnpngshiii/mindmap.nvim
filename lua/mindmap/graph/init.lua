@@ -315,30 +315,46 @@ function Graph:new(
 end
 
 ---Add a node to the graph.
+---If the node has `before_add_into_graph` and `after_add_into_graph` methods, they will be called before and after adding the node.
 ---@param node PrototypeNode Node to be added.
 ---@return nil _ This function does not return anything.
 function Graph:add_node(node)
-	local node_id = #self.nodes + 1
-	self.nodes[node_id] = node
+	if node.before_add_into_graph then
+		node:before_add_into_graph()
+	end
 
-	self.logger:info("Node", "Add " .. node.type .. " <" .. node_id .. ">.")
+	self.nodes[node.id] = node
+
+	node.state = "active"
+	if node.after_add_into_graph then
+		node:after_add_into_graph()
+	end
+
+	self.logger:info("Node", "Add " .. node.type .. " <" .. node.id .. ">.")
 end
 
 ---Remove a node from the graph and all edges related to it using ID.
+---If the node has `before_remove_from_graph` and `after_remove_from_graph` methods, they will be called before and after removing the node.
 ---@param node_id NodeID ID of the node to be removed.
 ---@return nil _ This function does not return anything.
 function Graph:remove_node(node_id)
+	if not self.nodes[node_id] then
+		self.logger:warn("Node", "Node <" .. node_id .. "> does not exist. Abort removing.")
+	end
+
 	self.logger:info("Node", "Remove " .. self.nodes[node_id].type .. " <" .. node_id .. "> and related edges.")
 
-	local node = self.nodes[node_id]
+	if self.nodes[node_id].before_remove_from_graph then
+		self.nodes[node_id]:before_remove_from_graph()
+	end
 
+	local node = self.nodes[node_id]
 	for _, incoming_edge_id in pairs(node.incoming_edge_ids) do
 		local incoming_edge = self.edges[incoming_edge_id]
 		local from_node = self.nodes[incoming_edge.from_node_id]
 		from_node:remove_outcoming_edge_id(incoming_edge_id)
 		self:remove_edge(incoming_edge_id)
 	end
-
 	for _, outcoming_edge_id in pairs(node.outcoming_edge_ids) do
 		local outcoming_edge = self.edges[outcoming_edge_id]
 		local to_node = self.nodes[outcoming_edge.to_node_id]
@@ -347,27 +363,37 @@ function Graph:remove_node(node_id)
 	end
 
 	self.nodes[node_id].state = "removed"
+	if self.nodes[node_id].after_remove_from_graph then
+		self.nodes[node_id]:after_remove_from_graph()
+	end
 end
 
 ---Add a edge to the graph.
+---If the edge has `before_add_into_graph` and `after_add_into_graph` methods, they will be called before and after adding the edge.
 ---@param edge PrototypeEdge Edge to be added.
 ---@return nil _ This function does not return anything.
 function Graph:add_edge(edge)
-	-- TODO: add check for duplicate edge
-	local edge_id = #self.edges + 1
-	self.edges[edge_id] = edge
+	if edge.before_add_into_graph then
+		edge:before_add_into_graph()
+	end
 
+	self.edges[edge.id] = edge
 	local from_node = self.nodes[edge.from_node_id]
-	from_node:add_outcoming_edge_id(edge_id)
+	from_node:add_outcoming_edge_id(edge.id)
 	local to_node = self.nodes[edge.to_node_id]
-	to_node:add_incoming_edge_id(edge_id)
+	to_node:add_incoming_edge_id(edge.id)
+
+	edge.state = "active"
+	if edge.after_add_into_graph then
+		edge:after_add_into_graph()
+	end
 
 	self.logger:info(
 		"Edge",
 		"Add "
 			.. edge.type
 			.. " <"
-			.. edge_id
+			.. edge.id
 			.. "> from "
 			.. from_node.type
 			.. " <"
@@ -381,18 +407,29 @@ function Graph:add_edge(edge)
 end
 
 ---Remove an edge from the graph using ID.
+---If the node has `before_remove_from_graph` and `after_remove_from_graph` methods, they will be called before and after removing the node.
 ---@param edge_id EdgeID ID of the edge to be removed.
 ---@return nil _ This function does not return anything.
 function Graph:remove_edge(edge_id)
-	local edge = self.edges[edge_id]
+	if not self.edges[edge_id] then
+		self.logger:warn("Edge", "Edge <" .. edge_id .. "> does not exist. Abort removing.")
+		return
+	end
 
+	if self.edges[edge_id].before_remove_from_graph then
+		self.edges[edge_id]:before_remove_from_graph()
+	end
+
+	local edge = self.edges[edge_id]
 	local from_node = self.nodes[edge.from_node_id]
 	from_node:remove_outcoming_edge_id(edge_id)
-
 	local to_node = self.nodes[edge.to_node_id]
 	to_node:remove_outcoming_edge_id(edge_id)
 
 	self.edges[edge_id].state = "removed"
+	if self.edges[edge_id].after_remove_from_graph then
+		self.edges[edge_id]:after_remove_from_graph()
+	end
 
 	self.logger:info(
 		"Edge",

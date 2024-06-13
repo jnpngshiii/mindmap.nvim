@@ -87,6 +87,34 @@ function PrototypeNode:new(
 	return prototype_node
 end
 
+---@abstract
+---Handle the node before adding into the graph.
+---@diagnostic disable-next-line: unused-vararg
+function PrototypeNode:before_add_into_graph(...)
+	-- error("[PrototypeNode] Please implement function `before_add_into_graph` in subclass.")
+end
+
+---@abstract
+---Handle the node after adding into the graph.
+---@diagnostic disable-next-line: unused-vararg
+function PrototypeNode:after_add_into_graph(...)
+	-- error("[PrototypeNode] Please implement function `after_add_into_graph` in subclass.")
+end
+
+---@abstract
+---Handle the node before removing from the graph.
+---@diagnostic disable-next-line: unused-vararg
+function PrototypeNode:before_remove_from_graph(...)
+	-- error("[PrototypeNode] Please implement function `before_remove_from_graph` in subclass.")
+end
+
+---@abstract
+---Handle the node after removing from the graph.
+---@diagnostic disable-next-line: unused-vararg
+function PrototypeNode:after_remove_from_graph(...)
+	-- error("[PrototypeNode] Please implement function `after_remove_from_graph` in subclass.")
+end
+
 ---Add incoming edge to the node.
 ---@param incoming_edge_id EdgeID ID of the incoming edge to be added.
 ---@return nil _ This function does not return anything.

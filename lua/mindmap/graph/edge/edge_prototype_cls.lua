@@ -91,8 +91,8 @@ function PrototypeEdge:new(
 		due_at = due_at or 0,
 		ease = ease or 250,
 		interval = interval or 1,
-    answer_count = answer_count or 0,
-    again_count = again_count or 0,
+		answer_count = answer_count or 0,
+		again_count = again_count or 0,
 		cache = {},
 	}
 
@@ -100,6 +100,34 @@ function PrototypeEdge:new(
 	self.__index = self
 
 	return prototype_edge
+end
+
+---@abstract
+---Handle the edge before adding into the graph.
+---@diagnostic disable-next-line: unused-vararg
+function PrototypeEdge:before_add_into_graph(...)
+	-- error("[PrototypeEdge] Please implement function `before_add_into_graph` in subclass.")
+end
+
+---@abstract
+---Handle the edge after adding into the graph.
+---@diagnostic disable-next-line: unused-vararg
+function PrototypeEdge:after_add_into_graph(...)
+	-- error("[PrototypeEdge] Please implement function `after_add_into_graph` in subclass.")
+end
+
+---@abstract
+---Handle the edge before removing from the graph.
+---@diagnostic disable-next-line: unused-vararg
+function PrototypeEdge:before_remove_from_graph(...)
+	-- error("[PrototypeEdge] Please implement function `before_remove_from_graph` in subclass.")
+end
+
+---@abstract
+---Handle the edge after removing from the graph.
+---@diagnostic disable-next-line: unused-vararg
+function PrototypeEdge:after_remove_from_graph(...)
+	-- error("[PrototypeEdge] Please implement function `after_remove_from_graph` in subclass.")
 end
 
 ---@abstract
@@ -113,7 +141,7 @@ end
 ---Convert the table to a edge.
 ---@diagnostic disable-next-line: unused-vararg
 function PrototypeEdge:from_table(...)
-	error("[PrototypeEdge] Please implement function `to_table` in subclass.")
+	error("[PrototypeEdge] Please implement function `from_table` in subclass.")
 end
 
 ----------
