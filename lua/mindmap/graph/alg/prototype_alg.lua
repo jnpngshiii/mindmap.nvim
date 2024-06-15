@@ -2,6 +2,10 @@
 -- Class PrototypeAlg
 --------------------
 
+DAY_SECONDS = 86400
+HOUR_SECONDS = 3600
+MINUTE_SECONDS = 60
+
 ---@alias AlgType string
 
 ---@class PrototypeAlg
@@ -47,10 +51,28 @@ function PrototypeAlg:answer_good(...)
 end
 
 ---@abstract
----Answer the card with "good".
+---Answer the card with "again".
 ---@diagnostic disable-next-line: unused-vararg
 function PrototypeAlg:answer_again(...)
 	error("[PrototypeAlg] Please implement function `answer_again` in subclass.")
 end
+
+---Adjust the interval for 8 or more days.
+---@param interval integer The interval.
+---@param fuzz? integer The fuzz factor.
+---@return integer The new interval.
+function PrototypeAlg:random_adjust_interval(interval, fuzz)
+	fuzz = fuzz or 3
+
+	if interval >= 8 then
+		local choices = { -fuzz, 0, fuzz }
+		local random_index = math.random(#choices)
+		interval = interval + choices[random_index]
+	end
+
+	return interval
+end
+
+--------------------
 
 return PrototypeAlg

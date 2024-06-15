@@ -18,6 +18,7 @@ function default_edge_cls_method.to_table(cls, self)
 		ease = self.ease,
 		interval = self.interval,
 		answer_count = self.answer_count,
+    ease_count = self.ease_count,
 		again_count = self.again_count,
 	}
 end
@@ -40,6 +41,7 @@ function default_edge_cls_method.from_table(cls, self, tbl)
 		tbl.ease,
 		tbl.interval,
 		tbl.answer_count,
+    tbl.ease_count,
 		tbl.again_count
 	)
 end

@@ -22,6 +22,7 @@
 ---@field ease integer Ease of the edge. Used in space repetition. Auto generated and updated.
 ---@field interval integer Interval of the edge. Used in space repetition. Auto generated and updated.
 ---@field answer_count integer Count of answer of the edge. Used in space repetition. Auto generated and updated.
+---@field ease_count integer Count of answer of the edge. Used in space repetition. Auto generated and updated.
 ---@field again_count integer Count of answer of the edge. Used in space repetition. Auto generated and updated.
 ---@field cache table Cache of the edge. Save temporary data to avoid recalculation. Auto generated and updated.
 local PrototypeEdge = {}
@@ -36,6 +37,7 @@ local prototype_edge_version = 8
 -- v6: Remove `algorithm` field.
 -- v7: Add `answer_count` field and `again_count` field.
 -- v8: Add `[before|after]_[add_into|remove_from]_graph` methods.
+-- v9: Add `ease_count` field.
 
 ----------
 -- Instance Method
@@ -57,6 +59,7 @@ local prototype_edge_version = 8
 ---@param ease? integer Ease of the edge.
 ---@param interval? integer Interval of the edge.
 ---@param answer_count? integer Count of answer of the edge.
+---@param ease_count? integer Count of answer of the edge.
 ---@param again_count? integer Count of answer of the edge.
 ---@return PrototypeEdge _ The created edge.
 function PrototypeEdge:new(
@@ -75,6 +78,7 @@ function PrototypeEdge:new(
 	ease,
 	interval,
 	answer_count,
+  ease_count,
 	again_count
 )
 	local prototype_edge = {
@@ -93,6 +97,7 @@ function PrototypeEdge:new(
 		ease = ease or 250,
 		interval = interval or 1,
 		answer_count = answer_count or 0,
+    ease_count = ease_count or 0,
 		again_count = again_count or 0,
 		cache = {},
 	}
