@@ -52,8 +52,8 @@ local graph_version = 2
 ---Information must have `data`, `ins_methods` and `cls_methods` fields.
 ---
 ---Examples:
----  `cls.ins_method(self, ...)` -> `cls:ins_method(...)`
----  `cls_method(cls, self, ...)` -> `cls:ins_method(...)`
+---  `cls . ins_method(self, ...)` -> `cls : ins_method(...)`
+---  `cls . cls_method(cls, self, ...)` -> `cls : ins_method(...)`
 function Graph:register_sub_class(sub_cls_category, sub_cls_info)
 	local sub_cls = self[sub_cls_category .. "_sub_cls"]
 
