@@ -5,6 +5,8 @@
 ---@alias AlgType string
 
 ---@class PrototypeAlg
+---@field initial_ease integer Initial ease of the algorithm.
+---@field initial_interval integer Initial interval of the algorithm.
 ---@field data table Data of the algorithm.
 ---@field version integer Version of the algorithm.
 local PrototypeAlg = {}
@@ -18,6 +20,8 @@ local prototype_alg_version = 0
 ---@return PrototypeAlg _ The created algorithm.
 function PrototypeAlg:new(data, version)
 	local prototype_alg = {
+		initial_ease = 250,
+		initial_interval = 1,
 		data = data or {},
 		version = version or prototype_alg_version,
 	}

@@ -21,7 +21,7 @@ local utils = require("mindmap.utils")
 ---@field default_edge_ins_method table<string, function> Default instance method for all edges. Example: `bar(self, ...)`.
 ---@field default_edge_cls_method table<string, function> Default class method for all edges. Example: `bar(cls, self, ...)`.
 ---
----@field alg_type string Type of the algorithm used in space repetition. Default to "sm-2".
+---@field alg_type string Type of the algorithm used in space repetition. Default to "SM2Alg".
 ---@field alg_prototype_cls PrototypeAlg Prototype of the algorithm. Used to create sub algorithm classes. Must have a `new` method and a `data` field.
 ---@field alg_sub_cls_info table<AlgType, PrototypeAlg> Information of the sub algorithm classes. Must have `data`, `ins_methods` and `cls_methods` fields.
 ---@field default_alg_ins_method table<string, function> Default instance method for all algorithms. Example: `baz(self, ...)`.
@@ -144,7 +144,7 @@ end
 ---@param default_edge_ins_method table<string, function> Default instance method for all edges. Example: `bar(self, ...)`.
 ---@param default_edge_cls_method table<string, function> Default class method for all edges. Example: `bar(cls, self, ...)`.
 ---
----@param alg_type string Type of the algorithm used in space repetition. Default to "sm-2".
+---@param alg_type string Type of the algorithm used in space repetition. Default to "SM2Alg".
 ---@param alg_prototype_cls PrototypeAlg Prototype of the algorithm. Used to create sub algorithm classes. Must have a `new` method and a `data` field.
 ---@param alg_sub_cls_info table<AlgType, PrototypeAlg> Information of the sub algorithm classes. Must have `data`, `ins_methods` and `cls_methods` fields.
 ---@param default_alg_ins_method table<string, function> Default instance method for all algorithms. Example: `baz(self, ...)`.
@@ -232,7 +232,7 @@ function Graph:new(
 		default_edge_ins_method = default_edge_ins_method or {},
 		default_edge_cls_method = default_edge_cls_method or {},
 		--
-		alg_type = alg_type or "sm-2",
+		alg_type = alg_type or "SM2Alg",
 		alg_prototype_cls = alg_prototype_cls,
 		alg_sub_cls_info = setmetatable(alg_sub_cls_info, {
 			__index = function(tbl, key)
@@ -378,7 +378,12 @@ function Graph:add_edge(edge)
 		edge:before_add_into_graph()
 	end
 
+	-- TODO: allow auto init
+	-- TODO: allow use init function
+	edge.ease = self.alg.initial_ease
+	edge.interval = self.alg.initial_interval
 	self.edges[edge.id] = edge
+
 	local from_node = self.nodes[edge.from_node_id]
 	from_node:add_outcoming_edge_id(edge.id)
 	local to_node = self.nodes[edge.to_node_id]

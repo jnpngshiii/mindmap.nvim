@@ -31,7 +31,7 @@ local M = {}
 ---@field default_edge_ins_method table<string, function> Default instance method for all edges. Example: `bar(self, ...)`.
 ---@field default_edge_cls_method table<string, function> Default class method for all edges. Example: `bar(cls, self, ...)`.
 ---Space repetition configuration:
----@field alg_type string Type of the algorithm used in space repetition. Default to "sm-2".
+---@field alg_type string Type of the algorithm used in space repetition. Default to "SM2Alg".
 ---@field alg_prototype_cls PrototypeAlg Prototype of the algorithm. Used to create sub algorithm classes. Must have a `new` method and a `data` field.
 ---@field alg_sub_cls_info table<AlgType, PrototypeAlg> Information of the sub algorithm classes. Must have `data`, `ins_methods` and `cls_methods` fields.
 ---@field default_alg_ins_method table<string, function> Default instance method for all algorithms. Example: `baz(self, ...)`.
@@ -71,11 +71,15 @@ local plugin_config = {
 	default_edge_ins_method = require("mindmap.graph.edge.default_ins_method"),
 	default_edge_cls_method = require("mindmap.graph.edge.default_cls_method"),
 	-- Space repetitionconfiguration:
-	alg_type = "sm-2",
-	alg_prototype_cls = require("mindmap.graph.alg.alg_prototype_cls"),
-	alg_sub_cls_info = require("mindmap.graph.alg.alg_sub_cls_info"),
-	default_alg_ins_method = require("mindmap.graph.alg.alg_ins_method"),
-	default_alg_cls_method = require("mindmap.graph.alg.alg_cls_method"),
+	alg_type = "SimpleAlg", -- TODO: "SM2Alg"
+	alg_prototype_cls = require("mindmap.graph.alg.prototype_alg"),
+	alg_sub_cls_info = {
+		AnkiAlg = require("mindmap.graph.alg.anki_alg"),
+		SimpleAlg = require("mindmap.graph.alg.simple_alg"),
+		SM2Alg = require("mindmap.graph.alg.sm2_alg"),
+	},
+	default_alg_ins_method = require("mindmap.graph.alg.default_ins_method"),
+	default_alg_cls_method = require("mindmap.graph.alg.default_cls_method"),
 	-- Behavior configuration:
 	--   Automatic behavior:
 	show_excerpt_after_add = true,
