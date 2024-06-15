@@ -86,7 +86,7 @@ function Graph:register_sub_class(sub_cls_category, sub_cls_info)
 			end
 			-- Add specific instance methods.
 			if cls_info.ins_methods then
-				for name, func in pairs(cls_info.ins_methods) do
+				for name, func in pairs(cls_info.ins_methods or {}) do
 					assert(type(func) == "function", "Instance method `" .. name .. "` is not a function.")
 					sub_class[name] = func
 				end
@@ -100,7 +100,7 @@ function Graph:register_sub_class(sub_cls_category, sub_cls_info)
 			end
 			-- Add specific class methods.
 			if cls_info.cls_methods then
-				for name, func in pairs(cls_info.cls_methods) do
+				for name, func in pairs(cls_info.cls_methods or {}) do
 					sub_class[name] = function(...)
 						return func(sub_class, ...)
 					end

@@ -1,7 +1,7 @@
-local edge_cls_method = {}
+local default_edge_cls_method = {}
 
 ---@diagnostic disable-next-line: unused-local
-function edge_cls_method.to_table(cls, self)
+function default_edge_cls_method.to_table(cls, self)
 	return {
 		id = self.id,
 		from_node_id = self.from_node_id,
@@ -23,7 +23,7 @@ function edge_cls_method.to_table(cls, self)
 end
 
 ---@diagnostic disable-next-line: unused-local
-function edge_cls_method.from_table(cls, self, tbl)
+function default_edge_cls_method.from_table(cls, self, tbl)
 	return cls:new(
 		tbl.id,
 		tbl.from_node_id,
@@ -44,4 +44,4 @@ function edge_cls_method.from_table(cls, self, tbl)
 	)
 end
 
-return edge_cls_method
+return default_edge_cls_method

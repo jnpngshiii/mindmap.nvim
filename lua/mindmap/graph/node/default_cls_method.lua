@@ -1,7 +1,7 @@
-local node_cls_method = {}
+local default_node_cls_method = {}
 
 ---@diagnostic disable-next-line: unused-local
-function node_cls_method.to_table(cls, self)
+function default_node_cls_method.to_table(cls, self)
 	return {
 		id = self.id,
 		file_name = self.file_name,
@@ -19,7 +19,7 @@ function node_cls_method.to_table(cls, self)
 end
 
 ---@diagnostic disable-next-line: unused-local
-function node_cls_method.from_table(cls, self, tbl)
+function default_node_cls_method.from_table(cls, self, tbl)
 	return cls:new(
 		tbl.id,
 		tbl.file_name,
@@ -36,4 +36,4 @@ function node_cls_method.from_table(cls, self, tbl)
 	)
 end
 
-return node_cls_method
+return default_node_cls_method

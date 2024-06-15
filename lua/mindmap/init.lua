@@ -52,16 +52,24 @@ local plugin_config = {
 	-- Graph configuration:
 	--   Node:
 	default_node_type = "SimpleNode",
-	node_prototype_cls = require("mindmap.graph.node.node_prototype_cls"),
-	node_sub_cls_info = require("mindmap.graph.node.node_sub_cls_info"),
-	default_node_ins_method = require("mindmap.graph.node.node_ins_method"),
-	default_node_cls_method = require("mindmap.graph.node.node_cls_method"),
+	node_prototype_cls = require("mindmap.graph.node.prototype_node"),
+	node_sub_cls_info = {
+		ExcerptNode = require("mindmap.graph.node.excerpt_node"),
+		HeadingNode = require("mindmap.graph.node.heading_node"),
+		SimpleNode = require("mindmap.graph.node.simple_node"),
+	},
+	default_node_ins_method = require("mindmap.graph.node.default_ins_method"),
+	default_node_cls_method = require("mindmap.graph.node.default_cls_method"),
 	--   Edge:
 	default_edge_type = "SimpleEdge",
-	edge_prototype_cls = require("mindmap.graph.edge.edge_prototype_cls"),
-	edge_sub_cls_info = require("mindmap.graph.edge.edge_sub_cls_info"),
-	default_edge_ins_method = require("mindmap.graph.edge.edge_ins_method"),
-	default_edge_cls_method = require("mindmap.graph.edge.edge_cls_method"),
+	edge_prototype_cls = require("mindmap.graph.edge.prototype_edge"),
+	edge_sub_cls_info = {
+		SelfLoopContentEdge = require("mindmap.graph.edge.self_loop_content_edge"),
+		SelfLoopSubheadingEdge = require("mindmap.graph.edge.self_loop_subheading_edge"),
+		SimpleEdge = require("mindmap.graph.edge.simple_edge"),
+	},
+	default_edge_ins_method = require("mindmap.graph.edge.default_ins_method"),
+	default_edge_cls_method = require("mindmap.graph.edge.default_cls_method"),
 	-- Space repetitionconfiguration:
 	alg_type = "sm-2",
 	alg_prototype_cls = require("mindmap.graph.alg.alg_prototype_cls"),
