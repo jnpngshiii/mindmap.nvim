@@ -1,5 +1,7 @@
-local Logger = require("mindmap.graph.logger")
+local Popup = require("nui.popup")
+local Layout = require("nui.layout")
 
+local Logger = require("mindmap.graph.logger")
 local utils = require("mindmap.utils")
 
 ---@class Graph
@@ -472,6 +474,96 @@ function Graph:get_sp_info_from_edge(edge_id)
 	local _, back = from_node:get_content(edge.type)
 
 	return front, back, edge.created_at, edge.updated_at, edge.due_at, edge.ease, edge.interval
+end
+
+---Show card.
+---@param edge_id EdgeID ID of the edge.
+---@return nil _ This function does not return anything.
+function Graph:show_card(edge_id)
+	local edge = self.edges[edge_id]
+	local front, back, _, _, _, _, _ = self:get_sp_info_from_edge(edge_id)
+
+	--------------------
+	-- UI
+	--------------------
+
+	local card_front, card_back =
+		Popup({
+			enter = false,
+			focusable = false,
+			border = {
+				style = "rounded",
+				text = { top = " Front ", top_align = "center" },
+			},
+			buf_options = { filetype = "norg", readonly = false },
+		}), Popup({
+			enter = false,
+			focusable = false,
+			relative = "editor",
+			border = {
+				style = "rounded",
+				text = { top = " Back ", top_align = "center" },
+			},
+			buf_options = { filetype = "norg", readonly = false },
+		})
+
+	local card_ui = Layout(
+		{
+			position = { row = "50%", col = "50%" },
+			size = { width = "20%", height = "20%" },
+		},
+		Layout.Box({
+			Layout.Box(card_front, { size = "20%" }),
+			Layout.Box(card_back, { size = "80%" }),
+		}, { dir = "col" })
+	)
+	card_ui:mount()
+
+	--------------------
+	-- Front
+	--------------------
+
+	vim.api.nvim_buf_set_lines(card_front.bufnr, 0, -1, false, front)
+
+	local choice
+	repeat
+		choice = vim.fn.getchar()
+	until choice == string.byte(" ") or choice == string.byte("q")
+
+	if choice == string.byte("q") then
+		self.logger:info("SP", "Quit spaced repetition.")
+		card_ui:unmount()
+		return
+	end
+
+	--------------------
+	-- Back
+	--------------------
+
+	vim.api.nvim_buf_set_lines(card_back.bufnr, 0, -1, false, back)
+	card_ui:update({})
+
+	repeat
+		choice = vim.fn.getchar()
+	until choice == string.byte("1")
+		or choice == string.byte("a")
+		or choice == string.byte("2")
+		or choice == string.byte("g")
+		or choice == string.byte("3")
+		or choice == string.byte("e")
+		or choice == string.byte("q")
+
+	if choice == string.byte("1") or choice == string.byte("a") then
+		self.alg:answer_again(edge)
+	elseif choice == string.byte("2") or choice == string.byte("g") then
+		self.alg:answer_good(edge)
+	elseif choice == string.byte("3") or choice == string.byte("e") then
+		self.alg:answer_easy(edge)
+	elseif choice == string.byte("q") then
+		self.logger:info("SP", "Quit spaced repetition.")
+	end
+
+	card_ui:unmount()
 end
 
 ---Save a graph to a JSON file.

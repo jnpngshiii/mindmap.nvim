@@ -727,6 +727,12 @@ end
 function M.MindmapTest()
 	local graph = find_graph()
 
+	-- TODO: to_node 必须要打开
+	-- TODO: 内容不回绕显示
+	-- TODO: 优化 UI
+	graph:show_card(3)
+	graph:show_card(4)
+
 	graph:save()
 end
 
