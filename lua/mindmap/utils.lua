@@ -209,11 +209,11 @@ function M.get_file_content(bufnr_or_file_path, start_row, end_row, start_col, e
 end
 
 ---Get the buffer number from the buffer number or file path.
----@param bufnr_or_file_path integer|string Buffer number or file path.
+---@param bufnr_or_file_path? integer|string Buffer number or file path. Default: 0.
 ---@param create_buf_if_not_exist? boolean|string Create a new buffer if the buffer does not exist, and how to create it. Can be nil, true, false, "h" or "v". Default: nil.
 ---@return integer bufnr, boolean is_temp_buf Buffer number and whether it is a temp buffer.
 function M.giiit_bufnr(bufnr_or_file_path, create_buf_if_not_exist)
-	local bufnr = vim.fn.bufnr(bufnr_or_file_path)
+	local bufnr = vim.fn.bufnr(bufnr_or_file_path or 0)
 	local is_temp_buf = false
 
 	if bufnr == -1 and create_buf_if_not_exist and type(bufnr_or_file_path) == "string" then

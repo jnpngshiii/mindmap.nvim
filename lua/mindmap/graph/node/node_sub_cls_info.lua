@@ -96,47 +96,50 @@ default_node_sub_cls.HeadingNode = {
 		--
 	},
 	ins_methods = {
-		---Manage the id of the node in the text.
-		---@param self PrototypeNode
-		---@param action string Action to be taken. Can be 'add' or 'remove'.
-		---@return nil _ This function does not return anything.
-		manage_text_id = function(self, action)
-			if action ~= "add" and action ~= "remove" then
-				vim.notify("Invalid action: " .. action .. ". Action must be 'add' or 'remove'.")
-				return
-			end
-
-			local ts_node, bufnr, is_temp_buf = self:get_corresponding_ts_node()
-			local ts_node_title, _, _ = ts_utils.parse_heading_node(ts_node)
-
-			if action == "add" then
+		after_add_into_graph = function(self)
+			-- Use cache
+			if type(self.cache.ts_node) == "userdata" and type(self.cache.ts_node_bufnr) == "number" then
+				local ts_node_title, _, _ = ts_utils.parse_heading_node(self.cache.ts_node)
 				local node_text = vim.treesitter.get_node_text(ts_node_title, 0)
 				ts_utils.replace_node_text(
-					string.gsub(node_text, "%$", " %%" .. string.format("%08d", self.id) .. "%%"),
+					string.gsub(node_text, "$", " %%" .. string.format("%08d", self.id) .. "%%"),
 					ts_node_title,
-					bufnr
+					self.cache.ts_node_bufnr
 				)
 			end
-			if action == "remove" then
+
+			-- TODO: add else
+		end,
+
+		after_remove_from_graph = function(self)
+			-- Use cache
+			if type(self.cache.ts_node) == "userdata" and type(self.cache.ts_node_bufnr) == "number" then
+				local ts_node_title, _, _ = ts_utils.parse_heading_node(self.cache.ts_node)
 				local node_text = vim.treesitter.get_node_text(ts_node_title, 0)
 				ts_utils.replace_node_text(
 					string.gsub(node_text, " %%" .. string.format("%08d", self.id) .. "%%", ""),
 					ts_node_title,
-					bufnr
+					self.cache.ts_node_bufnr
 				)
+
+				return
 			end
+
+			local abs_path = self:get_abs_path()
+			local bufnr, is_temp_buf = utils.giiit_bufnr(abs_path)
+			local ts_node = ts_utils.get_heading_node_by_id(self.id, bufnr)
+			local ts_node_title, _, _ = ts_utils.parse_heading_node(ts_node)
+
+			local node_text = vim.treesitter.get_node_text(ts_node_title, 0)
+			ts_utils.replace_node_text(
+				string.gsub(node_text, " %%" .. string.format("%08d", self.id) .. "%%", ""),
+				ts_node_title,
+				bufnr
+			)
 
 			if is_temp_buf then
 				vim.api.nvim_buf_delete(bufnr, { force = true })
 			end
-		end,
-
-		after_add_into_graph = function(self)
-			self:manage_text_id("add")
-		end,
-
-		after_remove_from_graph = function(self)
-			self:manage_text_id("remove")
 		end,
 
 		---Get the content of the node.

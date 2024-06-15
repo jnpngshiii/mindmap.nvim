@@ -176,8 +176,6 @@ local function find_heading_nodes(graph, location)
 	if location == "lastest" then
 		-- The process here is a littel bit different.
 		local lastest_node = graph.nodes[#graph.nodes]
-		-- local lastest_ts_node, _, _ = lastest_node:get_corresponding_ts_node()
-		-- FIXME: -1 bufnr
 		local lastest_ts_node
 
 		if lastest_node.state == "active" then
@@ -253,11 +251,11 @@ end
 ---@deprecated
 -- TODO: Merge into `MindmapAdd`
 function M.MindmapAddNearestHeadingAsHeadingNode()
-	-- Get graph
+	-- Get graph --
 
 	local found_graph = find_graph()
 
-	-- Get tree-sitter node
+	-- Get tree-sitter node --
 
 	local nearest_heading_ts_node = nts_utils.get_node_at_cursor()
 	while nearest_heading_ts_node and not nearest_heading_ts_node:type():match("^heading%d$") do
@@ -267,7 +265,7 @@ function M.MindmapAddNearestHeadingAsHeadingNode()
 		return
 	end
 
-	-- Pre action
+	-- Pre action --
 
 	-- Avoid adding the same heading node
 	local title_node, _, _ = ts_utils.parse_heading_node(nearest_heading_ts_node)
@@ -276,15 +274,19 @@ function M.MindmapAddNearestHeadingAsHeadingNode()
 		return
 	end
 
-	-- Add node
+	-- Add node --
 
 	local file_name, _, rel_file_path, _ = unpack(utils.get_file_info())
 	local created_heading_node =
 		found_graph.node_sub_cls["HeadingNode"]:new(#found_graph.nodes + 1, file_name, rel_file_path)
+	created_heading_node.cache.ts_node = nearest_heading_ts_node
+	created_heading_node.cache.ts_node_bufnr = vim.api.nvim_get_current_buf()
+
 	found_graph:add_node(created_heading_node)
 
-	-- Post action
-	-- This action is manage by `node:after_add_into_graph(self)`
+	-- Post action --
+	-- This action is manage by `node:after_add_into_graph(self)`,
+	-- which is auto called by `graph:add_node(node)`.
 end
 
 vim.api.nvim_create_user_command("MindmapAddNearestHeadingAsHeadingNode", function()
