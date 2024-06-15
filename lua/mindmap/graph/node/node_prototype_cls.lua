@@ -25,13 +25,14 @@ local ts_utils = require("mindmap.ts_utils")
 ---@field cache table<string, any> Cache of the node.
 local PrototypeNode = {}
 
-local prototype_node_version = 5
+local prototype_node_version = 6
 -- v0: Initial version.
 -- v1: Add `tag` field.
 -- v2: Remove `id` field.
 -- v3: Make `type` field auto generated.
 -- v4: Factory.
 -- v5: Add `id` field and `state` field.
+-- v6: Add `[before|after]_[add_into|remove_from]_graph` methods.
 
 ----------
 -- Instance Method

@@ -37,9 +37,10 @@ local utils = require("mindmap.utils")
 ---@field alg PrototypeAlg Algorithm of the graph.
 local Graph = {}
 
-local graph_version = 1
+local graph_version = 2
 -- v0: Initial version.
 -- v1: Add `alg` field.
+-- v2: Auto call `[before|after]_[add_into|remove_from]_graph`
 
 --------------------
 -- Instance Method

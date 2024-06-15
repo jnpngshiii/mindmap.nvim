@@ -26,7 +26,7 @@
 ---@field cache table Cache of the edge. Save temporary data to avoid recalculation. Auto generated and updated.
 local PrototypeEdge = {}
 
-local prototype_edge_version = 7
+local prototype_edge_version = 8
 -- v0: Initial version.
 -- v1: Add `tag` field.
 -- v2: Remove `id` field.
@@ -35,6 +35,7 @@ local prototype_edge_version = 7
 -- v5: Add `id` field, `algorithm` field, and `state` field.
 -- v6: Remove `algorithm` field.
 -- v7: Add `answer_count` field and `again_count` field.
+-- v8: Add `[before|after]_[add_into|remove_from]_graph` methods.
 
 ----------
 -- Instance Method
