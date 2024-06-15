@@ -9,7 +9,7 @@ version: 1.1.1
 @end
 * 1. First Title
    This is content 1.
-* 2. Second Title %00000001%
+* 2. Second Title
    This is content 2.
 ** 2.1 sub title %00000002%
    This is content 2.1.

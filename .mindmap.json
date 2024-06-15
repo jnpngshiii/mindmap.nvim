@@ -4,66 +4,85 @@
       "tag": [],
       "id": 1,
       "data": [],
-      "file_name": "mindmap.norg",
       "outcoming_edge_ids": [],
+      "rel_file_path": "doc",
       "created_at": 1718195295,
-      "state": "active",
+      "state": "removed",
       "type": "HeadingNode",
       "version": 5,
-      "rel_file_path": "doc",
-      "incoming_edge_ids": [1, 2]
+      "file_name": "mindmap.norg",
+      "incoming_edge_ids": [
+        1,
+        2
+      ]
     },
     {
       "tag": [],
       "id": 2,
       "data": [],
-      "file_name": "mindmap.norg",
       "outcoming_edge_ids": [],
+      "rel_file_path": "doc",
       "created_at": 1718195302,
       "state": "active",
       "type": "HeadingNode",
       "version": 5,
-      "rel_file_path": "doc",
-      "incoming_edge_ids": [3]
+      "file_name": "mindmap.norg",
+      "incoming_edge_ids": [
+        3
+      ]
     },
     {
       "tag": [],
       "id": 3,
-      "data": { "start_col": 16, "start_row": 2, "end_col": 18, "end_row": 4 },
-      "file_name": "extra_info.txt",
-      "outcoming_edge_ids": [1, 2],
+      "data": {
+        "start_col": 16,
+        "start_row": 2,
+        "end_col": 18,
+        "end_row": 4
+      },
+      "outcoming_edge_ids": [],
+      "rel_file_path": "doc",
       "created_at": 1718195324,
       "state": "active",
       "type": "ExcerptNode",
       "version": 5,
-      "rel_file_path": "doc",
+      "file_name": "extra_info.txt",
       "incoming_edge_ids": []
     },
     {
       "tag": [],
       "id": 4,
-      "data": { "start_col": 21, "start_row": 5, "end_col": 34, "end_row": 6 },
-      "file_name": "extra_info.txt",
-      "outcoming_edge_ids": [3],
+      "data": {
+        "start_col": 21,
+        "start_row": 5,
+        "end_col": 34,
+        "end_row": 6
+      },
+      "outcoming_edge_ids": [
+        3
+      ],
+      "rel_file_path": "doc",
       "created_at": 1718197966,
       "state": "active",
       "type": "ExcerptNode",
       "version": 5,
-      "rel_file_path": "doc",
+      "file_name": "extra_info.txt",
       "incoming_edge_ids": []
     },
     {
       "tag": [],
       "id": 5,
       "data": [],
-      "file_name": "mindmap.norg",
       "outcoming_edge_ids": [],
+      "rel_file_path": "doc",
       "created_at": 1718204259,
       "state": "active",
       "type": "HeadingNode",
       "version": 5,
-      "rel_file_path": "doc",
-      "incoming_edge_ids": [4]
+      "file_name": "mindmap.norg",
+      "incoming_edge_ids": [
+        4
+      ]
     },
     {
       "tag": [],
@@ -74,52 +93,67 @@
         "end_col": 108,
         "end_row": 20
       },
-      "file_name": "chapter113.xhtml",
-      "outcoming_edge_ids": [4],
+      "outcoming_edge_ids": [
+        4
+      ],
+      "rel_file_path": "doc",
       "created_at": 1718204313,
       "state": "active",
       "type": "ExcerptNode",
       "version": 5,
-      "rel_file_path": "doc",
+      "file_name": "chapter113.xhtml",
       "incoming_edge_ids": []
     },
     {
       "tag": [],
       "id": 7,
-      "data": { "start_col": 0, "start_row": 0, "end_col": 0, "end_row": 0 },
-      "file_name": "chapter113.xhtml",
+      "data": {
+        "start_col": 0,
+        "start_row": 0,
+        "end_col": 0,
+        "end_row": 0
+      },
       "outcoming_edge_ids": [],
+      "rel_file_path": "doc",
       "created_at": 1718205278,
       "state": "active",
       "type": "ExcerptNode",
       "version": 5,
-      "rel_file_path": "doc",
+      "file_name": "chapter113.xhtml",
       "incoming_edge_ids": []
     },
     {
       "tag": [],
       "id": 8,
       "data": [],
-      "file_name": "mindmap.norg",
       "outcoming_edge_ids": [],
+      "rel_file_path": "doc",
       "created_at": 1718205288,
       "state": "removed",
       "type": "HeadingNode",
       "version": 5,
-      "rel_file_path": "doc",
-      "incoming_edge_ids": [5, 6]
+      "file_name": "mindmap.norg",
+      "incoming_edge_ids": [
+        5,
+        6
+      ]
     },
     {
       "tag": [],
       "id": 9,
-      "data": { "start_col": 0, "start_row": 0, "end_col": 0, "end_row": 0 },
-      "file_name": "chapter113.xhtml",
+      "data": {
+        "start_col": 0,
+        "start_row": 0,
+        "end_col": 0,
+        "end_row": 0
+      },
       "outcoming_edge_ids": [],
+      "rel_file_path": "doc",
       "created_at": 1718205347,
       "state": "active",
       "type": "ExcerptNode",
       "version": 5,
-      "rel_file_path": "doc",
+      "file_name": "chapter113.xhtml",
       "incoming_edge_ids": []
     },
     {
@@ -131,27 +165,29 @@
         "end_col": 192,
         "end_row": 23
       },
-      "file_name": "chapter113.xhtml",
       "outcoming_edge_ids": [],
+      "rel_file_path": "doc",
       "created_at": 1718205380,
       "state": "active",
       "type": "ExcerptNode",
       "version": 5,
-      "rel_file_path": "doc",
+      "file_name": "chapter113.xhtml",
       "incoming_edge_ids": []
     },
     {
       "tag": [],
       "id": 11,
       "data": [],
-      "file_name": "mindmap.norg",
       "outcoming_edge_ids": [],
+      "rel_file_path": "doc",
       "created_at": 1718205411,
       "state": "active",
       "type": "HeadingNode",
       "version": 5,
-      "rel_file_path": "doc",
-      "incoming_edge_ids": [7]
+      "file_name": "mindmap.norg",
+      "incoming_edge_ids": [
+        7
+      ]
     },
     {
       "tag": [],
@@ -162,122 +198,137 @@
         "end_col": 192,
         "end_row": 23
       },
-      "file_name": "chapter113.xhtml",
-      "outcoming_edge_ids": [7],
+      "outcoming_edge_ids": [
+        7
+      ],
+      "rel_file_path": "doc",
       "created_at": 1718205440,
       "state": "active",
       "type": "ExcerptNode",
       "version": 5,
-      "rel_file_path": "doc",
+      "file_name": "chapter113.xhtml",
       "incoming_edge_ids": []
     }
   ],
   "edges": [
     {
       "tag": [],
+      "version": 6,
+      "state": "removed",
+      "type": "SimpleEdge",
+      "to_node_id": 1,
       "id": 1,
-      "data": [],
-      "updated_at": 1718197113,
-      "due_at": 0,
-      "from_node_id": 3,
       "created_at": 1718197113,
-      "state": "active",
-      "type": "SimpleEdge",
-      "to_node_id": 1,
-      "version": 6,
-      "ease": 250,
-      "interval": 1
-    },
-    {
-      "tag": [],
-      "id": 2,
-      "data": [],
-      "updated_at": 1718197935,
-      "due_at": 0,
       "from_node_id": 3,
-      "created_at": 1718197935,
-      "state": "active",
-      "type": "SimpleEdge",
-      "to_node_id": 1,
-      "version": 6,
+      "updated_at": 1718197113,
+      "again_count": 0,
+      "answer_count": 0,
+      "interval": 1,
       "ease": 250,
-      "interval": 1
+      "data": [],
+      "due_at": 0
     },
     {
       "tag": [],
-      "id": 3,
+      "version": 6,
+      "state": "removed",
+      "type": "SimpleEdge",
+      "to_node_id": 1,
+      "id": 2,
+      "created_at": 1718197935,
+      "from_node_id": 3,
+      "updated_at": 1718197935,
+      "again_count": 0,
+      "answer_count": 0,
+      "interval": 1,
+      "ease": 250,
       "data": [],
-      "updated_at": 1718197979,
-      "due_at": 0,
-      "from_node_id": 4,
-      "created_at": 1718197979,
+      "due_at": 0
+    },
+    {
+      "tag": [],
+      "version": 6,
       "state": "active",
       "type": "SimpleEdge",
       "to_node_id": 2,
-      "version": 6,
+      "id": 3,
+      "created_at": 1718197979,
+      "from_node_id": 4,
+      "updated_at": 1718197979,
+      "again_count": 0,
+      "answer_count": 0,
+      "interval": 1,
       "ease": 250,
-      "interval": 1
+      "data": [],
+      "due_at": 0
     },
     {
       "tag": [],
-      "id": 4,
-      "data": [],
-      "updated_at": 1718204326,
-      "due_at": 0,
-      "from_node_id": 6,
-      "created_at": 1718204326,
+      "version": 6,
       "state": "active",
       "type": "SimpleEdge",
       "to_node_id": 5,
-      "version": 6,
+      "id": 4,
+      "created_at": 1718204326,
+      "from_node_id": 6,
+      "updated_at": 1718204326,
+      "again_count": 0,
+      "answer_count": 0,
+      "interval": 1,
       "ease": 250,
-      "interval": 1
+      "data": [],
+      "due_at": 0
     },
     {
       "tag": [],
+      "version": 6,
+      "state": "removed",
+      "type": "SimpleEdge",
+      "to_node_id": 8,
       "id": 5,
-      "data": [],
-      "updated_at": 1718205294,
-      "due_at": 0,
-      "from_node_id": 8,
       "created_at": 1718205294,
-      "state": "removed",
-      "type": "SimpleEdge",
-      "to_node_id": 8,
-      "version": 6,
+      "from_node_id": 8,
+      "updated_at": 1718205294,
+      "again_count": 0,
+      "answer_count": 0,
+      "interval": 1,
       "ease": 250,
-      "interval": 1
+      "data": [],
+      "due_at": 0
     },
     {
       "tag": [],
+      "version": 6,
+      "state": "removed",
+      "type": "SimpleEdge",
+      "to_node_id": 8,
       "id": 6,
-      "data": [],
-      "updated_at": 1718205368,
-      "due_at": 0,
-      "from_node_id": 9,
       "created_at": 1718205368,
-      "state": "removed",
-      "type": "SimpleEdge",
-      "to_node_id": 8,
-      "version": 6,
+      "from_node_id": 9,
+      "updated_at": 1718205368,
+      "again_count": 0,
+      "answer_count": 0,
+      "interval": 1,
       "ease": 250,
-      "interval": 1
+      "data": [],
+      "due_at": 0
     },
     {
       "tag": [],
-      "id": 7,
-      "data": [],
-      "updated_at": 1718205460,
-      "due_at": 0,
-      "from_node_id": 12,
-      "created_at": 1718205460,
+      "version": 6,
       "state": "active",
       "type": "SimpleEdge",
       "to_node_id": 11,
-      "version": 6,
+      "id": 7,
+      "created_at": 1718205460,
+      "from_node_id": 12,
+      "updated_at": 1718205460,
+      "again_count": 0,
+      "answer_count": 0,
+      "interval": 1,
       "ease": 250,
-      "interval": 1
+      "data": [],
+      "due_at": 0
     }
   ]
 }
-

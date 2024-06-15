@@ -131,6 +131,14 @@ default_node_sub_cls.HeadingNode = {
 			end
 		end,
 
+		after_add_into_graph = function(self)
+			self:manage_text_id("add")
+		end,
+
+		after_remove_from_graph = function(self)
+			self:manage_text_id("remove")
+		end,
+
 		---Get the content of the node.
 		---@param edge_type EdgeType Type of the edge.
 		---@return string[] front ,string[] back Content of the node.

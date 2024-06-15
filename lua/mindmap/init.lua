@@ -253,16 +253,21 @@ end
 ---@deprecated
 -- TODO: Merge into `MindmapAdd`
 function M.MindmapAddNearestHeadingAsHeadingNode()
+	-- Get graph
+
 	local found_graph = find_graph()
+
+	-- Get tree-sitter node
 
 	local nearest_heading_ts_node = nts_utils.get_node_at_cursor()
 	while nearest_heading_ts_node and not nearest_heading_ts_node:type():match("^heading%d$") do
 		nearest_heading_ts_node = nearest_heading_ts_node:parent()
 	end
-
 	if not nearest_heading_ts_node then
 		return
 	end
+
+	-- Pre action
 
 	-- Avoid adding the same heading node
 	local title_node, _, _ = ts_utils.parse_heading_node(nearest_heading_ts_node)
@@ -271,18 +276,15 @@ function M.MindmapAddNearestHeadingAsHeadingNode()
 		return
 	end
 
+	-- Add node
+
 	local file_name, _, rel_file_path, _ = unpack(utils.get_file_info())
 	local created_heading_node =
 		found_graph.node_sub_cls["HeadingNode"]:new(#found_graph.nodes + 1, file_name, rel_file_path)
-
-	local nearest_heading_title_node, _, _ = ts_utils.parse_heading_node(nearest_heading_ts_node)
-	local node_text = vim.treesitter.get_node_text(nearest_heading_title_node, 0)
-	ts_utils.replace_node_text(
-		node_text .. " %" .. string.format("%08d", #found_graph.nodes + 1) .. "%",
-		nearest_heading_title_node,
-		0
-	)
 	found_graph:add_node(created_heading_node)
+
+	-- Post action
+	-- This action is manage by `node:after_add_into_graph(self)`
 end
 
 vim.api.nvim_create_user_command("MindmapAddNearestHeadingAsHeadingNode", function()
@@ -412,11 +414,7 @@ function M.MindmapRemove(location, node_or_edge_type)
 	if node_or_edge_type == "node" or found_graph.node_sub_cls[node_or_edge_type] then
 		for id, node in pairs(nodes) do
 			if node_or_edge_type == "node" or node.type == node_or_edge_type then
-				-- First, remove the node from the graph
 				found_graph:remove_node(id)
-				-- Second, remove the node from the text
-				-- TODO: abstract this
-				node:manage_text_id("remove")
 			end
 		end
 	end
