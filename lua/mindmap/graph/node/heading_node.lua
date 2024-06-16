@@ -19,9 +19,7 @@ local HeadingNode = {
 ---@param self HeadingNode The node.
 function HeadingNode.ins_methods.after_add_into_graph(self)
 	-- Use cache
-	print("HeadingNode after_add_into_graph")
 	if type(self.cache.ts_node) == "userdata" and type(self.cache.ts_node_bufnr) == "number" then
-		print("HeadingNode after_add_into_graph cache")
 		local ts_node_title, _, _ = ts_utils.parse_heading_node(self.cache.ts_node)
 		local node_text = vim.treesitter.get_node_text(ts_node_title, 0)
 		ts_utils.replace_node_text(
@@ -51,7 +49,7 @@ function HeadingNode.ins_methods.after_remove_from_graph(self)
 	end
 
 	local abs_path = self:get_abs_path()
-	local bufnr, is_temp_buf = utils.giiit_bufnr(abs_path)
+	local bufnr, is_temp_buf = utils.get_bufnr(abs_path)
 	local ts_node = ts_utils.get_heading_node_by_id(self.id, bufnr)
 	if not ts_node then
 		vim.notify("Can not find the tree-sitter node with id: " .. self.id .. ". Aborted.", vim.log.levels.ERROR)
@@ -82,7 +80,7 @@ function HeadingNode.ins_methods.get_content(self, edge_type)
 
 	local abs_proj_path = utils.get_file_info()[4]
 	local abs_file_path = utils.get_abs_path(self.rel_file_path, abs_proj_path)
-	local bufnr, is_temp_buf = utils.giiit_bufnr(abs_file_path .. "/" .. self.file_name)
+	local bufnr, is_temp_buf = utils.get_bufnr(abs_file_path .. "/" .. self.file_name)
 	local heading_node = ts_utils.get_heading_node_by_id(self.id, bufnr)
 
 	if not heading_node then

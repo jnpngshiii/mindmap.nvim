@@ -389,7 +389,7 @@ end, {
 			end
 			return tbl
 		else
-			return { "lastest", "nearest", "telescope", "buffer" }
+			return { "lastest", "nearest", "-telescope", "buffer" }
 		end
 	end,
 })
@@ -464,7 +464,7 @@ end, {
 	---@diagnostic disable-next-line: unused-local
 	complete = function(arg_lead, cmd_line, cursor_pos)
 		if cursor_pos == 14 then
-			return { "nearest", "buffer", "*graph", "*telescope" }
+			return { "lastest", "nearest", "-telescope", "buffer" }
 		else
 			return { "node", "edge" }
 		end
@@ -499,13 +499,83 @@ if plugin_config.enable_default_keymap then
 end
 
 ----------
--- MindmapShow
+-- MindmapSp
 ----------
 
-function M.MindmapShow(location, show_type)
+function M.MindmapSp(location)
+	local found_graph = find_graph()
+	local heading_nodes, _ = find_heading_nodes(found_graph, location)
+
+	vim.notify("Reviewing `" .. location .. "` start.")
+
+	for _, node in pairs(heading_nodes) do
+		for _, edge_id in ipairs(node.incoming_edge_ids) do
+			if found_graph.edges[edge_id].due_at < tonumber(os.time()) then
+				found_graph:show_card(edge_id)
+			end
+		end
+		-- TODO: review outgoing edge here?
+		for _, edge_id in ipairs(node.outcoming_edge_ids) do
+			if found_graph.edges[edge_id].due_at < tonumber(os.time()) then
+				found_graph:show_card(edge_id)
+			end
+		end
+	end
+
+	vim.notify("Reviewing `" .. location .. "` end.")
+end
+
+vim.api.nvim_create_user_command("MindmapSp", function(arg)
+	M.MindmapSp(arg.fargs[1])
+end, {
+	nargs = "*",
+	---@diagnostic disable-next-line: unused-local
+	complete = function(arg_lead, cmd_line, cursor_pos)
+		return { "lastest", "nearest", "-telescope", "buffer", "-graph" }
+	end,
+})
+
+if plugin_config.enable_default_keymap then
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "sl",
+		"<cmd>MindmapSp lastest<cr>",
+		{ noremap = true, silent = true, desc = "Review lastest edge" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "sn",
+		"<cmd>MindmapSp nearest<cr>",
+		{ noremap = true, silent = true, desc = "Review nearest edge" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "st",
+		"<cmd>MindmapSp telescope<cr>",
+		{ noremap = true, silent = true, desc = "Review telescope edge" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "sb",
+		"<cmd>MindmapSp buffer<cr>",
+		{ noremap = true, silent = true, desc = "Review buffer edge" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		plugin_config.keymap_prefix .. "sg",
+		"<cmd>MindmapSp graph<cr>",
+		{ noremap = true, silent = true, desc = "Review graph edge" }
+	)
+end
+
+----------
+-- MindmapDisplay
+----------
+
+function M.MindmapDisplay(location, show_type)
 	if show_type ~= "card_back" and show_type ~= "excerpt" and show_type ~= "sp_info" then
 		vim.notify(
-			"[MindmapShow] Invalid `type`. Type must be `card_back`, `excerpt` or `sp_info`.",
+			"[MindmapDisplay] Invalid `type`. Type must be `card_back`, `excerpt` or `sp_info`.",
 			vim.log.levels.ERROR
 		)
 		return
@@ -553,14 +623,14 @@ function M.MindmapShow(location, show_type)
 	end
 end
 
-vim.api.nvim_create_user_command("MindmapShow", function(arg)
-	M.MindmapShow(arg.fargs[1], arg.fargs[2])
+vim.api.nvim_create_user_command("MindmapDisplay", function(arg)
+	M.MindmapDisplay(arg.fargs[1], arg.fargs[2])
 end, {
 	nargs = "*",
 	---@diagnostic disable-next-line: unused-local
 	complete = function(arg_lead, cmd_line, cursor_pos)
 		if cursor_pos == 12 then
-			return { "lastest", "nearest", "telescope", "buffer" }
+			return { "lastest", "nearest", "-telescope", "buffer" }
 		else
 			return { "card_back", "excerpt", "sp_info" }
 		end
@@ -570,39 +640,39 @@ end, {
 if plugin_config.enable_default_keymap then
 	vim.api.nvim_set_keymap(
 		"n",
-		plugin_config.keymap_prefix .. "sc",
-		"<cmd>MindmapShow nearest card_back<cr>",
-		{ noremap = true, silent = true, desc = "Show nearest card back" }
+		plugin_config.keymap_prefix .. "dc",
+		"<cmd>MindmapDisplay nearest card_back<cr>",
+		{ noremap = true, silent = true, desc = "Display nearest card back" }
 	)
 	vim.api.nvim_set_keymap(
 		"n",
-		plugin_config.keymap_prefix .. "sC",
-		"<cmd>MindmapShow buffer card_back<cr>",
-		{ noremap = true, silent = true, desc = "Show buffer card back" }
+		plugin_config.keymap_prefix .. "dC",
+		"<cmd>MindmapDisplay buffer card_back<cr>",
+		{ noremap = true, silent = true, desc = "Display buffer card back" }
 	)
 	vim.api.nvim_set_keymap(
 		"n",
-		plugin_config.keymap_prefix .. "se",
-		"<cmd>MindmapShow nearest excerpt<cr>",
-		{ noremap = true, silent = true, desc = "Show nearest excerpt" }
+		plugin_config.keymap_prefix .. "de",
+		"<cmd>MindmapDisplay nearest excerpt<cr>",
+		{ noremap = true, silent = true, desc = "Display nearest excerpt" }
 	)
 	vim.api.nvim_set_keymap(
 		"n",
-		plugin_config.keymap_prefix .. "sE",
-		"<cmd>MindmapShow buffer excerpt<cr>",
-		{ noremap = true, silent = true, desc = "Show buffer excerpt" }
+		plugin_config.keymap_prefix .. "dE",
+		"<cmd>MindmapDisplay buffer excerpt<cr>",
+		{ noremap = true, silent = true, desc = "Display buffer excerpt" }
 	)
 	vim.api.nvim_set_keymap(
 		"n",
-		plugin_config.keymap_prefix .. "ss",
-		"<cmd>MindmapShow nearest sp_info<cr>",
-		{ noremap = true, silent = true, desc = "Show nearest sp info" }
+		plugin_config.keymap_prefix .. "ds",
+		"<cmd>MindmapDisplay nearest sp_info<cr>",
+		{ noremap = true, silent = true, desc = "Display nearest sp info" }
 	)
 	vim.api.nvim_set_keymap(
 		"n",
-		plugin_config.keymap_prefix .. "sS",
-		"<cmd>MindmapShow buffer sp_info<cr>",
-		{ noremap = true, silent = true, desc = "Show buffer sp info" }
+		plugin_config.keymap_prefix .. "dS",
+		"<cmd>MindmapDisplay buffer sp_info<cr>",
+		{ noremap = true, silent = true, desc = "Display buffer sp info" }
 	)
 end
 
@@ -634,7 +704,7 @@ end, {
 	---@diagnostic disable-next-line: unused-local
 	complete = function(arg_lead, cmd_line, cursor_pos)
 		if cursor_pos == 13 then
-			return { "lastest", "nearest", "telescope", "buffer" }
+			return { "lastest", "nearest", "-telescope", "buffer" }
 		else
 			return { "card_back", "excerpt", "sp_info" }
 		end

@@ -61,7 +61,7 @@ function M.parse_heading_node(heading_node)
 	return title_node, content_node, sub_heading_nodes
 end
 
----Get all heading nodes in the given buffer.
+---Get all heading nodes which have an id in the given buffer.
 ---@param bufnr? integer The buffer number.
 ---@return table<NodeID, TSNode> heading_nodes The heading nodes.
 function M.get_heading_node_in_buf(bufnr)

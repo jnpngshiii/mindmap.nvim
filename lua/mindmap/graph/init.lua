@@ -554,10 +554,13 @@ function Graph:show_card(edge_id)
 		or choice == string.byte("q")
 
 	if choice == string.byte("1") or choice == string.byte("a") then
+		self.logger:debug("SP", "Answer again to edge `" .. edge_id .. "`.")
 		self.alg:answer_again(edge)
 	elseif choice == string.byte("2") or choice == string.byte("g") then
+		self.logger:debug("SP", "Answer good to edge `" .. edge_id .. "`.")
 		self.alg:answer_good(edge)
 	elseif choice == string.byte("3") or choice == string.byte("e") then
+		self.logger:debug("SP", "Answer easy to edge `" .. edge_id .. "`.")
 		self.alg:answer_easy(edge)
 	elseif choice == string.byte("q") then
 		self.logger:info("SP", "Quit spaced repetition.")

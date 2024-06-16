@@ -212,7 +212,7 @@ end
 ---@param bufnr_or_file_path? integer|string Buffer number or file path. Default: 0.
 ---@param create_buf_if_not_exist? boolean|string Create a new buffer if the buffer does not exist, and how to create it. Can be nil, true, false, "h" or "v". Default: nil.
 ---@return integer bufnr, boolean is_temp_buf Buffer number and whether it is a temp buffer.
-function M.giiit_bufnr(bufnr_or_file_path, create_buf_if_not_exist)
+function M.get_bufnr(bufnr_or_file_path, create_buf_if_not_exist)
 	local bufnr = vim.fn.bufnr(bufnr_or_file_path or 0)
 	local is_temp_buf = false
 
