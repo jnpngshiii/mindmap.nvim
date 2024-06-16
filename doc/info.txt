@@ -1,0 +1,3 @@
+This is an `ExcerptNode`. Your can use `SimpleEdge` to link the excerpt to the
+2nd Sub Heading Node to mark the relationship between the two. This is the end
+of the `ExcerptNode`. Foo, bar, baz.
