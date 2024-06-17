@@ -1,5 +1,4 @@
 local utils = require("mindmap.utils")
-local ts_utils = require("mindmap.ts_utils")
 
 --------------------
 -- Class PrototypeNode

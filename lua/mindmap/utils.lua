@@ -1,4 +1,4 @@
-local M = {}
+local utils = {}
 
 --------------------
 -- Helper functions
@@ -8,12 +8,12 @@ local M = {}
 ---@param content string|string[]
 ---@param pattern string
 ---@return string[] _
-function M.match_pattern(content, pattern)
+function utils.match_pattern(content, pattern)
 	local match_list = {}
 
 	if type(content) == "table" then
 		for _, c in ipairs(content) do
-			local sub_match_list = M.match_pattern(c, pattern)
+			local sub_match_list = utils.match_pattern(c, pattern)
 			for _, sub_match in ipairs(sub_match_list) do
 				table.insert(match_list, sub_match)
 			end
@@ -31,7 +31,7 @@ end
 ---@param str string
 ---@param sep string
 ---@return table _
-function M.split_string(str, sep)
+function utils.split_string(str, sep)
 	local parts = {}
 	for part in string.gmatch(str, "([^" .. sep .. "]+)") do
 		table.insert(parts, part)
@@ -43,7 +43,7 @@ end
 ---@param bufnr integer Buffer number.
 ---@param line_num integer Line number.
 ---@return string indent Indent of the line.
-function M.get_indent(bufnr, line_num)
+function utils.get_indent(bufnr, line_num)
 	local line = vim.api.nvim_buf_get_lines(bufnr, line_num - 1, line_num, false)[1]
 	local indent = line:match("^[%*%s]*"):gsub("[%*%s]", " ")
 	return indent or ""
@@ -55,12 +55,12 @@ end
 ---@param line_num integer Line number.
 ---@param text string|string[] Text to be added as virtual text.
 ---@return nil _ This function does not return anything.
-function M.add_virtual_text(bufnr, namespace, line_num, text)
+function utils.add_virtual_text(bufnr, namespace, line_num, text)
 	if type(text) == "string" then
 		text = { text }
 	end
 
-	local indent = M.get_indent(bufnr, line_num)
+	local indent = utils.get_indent(bufnr, line_num)
 
 	local virt_text = {}
 	for _, t in ipairs(text) do
@@ -83,7 +83,7 @@ end
 ---@param start_row? integer Start of range of lines to clear
 ---@param end_row? integer End of range of lines to clear (exclusive) or -1 to clear to end of buffer.
 ---@return nil _ This function does not return anything.
-function M.clear_virtual_text(bufnr, namespace, start_row, end_row)
+function utils.clear_virtual_text(bufnr, namespace, start_row, end_row)
 	vim.api.nvim_buf_clear_namespace(bufnr, namespace, start_row or 0, end_row or -1)
 end
 
@@ -92,9 +92,9 @@ end
 ---@param target_path string A path to be converted to an absolute path.
 ---@param reference_path string A reference path.
 ---@return string _
-function M.get_abs_path(target_path, reference_path)
-	local target_path_parts = M.split_string(target_path, "/")
-	local reference_path_parts = M.split_string(reference_path, "/")
+function utils.get_abs_path(target_path, reference_path)
+	local target_path_parts = utils.split_string(target_path, "/")
+	local reference_path_parts = utils.split_string(reference_path, "/")
 
 	for _, part in ipairs(target_path_parts) do
 		if part == ".." then
@@ -117,9 +117,9 @@ end
 ---@param target_path string A path to be converted to a relative path.
 ---@param reference_path string A reference path.
 ---@return string _
-function M.get_rel_path(target_path, reference_path)
-	local target_parts = M.split_string(target_path, "/")
-	local reference_parts = M.split_string(reference_path, "/")
+function utils.get_rel_path(target_path, reference_path)
+	local target_parts = utils.split_string(target_path, "/")
+	local reference_parts = utils.split_string(reference_path, "/")
 	local rel_path = {}
 
 	while #target_parts > 0 and #reference_parts > 0 and target_parts[1] == reference_parts[1] do
@@ -140,7 +140,7 @@ end
 ---Get the information of a buffer or a file.
 ---@param bufnr_or_file_path? integer|string Buffer number or file path of the file to be parsed.
 ---@return string[] _ { file_name, abs_file_path, rel_file_path, proj_path }
-function M.get_file_info(bufnr_or_file_path)
+function utils.get_file_info(bufnr_or_file_path)
 	bufnr_or_file_path = bufnr_or_file_path or 0
 
 	local file_path
@@ -156,7 +156,7 @@ function M.get_file_info(bufnr_or_file_path)
 
 	local file_name = vim.fs.basename(file_path)
 	local abs_file_path = vim.fs.dirname(file_path)
-	local rel_file_path = M.get_rel_path(abs_file_path, proj_path)
+	local rel_file_path = utils.get_rel_path(abs_file_path, proj_path)
 
 	return { file_name, abs_file_path, rel_file_path, proj_path }
 end
@@ -168,7 +168,7 @@ end
 ---@param start_col? integer The start column of the range to be read.
 ---@param end_col? integer The end column of the range to be read.
 ---@return string[] _ { line1, line2, ... }
-function M.get_file_content(bufnr_or_file_path, start_row, end_row, start_col, end_col)
+function utils.get_file_content(bufnr_or_file_path, start_row, end_row, start_col, end_col)
 	bufnr_or_file_path = bufnr_or_file_path or 0
 
 	local file_path
@@ -212,7 +212,7 @@ end
 ---@param bufnr_or_file_path? integer|string Buffer number or file path. Default: 0.
 ---@param create_buf_if_not_exist? boolean|string Create a new buffer if the buffer does not exist, and how to create it. Can be nil, true, false, "h" or "v". Default: nil.
 ---@return integer bufnr, boolean is_temp_buf Buffer number and whether it is a temp buffer.
-function M.get_bufnr(bufnr_or_file_path, create_buf_if_not_exist)
+function utils.get_bufnr(bufnr_or_file_path, create_buf_if_not_exist)
 	local bufnr = vim.fn.bufnr(bufnr_or_file_path or 0)
 	local is_temp_buf = false
 
@@ -241,11 +241,11 @@ end
 ---Remove fields that are not string, number, or boolean in a table.
 ---@param tbl table
 ---@return table _
-function M.remove_table_fields(tbl)
+function utils.remove_table_fields(tbl)
 	local proccessed_tbl = tbl
 	for k, v in pairs(proccessed_tbl) do
 		if type(v) == "table" then
-			M.remove_table_fields(v)
+			utils.remove_table_fields(v)
 		elseif type(v) ~= "string" and type(v) ~= "number" and type(v) ~= "boolean" then
 			tbl[k] = nil
 		end
@@ -259,4 +259,4 @@ end
 
 --------------------
 
-return M
+return utils

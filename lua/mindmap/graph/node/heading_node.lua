@@ -1,6 +1,10 @@
 local utils = require("mindmap.utils")
 local ts_utils = require("mindmap.ts_utils")
 
+--------------------
+-- Class HeadingNode
+--------------------
+
 ---@class HeadingNode : PrototypeNode
 ---@field after_add_into_graph fun(self: HeadingNode) Extra function to run after adding the node into the graph.
 ---@field after_remove_from_graph fun(self: HeadingNode) Extra function to run after removing the node from the graph.

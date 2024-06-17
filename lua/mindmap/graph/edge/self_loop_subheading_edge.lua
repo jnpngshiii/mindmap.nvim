@@ -1,3 +1,7 @@
+--------------------
+-- Class SelfLoopSubheadingEdge
+--------------------
+
 ---@class SelfLoopSubheadingEdge : PrototypeEdge
 local SelfLoopSubheadingEdge = {
 	data = {},

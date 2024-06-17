@@ -4,6 +4,10 @@ local Layout = require("nui.layout")
 local Logger = require("mindmap.graph.logger")
 local utils = require("mindmap.utils")
 
+--------------------
+-- Class Graph
+--------------------
+
 ---@class Graph
 ---
 ---@field save_path string Path to load and save the graph. Default: {current_project_path}.

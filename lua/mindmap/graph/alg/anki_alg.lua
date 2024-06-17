@@ -1,3 +1,7 @@
+--------------------
+-- Class AnkiAlg
+--------------------
+
 ---@class AnkiAlg : PrototypeAlg
 local AnkiAlg = {
 	data = {},

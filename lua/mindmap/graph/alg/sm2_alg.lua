@@ -1,3 +1,7 @@
+--------------------
+-- Class SM2Alg
+--------------------
+
 ---@class SM2Alg : PrototypeAlg
 local SM2Alg = {
 	data = {},

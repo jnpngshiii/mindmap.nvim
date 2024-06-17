@@ -1,3 +1,7 @@
+--------------------
+-- Class SimpleNode
+--------------------
+
 ---@class SimpleNode : PrototypeNode
 local SimpleNode = {
 	data = {},

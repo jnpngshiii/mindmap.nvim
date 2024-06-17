@@ -1,9 +1,9 @@
-local M = {}
+local ts_utils = {}
 
 ---Get the root node in the given buffer.
 ---@param bufnr? integer The buffer number.
 ---@return TSNode? _ The root node in the given buffer.
-function M.get_root_node(bufnr)
+function ts_utils.get_root_node(bufnr)
 	bufnr = bufnr or 0
 
 	local lang_tree = vim.treesitter.get_parser(bufnr, "norg")
@@ -24,7 +24,7 @@ end
 ---Get the title node, content node, and sub heading nodes of the given heading node.
 ---@param heading_node TSNode The heading node.
 ---@return TSNode title_node, TSNode? content_node, TSNode[] sub_heading_nodes The title node, content node, and sub heading nodes.
-function M.parse_heading_node(heading_node)
+function ts_utils.parse_heading_node(heading_node)
 	local sub_heading_level = tonumber(string.match(heading_node:type(), "%d")) + 1
 	if not sub_heading_level then
 		vim.notify("Node `" .. heading_node:type() .. "` is not a heading node.", vim.log.levels.ERROR)
@@ -64,10 +64,10 @@ end
 ---Get all heading nodes which have an id in the given buffer.
 ---@param bufnr? integer The buffer number.
 ---@return table<NodeID, TSNode> heading_nodes The heading nodes.
-function M.get_heading_node_in_buf(bufnr)
+function ts_utils.get_heading_node_in_buf(bufnr)
 	bufnr = bufnr or 0
 
-	local root_node = M.get_root_node(bufnr)
+	local root_node = ts_utils.get_root_node(bufnr)
 	if not root_node then
 		return {}
 	end
@@ -85,7 +85,7 @@ function M.get_heading_node_in_buf(bufnr)
 
 	local heading_nodes = {}
 	for _, heading_node in parsed_query:iter_captures(root_node, 0) do
-		local title_node, _, _ = M.parse_heading_node(heading_node)
+		local title_node, _, _ = ts_utils.parse_heading_node(heading_node)
 		local title_node_text = vim.treesitter.get_node_text(title_node, bufnr)
 		-- TODO: handle multiple matches.
 		-- Just handle the first match now.
@@ -102,10 +102,10 @@ end
 ---@param id NodeID The id of the heading node.
 ---@param bufnr? integer The buffer number.
 ---@return TSNode? _ The heading node.
-function M.get_heading_node_by_id(id, bufnr)
+function ts_utils.get_heading_node_by_id(id, bufnr)
 	bufnr = bufnr or 0
 
-	local heading_nodes = M.get_heading_node_in_buf(bufnr)
+	local heading_nodes = ts_utils.get_heading_node_in_buf(bufnr)
 	return heading_nodes[id]
 end
 
@@ -114,7 +114,7 @@ end
 ---@param node TSNode The tree-sitter node.
 ---@param bufnr? integer The buffer number.
 ---@return nil _ This function does not return anything.
-function M.replace_node_text(text, node, bufnr)
+function ts_utils.replace_node_text(text, node, bufnr)
 	if type(text) == "string" then
 		text = { text }
 	end
@@ -128,4 +128,4 @@ end
 
 --------------------
 
-return M
+return ts_utils

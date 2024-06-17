@@ -1,3 +1,7 @@
+--------------------
+-- Class SimpleEdge
+--------------------
+
 ---@class SimpleEdge : PrototypeEdge
 local SimpleEdge = {
 	data = {},

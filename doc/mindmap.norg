@@ -11,7 +11,6 @@ version: 1.1.1
 * 1st Heading Node
   This is the content of the 1st Heading Node.
   `SelfLoopContentEdge` will use this as the back of card.
-
 * 2nd Heading Node
 ** 1st Sub Heading Node, `SelfLoopSubheadingNode` will use this as the back of card. The same as blow.
 ** 2nd Sub Heading Node

@@ -1,10 +1,10 @@
 local utils = require("mindmap.utils")
 
----@alias Timestamp string
-
 --------------------
 -- Class Message
 --------------------
+
+---@alias Timestamp string
 
 ---@class Message
 ---@field type string Message type (DEBUG, INFO, WARN, ERROR). Default: "INFO".

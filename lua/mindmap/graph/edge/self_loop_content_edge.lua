@@ -1,3 +1,7 @@
+--------------------
+-- Class SelfLoopContentEdge
+--------------------
+
 ---@class SelfLoopContentEdge : PrototypeEdge
 local SelfLoopContentEdge = {
 	data = {},

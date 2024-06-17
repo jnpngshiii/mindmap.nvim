@@ -1,5 +1,9 @@
 local utils = require("mindmap.utils")
 
+--------------------
+-- Class ExcerptNode
+--------------------
+
 ---@class ExcerptNode : PrototypeNode
 ---@field data.start_row integer Start row of the excerpt.
 ---@field data.start_col integer Start column of the excerpt.

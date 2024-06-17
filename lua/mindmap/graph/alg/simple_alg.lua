@@ -1,3 +1,7 @@
+--------------------
+-- Class SimpleAlg
+--------------------
+
 ---@class SimpleAlg : PrototypeAlg
 local SimpleAlg = {
 	data = {},
