@@ -1,7 +1,12 @@
-local user_func = require("mindmap.user_func")
-local plugin_manager_adapter = require("mindmap.plugin_manager_adapter")
+local plugin_data = require("mindmap.plugin_data")
 
--- TODO: update this to use the new plugin_manager_adapter
-user_func.setup = plugin_manager_adapter.setup
+local plugin_manager_adapter = {}
 
-return user_func
+---For `lazy.nvim`
+function plugin_manager_adapter.setup(user_config)
+	user_config = user_config or {}
+
+	plugin_data.config = vim.tbl_extend("force", plugin_data.config, user_config)
+end
+
+return plugin_manager_adapter
