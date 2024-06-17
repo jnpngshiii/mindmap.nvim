@@ -54,8 +54,9 @@ end
 ---@param namespace number Namespace.
 ---@param line_num integer Line number.
 ---@param text string|string[] Text to be added as virtual text.
+---@param text_type? string Type of the virtual text. Default: "Comment".
 ---@return nil _ This function does not return anything.
-function utils.add_virtual_text(bufnr, namespace, line_num, text)
+function utils.add_virtual_text(bufnr, namespace, line_num, text, text_type)
 	if type(text) == "string" then
 		text = { text }
 	end
@@ -64,7 +65,7 @@ function utils.add_virtual_text(bufnr, namespace, line_num, text)
 
 	local virt_text = {}
 	for _, t in ipairs(text) do
-		table.insert(virt_text, { indent .. t, "Comment" })
+		table.insert(virt_text, { indent .. t, text_type or "Comment" })
 	end
 
 	vim.api.nvim_buf_set_extmark(bufnr, namespace, line_num - 1, -1, {
@@ -253,6 +254,39 @@ function utils.remove_table_fields(tbl)
 		end
 	end
 	return proccessed_tbl
+end
+
+---Limit the length of a string or a list of strings.
+---@param str_or_list string|string[] String or list of strings to be limited.
+---@param limitation integer Maximum length of each string.
+---@return string[] _ The limited list of strings.
+function utils.limit_string_length(str_or_list, limitation)
+	local str
+	if type(str_or_list) == "table" then
+		str = table.concat(str_or_list, " ") -- TODO: chinese?
+	elseif type(str_or_list) == "string" then
+		str = str_or_list
+	else
+		return {}
+	end
+
+	local result = {}
+	local start_index = 1
+	local str_length = string.len(str)
+
+	while start_index <= str_length do
+		local end_index = start_index + limitation - 1
+		if end_index > str_length then
+			end_index = str_length
+		end
+
+		local substring = string.sub(str, start_index, end_index)
+		table.insert(result, substring)
+
+		start_index = end_index + 1
+	end
+
+	return result
 end
 
 --------------------

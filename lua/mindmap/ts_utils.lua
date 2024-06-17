@@ -118,8 +118,6 @@ function ts_utils.replace_node_text(text, node, bufnr)
 	if type(text) == "string" then
 		text = { text }
 	end
-	-- table.insert(text, "") -- TODO: Remove this workaround.
-
 	bufnr = bufnr or 0
 
 	local start_row, start_col, end_row, end_col = node:range()

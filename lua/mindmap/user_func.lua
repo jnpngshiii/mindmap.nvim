@@ -177,6 +177,8 @@ local function find_heading_nodes(graph, location)
 				}),
 			})
 			:find()
+
+		-- TODO: ...
 	end
 
 	if location == "buffer" then
@@ -528,6 +530,7 @@ function user_func.MindmapDisplay(location, show_type)
 
 	local found_graph = find_graph()
 	local _, ts_nodes = find_heading_nodes(found_graph, location)
+	local screen_width = vim.api.nvim_win_get_width(0) - 20
 
 	for id, ts_node in pairs(ts_nodes) do
 		-- Avoid duplicate virtual text
@@ -542,8 +545,12 @@ function user_func.MindmapDisplay(location, show_type)
 				local from_node = found_graph.nodes[incoming_edge.from_node_id]
 				local _, back = from_node:get_content(incoming_edge.type)
 
-				local text = index .. ": " .. back[1]
-				utils.add_virtual_text(0, find_namespace(show_type), line_num, text)
+				back[1] = string.format("* Card %s [%s]: %s", index, incoming_edge.type, back[1])
+				back = utils.limit_string_length(back, screen_width)
+				-- FIXME: wrong order
+				for i = #back, 1, -1 do
+					utils.add_virtual_text(0, find_namespace(show_type), line_num, back[i])
+				end
 			end
 
 			if show_type == "excerpt" then
@@ -552,17 +559,35 @@ function user_func.MindmapDisplay(location, show_type)
 				if from_node.type == "ExcerptNode" then
 					local _, back = from_node:get_content(incoming_edge.type)
 
-					local text = "│ " .. table.concat(back, " ")
-					utils.add_virtual_text(0, find_namespace(show_type), line_num, text)
+					back[1] = string.format("%s: %s", index, back[1])
+					back = utils.limit_string_length(back, screen_width)
+					-- FIXME: wrong order
+					for i = #back, 1, -1 do
+						utils.add_virtual_text(0, find_namespace(show_type), line_num, "│ " .. back[i])
+					end
 				end
 			end
 
 			if show_type == "sp_info" then
-				local front, back, created_at, updated_at, due_at, ease, interval =
+				local front, back, created_at, updated_at, due_at, ease, interval, answer_count, ease_count, again_count =
 					found_graph:get_sp_info_from_edge(incoming_edge_id)
 
-				local text = string.format("Due at: %d, Ease: %d, Int: %d", due_at, ease, interval)
-				utils.add_virtual_text(0, find_namespace(show_type), line_num, text)
+				local text = string.format(
+					"Due at: %s, Ease: %s, Interval: %s, Again: %s/%s",
+					-- FIXME:
+					os.date("%Y-%m-%d %H:%M:%S", due_at),
+					ease,
+					interval,
+					again_count,
+					answer_count
+				)
+
+				local text_type
+				if due_at < tonumber(os.time()) then
+					text_type = "Error"
+				end
+
+				utils.add_virtual_text(0, find_namespace(show_type), line_num, text, text_type)
 			end
 		end
 	end

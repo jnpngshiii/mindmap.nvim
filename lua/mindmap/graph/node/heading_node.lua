@@ -77,31 +77,32 @@ end
 ---Get the content of the node.
 ---@param self HeadingNode The node.
 ---@param edge_type EdgeType Type of the edge.
----@return string[] front ,string[] back Content of the node.
+---@return string[] front, string[] back Content of the node.
 ---@diagnostic disable-next-line: unused-local
 function HeadingNode.ins_methods.get_content(self, edge_type)
+	if self.cache.get_content then
+		return self.cache.get_content.front, self.cache.get_content.back
+	end
 	local front, back = {}, {}
 
-	local abs_proj_path = utils.get_file_info()[4]
-	local abs_file_path = utils.get_abs_path(self.rel_file_path, abs_proj_path)
-	local bufnr, is_temp_buf = utils.get_bufnr(abs_file_path .. "/" .. self.file_name, true)
+	local bufnr, is_temp_buf = utils.get_bufnr(self:get_abs_path(), true)
 	local heading_node = ts_utils.get_heading_node_by_id(self.id, bufnr)
-
 	if not heading_node then
-		return front, back
+		return {}, {}
 	end
+
 	local title_node, content_node, sub_heading_nodes = ts_utils.parse_heading_node(heading_node)
-
-	if title_node then
-		front = utils.split_string(vim.treesitter.get_node_text(title_node, bufnr), "\n")
-	end
-
+	front = utils.split_string(vim.treesitter.get_node_text(title_node, bufnr), "\n")
 	if content_node and edge_type == "SelfLoopContentEdge" then
 		back = utils.split_string(vim.treesitter.get_node_text(content_node, bufnr), "\n")
 	elseif content_node and edge_type == "SelfLoopSubheadingEdge" then
 		for _, sub_heading_node in ipairs(sub_heading_nodes) do
 			table.insert(back, utils.split_string(vim.treesitter.get_node_text(sub_heading_node, bufnr), "\n")[1])
 		end
+	end
+
+	if not self.cache.get_content then
+		self.cache.get_content = { front = front, back = back }
 	end
 
 	if is_temp_buf then

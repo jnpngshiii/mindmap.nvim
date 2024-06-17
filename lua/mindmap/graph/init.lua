@@ -463,7 +463,7 @@ end
 
 ---Spaced repetition function: get spaced repetition information from the edge.
 ---@param edge_id EdgeID ID of the edge.
----@return string[] front, string[] back, integer created_at, integer updated_at, integer due_at, integer ease, integer interval The spaced repetition information.
+---@return string[] front, string[] back, integer created_at, integer updated_at, integer due_at, integer ease, integer interval, integer answer_count, integer ease_count, integer again_count The spaced repetition information.
 function Graph:get_sp_info_from_edge(edge_id)
 	local edge = self.edges[edge_id]
 
@@ -477,7 +477,16 @@ function Graph:get_sp_info_from_edge(edge_id)
 	local from_node = self.nodes[edge.from_node_id]
 	local _, back = from_node:get_content(edge.type)
 
-	return front, back, edge.created_at, edge.updated_at, edge.due_at, edge.ease, edge.interval
+	return front,
+		back,
+		edge.created_at,
+		edge.updated_at,
+		edge.due_at,
+		edge.ease,
+		edge.interval,
+		edge.answer_count,
+		edge.ease_count,
+		edge.again_count
 end
 
 ---Show card.
@@ -485,7 +494,7 @@ end
 ---@return nil _ This function does not return anything.
 function Graph:show_card(edge_id)
 	local edge = self.edges[edge_id]
-	local front, back, _, _, _, _, _ = self:get_sp_info_from_edge(edge_id)
+	local front, back, _, _, _, _, _, _, _, _ = self:get_sp_info_from_edge(edge_id)
 
 	--------------------
 	-- UI
