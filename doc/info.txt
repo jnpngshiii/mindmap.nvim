@@ -1,3 +1,9 @@
-This is an `ExcerptNode`. Your can use `SimpleEdge` to link the excerpt to the
-2nd Sub Heading Node to mark the relationship between the two. This is the end
-of the `ExcerptNode`. Foo, bar, baz.
+Foo, bar, baz. This is the start of the `ExcerptNode`. This `ExcerptNode` points to a
+`HeadingNode` using `SimpleEdge` as its excerpt for additional information. You
+can use `<localleader>mce` (clear excerpt) to clear the display of excerpts. This is the end of
+the `ExcerptNode`. Foo, bar, baz.
+
+Foo, bar, baz...
+
+Start: Here is a `ExcerptNode`. End. Foo, bar, baz...
+Start: Here is another `ExcerptNode`. Foo, bar, baz... End.
