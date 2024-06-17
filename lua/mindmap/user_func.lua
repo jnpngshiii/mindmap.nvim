@@ -1,11 +1,17 @@
 local nts_utils = require("nvim-treesitter.ts_utils")
+local actions = require("telescope.actions")
+local finders = require("telescope.finders")
+local pickers = require("telescope.pickers")
+local sorters = require("telescope.sorters")
 
 local Graph = require("mindmap.graph.init")
 local plugin_data = require("mindmap.plugin_data")
 local utils = require("mindmap.utils")
 local ts_utils = require("mindmap.ts_utils")
 
-local user_func = {}
+--------------------
+-- Local functions
+--------------------
 
 ---Find the registered namespace and return it.
 ---If the namespace does not exist, register it first.
@@ -136,8 +142,41 @@ local function find_heading_nodes(graph, location)
 	end
 
 	if location == "telescope" then
-		-- TODO: implement this
-		vim.notify("[find_heading_nodes] Location `telescope` is not implemented yet.", vim.log.levels.ERROR)
+		local nodes = {}
+		for _, node in pairs(graph.nodes) do
+			if node.state == "active" then
+				table.insert(nodes, {
+					node.id,
+					node.type,
+					node:get_abs_path(),
+					node:get_content()[1],
+				})
+			end
+		end
+
+		pickers
+			.new({}, {
+				prompt_title = "Select a node",
+				finder = finders.new_table({
+					results = nodes,
+					entry_maker = function(entry)
+						return {
+							value = entry,
+							display = string.format(
+								"ID: %s | Type: %s | Path: %s | Content: %s",
+								entry[1],
+								entry[2],
+								entry[3],
+								entry[4]
+							),
+							ordinal = entry[1],
+							path = entry[3],
+							lnum = entry[1],
+						}
+					end,
+				}),
+			})
+			:find()
 	end
 
 	if location == "buffer" then
@@ -159,6 +198,8 @@ end
 --------------------
 -- User functions
 --------------------
+
+local user_func = {}
 
 ----------
 -- MindmapAdd
@@ -698,17 +739,10 @@ end
 -- MindmapTest
 ----------
 
-if false then
+if true then
 	function user_func.MindmapTest()
 		local graph = find_graph()
-
-		-- TODO: to_node 必须要打开
-		-- TODO: 内容不回绕显示
-		-- TODO: 优化 UI
-		graph:show_card(3)
-		graph:show_card(4)
-
-		graph:save()
+		find_heading_nodes(graph, "telescope")
 	end
 
 	vim.api.nvim_create_user_command("MindmapTest", function()

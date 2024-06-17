@@ -217,7 +217,7 @@ function utils.get_bufnr(bufnr_or_file_path, create_buf_if_not_exist)
 	local is_temp_buf = false
 
 	if bufnr == -1 and create_buf_if_not_exist and type(bufnr_or_file_path) == "string" then
-		local ok, content = pcall(vim.api.readfile, bufnr_or_file_path)
+		local ok, content = pcall(vim.fn.readfile, bufnr_or_file_path)
 
 		if ok then
 			bufnr = vim.api.nvim_create_buf(false, true)
@@ -232,6 +232,8 @@ function utils.get_bufnr(bufnr_or_file_path, create_buf_if_not_exist)
 			end
 
 			vim.api.nvim_win_set_buf(0, bufnr)
+		else
+			vim.notify('Failed to read file: "' .. bufnr_or_file_path .. '".', vim.log.levels.ERROR)
 		end
 	end
 
