@@ -458,13 +458,10 @@ function user_func.MindmapSp(location)
 	for _, node in pairs(heading_nodes) do
 		for _, edge_id in ipairs(node.incoming_edge_ids) do
 			if found_graph.edges[edge_id].due_at < tonumber(os.time()) then
-				found_graph:show_card(edge_id)
-			end
-		end
-		-- TODO: review outgoing edge here?
-		for _, edge_id in ipairs(node.outcoming_edge_ids) do
-			if found_graph.edges[edge_id].due_at < tonumber(os.time()) then
-				found_graph:show_card(edge_id)
+				local status = found_graph:show_card(edge_id)
+				if status == "quit" then
+					break
+				end
 			end
 		end
 	end

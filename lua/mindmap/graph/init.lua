@@ -491,7 +491,7 @@ end
 
 ---Show card.
 ---@param edge_id EdgeID ID of the edge.
----@return nil _ This function does not return anything.
+---@return string status Status of spaced repetition. Can be "again", "good", "easy", "skip" or "quit".
 function Graph:show_card(edge_id)
 	local edge = self.edges[edge_id]
 	local front, back, _, _, _, _, _, _, _, _ = self:get_sp_info_from_edge(edge_id)
@@ -536,17 +536,25 @@ function Graph:show_card(edge_id)
 	-- Front
 	--------------------
 
+	local choice
+	local status
+
 	vim.api.nvim_buf_set_lines(card_front.bufnr, 0, -1, false, front)
 
-	local choice
 	repeat
 		choice = vim.fn.getchar()
-	until choice == string.byte(" ") or choice == string.byte("q")
+	until choice == string.byte(" ") or choice == string.byte("s") or choice == string.byte("q")
 
-	if choice == string.byte("q") then
-		self.logger:info("SP", "Quit spaced repetition.")
+	if choice == string.byte("s") then
+		self.logger:info("SP", "Skip spaced repetition of the current card.")
+		status = "skip"
 		card_ui:unmount()
-		return
+		return status
+	elseif choice == string.byte("q") then
+		self.logger:info("SP", "Quit spaced repetition of the current deck.")
+		status = "quit"
+		card_ui:unmount()
+		return status
 	end
 
 	--------------------
@@ -554,32 +562,42 @@ function Graph:show_card(edge_id)
 	--------------------
 
 	vim.api.nvim_buf_set_lines(card_back.bufnr, 0, -1, false, back)
-	card_ui:update({})
+	card_ui:update()
 
 	repeat
 		choice = vim.fn.getchar()
 	until choice == string.byte("1")
 		or choice == string.byte("a")
+		or choice == string.byte(" ")
 		or choice == string.byte("2")
 		or choice == string.byte("g")
 		or choice == string.byte("3")
 		or choice == string.byte("e")
+		or choice == string.byte("s")
 		or choice == string.byte("q")
 
 	if choice == string.byte("1") or choice == string.byte("a") then
 		self.logger:debug("SP", "Answer again to edge `" .. edge_id .. "`.")
 		self.alg:answer_again(edge)
-	elseif choice == string.byte("2") or choice == string.byte("g") then
+		status = "again"
+	elseif choice == string.byte(" ") or choice == string.byte("2") or choice == string.byte("g") then
 		self.logger:debug("SP", "Answer good to edge `" .. edge_id .. "`.")
 		self.alg:answer_good(edge)
+		status = "good"
 	elseif choice == string.byte("3") or choice == string.byte("e") then
 		self.logger:debug("SP", "Answer easy to edge `" .. edge_id .. "`.")
 		self.alg:answer_easy(edge)
+		status = "easy"
+	elseif choice == string.byte("s") then
+		self.logger:info("SP", "Skip spaced repetition of the current card.")
+		status = "skip"
 	elseif choice == string.byte("q") then
-		self.logger:info("SP", "Quit spaced repetition.")
+		self.logger:info("SP", "Quit spaced repetition of the current deck.")
+		status = "quit"
 	end
 
 	card_ui:unmount()
+	return status
 end
 
 ---Save a graph to a JSON file.
