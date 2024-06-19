@@ -466,18 +466,20 @@ end
 ---@return string[] front, string[] back, integer created_at, integer updated_at, integer due_at, integer ease, integer interval, integer answer_count, integer ease_count, integer again_count The spaced repetition information.
 function Graph:get_sp_info_from_edge(edge_id)
 	local edge = self.edges[edge_id]
+	local screen_width = vim.api.nvim_win_get_width(0) - 20
 
 	-- NOTE:
 	-- TO   : Front
 	-- From : Back
 
+
 	local to_node = self.nodes[edge.to_node_id]
 	local front, _ = to_node:get_content(edge.type)
-	front = front or { "N/A" }
+  front = utils.limit_string_length(front, screen_width)
 
 	local from_node = self.nodes[edge.from_node_id]
 	local _, back = from_node:get_content(edge.type)
-	back = back or { "N/A" }
+  back = utils.limit_string_length(back, screen_width)
 
 	return front,
 		back,
