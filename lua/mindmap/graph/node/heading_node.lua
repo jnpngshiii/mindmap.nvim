@@ -93,9 +93,13 @@ function HeadingNode.ins_methods.get_content(self, edge_type)
 
 	local title_node, content_node, sub_heading_nodes = ts_utils.parse_heading_node(heading_node)
 	front = utils.split_string(vim.treesitter.get_node_text(title_node, bufnr), "\n")
+	if not content_node and not #sub_heading_nodes then
+		back = { "[Error] Can not find content_node or sub_heading_nodes." }
+	end
+
 	if content_node and edge_type == "SelfLoopContentEdge" then
 		back = utils.split_string(vim.treesitter.get_node_text(content_node, bufnr), "\n")
-	elseif content_node and edge_type == "SelfLoopSubheadingEdge" then
+	elseif sub_heading_nodes and edge_type == "SelfLoopSubheadingEdge" then
 		for _, sub_heading_node in ipairs(sub_heading_nodes) do
 			table.insert(back, utils.split_string(vim.treesitter.get_node_text(sub_heading_node, bufnr), "\n")[1])
 		end
