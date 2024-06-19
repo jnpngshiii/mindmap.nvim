@@ -1,9 +1,12 @@
+local nts_utils = require("nvim-treesitter.ts_utils")
 local actions = require("telescope.actions")
 local finders = require("telescope.finders")
 local pickers = require("telescope.pickers")
 local sorters = require("telescope.sorters")
 
 local Graph = require("mindmap.graph.init")
+local utils = require("mindmap.utils")
+local ts_utils = require("mindmap.ts_utils")
 
 local plugin = {}
 
