@@ -649,6 +649,28 @@ function user_func.setup(user_config)
 			"<cmd>MindmapSp buffer<cr>",
 			{ noremap = true, silent = true, desc = "Review buffer edge" }
 		)
+
+		----------
+		-- MindmapDisplay
+		----------
+
+		vim.api.nvim_set_keymap(
+			"n",
+			plugin.config.shorten_keymap_prefix .. "d",
+			"<cmd>MindmapDisplay buffer excerpt<cr>",
+			{ noremap = true, silent = true, desc = "Display buffer excerpt" }
+		)
+
+		----------
+		-- MindmapClean
+		----------
+
+		vim.api.nvim_set_keymap(
+			"n",
+			plugin.config.shorten_keymap_prefix .. "c",
+			"<cmd>MindmapClean buffer excerpt<cr>",
+			{ noremap = true, silent = true, desc = "Clean buffer excerpt" }
+		)
 	end
 
 	if plugin.config.enable_default_autocmd then

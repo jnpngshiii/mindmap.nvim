@@ -477,7 +477,7 @@ function Graph:get_sp_info_from_edge(edge_id)
 
 	local from_node = self.nodes[edge.from_node_id]
 	local _, back = from_node:get_content(edge.type)
-  back = back or { "N/A" }
+	back = back or { "N/A" }
 
 	return front,
 		back,
