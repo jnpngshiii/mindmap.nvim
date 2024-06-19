@@ -195,7 +195,8 @@ function user_func.MindmapSp(location)
 			if found_graph.edges[edge_id].due_at < tonumber(os.time()) then
 				local status = found_graph:show_card(edge_id)
 				if status == "quit" then
-					break
+					vim.notify("Reviewing `" .. location .. "` end.")
+					return
 				end
 			end
 		end
@@ -588,7 +589,7 @@ function user_func.setup(user_config)
 	end
 
 	if plugin.config.enable_shorten_keymap then
-vim.notify("[Mindmap.nvim] Shorten keymap is enabled.")
+		vim.notify("[Mindmap.nvim] Shorten keymap is enabled.")
 
 		if plugin.config.shorten_keymap_prefix == "m" then
 			vim.api.nvim_set_keymap("n", "M", "m", { noremap = true })

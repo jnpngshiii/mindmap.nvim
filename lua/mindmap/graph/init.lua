@@ -473,9 +473,11 @@ function Graph:get_sp_info_from_edge(edge_id)
 
 	local to_node = self.nodes[edge.to_node_id]
 	local front, _ = to_node:get_content(edge.type)
+	front = front or { "N/A" }
 
 	local from_node = self.nodes[edge.from_node_id]
 	local _, back = from_node:get_content(edge.type)
+  back = back or { "N/A" }
 
 	return front,
 		back,
@@ -494,6 +496,8 @@ end
 ---@return string status Status of spaced repetition. Can be "again", "good", "easy", "skip" or "quit".
 function Graph:show_card(edge_id)
 	local edge = self.edges[edge_id]
+	local from_node_type = self.nodes[edge.from_node_id].type
+	local to_node_type = self.nodes[edge.to_node_id].type
 	local front, back, _, _, _, _, _, _, _, _ = self:get_sp_info_from_edge(edge_id)
 
 	--------------------
@@ -506,7 +510,7 @@ function Graph:show_card(edge_id)
 			focusable = false,
 			border = {
 				style = "rounded",
-				text = { top = " Front ", top_align = "center" },
+				text = { top = string.format(" Front: %s ", to_node_type), top_align = "center" },
 			},
 			buf_options = { filetype = "norg", readonly = false },
 		}), Popup({
@@ -515,7 +519,7 @@ function Graph:show_card(edge_id)
 			relative = "editor",
 			border = {
 				style = "rounded",
-				text = { top = " Back ", top_align = "center" },
+				text = { top = string.format(" Back: %s ", from_node_type), top_align = "center" },
 			},
 			buf_options = { filetype = "norg", readonly = false },
 		})
@@ -523,11 +527,11 @@ function Graph:show_card(edge_id)
 	local card_ui = Layout(
 		{
 			position = { row = "50%", col = "50%" },
-			size = { width = "20%", height = "20%" },
+			size = { width = "40%", height = "40%" },
 		},
 		Layout.Box({
-			Layout.Box(card_front, { size = "20%" }),
-			Layout.Box(card_back, { size = "80%" }),
+			Layout.Box(card_front, { size = "50%" }),
+			Layout.Box(card_back, { size = "50%" }),
 		}, { dir = "col" })
 	)
 	card_ui:mount()
