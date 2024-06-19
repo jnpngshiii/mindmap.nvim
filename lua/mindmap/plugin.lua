@@ -40,8 +40,10 @@ local plugin = {}
 ---@field show_excerpt_after_bfread boolean ...
 ---@field show_sp_info_after_bfread boolean ...
 ---  Default behavior:
----@field keymap_prefix string Prefix of the keymap. Default: "<localleader>m".
 ---@field enable_default_keymap boolean Enable default keymap. Default: true.
+---@field keymap_prefix string Prefix of the keymap. Default: "<localleader>m".
+---@field enable_shorten_keymap boolean Enable shorten keymap. Default: false.
+---@field shorten_keymap_prefix string Prefix of the shorten keymap. Default: "m".
 ---@field enable_default_autocmd boolean Enable default atuocmd. Default: true.
 plugin.config = {
 	-- Logger configuration:
@@ -82,8 +84,10 @@ plugin.config = {
 	--   Automatic behavior:
 	show_excerpt_after_add = true,
 	--   Default behavior:
-	keymap_prefix = "<localleader>m",
 	enable_default_keymap = true,
+	keymap_prefix = "<localleader>m",
+	enable_shorten_keymap = false,
+	shorten_keymap_prefix = "m",
 	enable_default_autocmd = true,
 }
 

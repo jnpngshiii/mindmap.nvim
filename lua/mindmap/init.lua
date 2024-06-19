@@ -587,6 +587,67 @@ function user_func.setup(user_config)
 		)
 	end
 
+	if plugin.config.enable_shorten_keymap then
+		if plugin.config.shorten_keymap_prefix == "m" then
+			vim.api.nvim_set_keymap("n", "M", "m", { noremap = true })
+		end
+
+		----------
+		-- MindmapAdd
+		----------
+
+		-- Add and Remove
+		-- Link and Unlink
+
+		vim.api.nvim_set_keymap(
+			"n",
+			plugin.config.shorten_keymap_prefix .. "a",
+			"<cmd>MindmapAddNearestHeadingAsHeadingNode<cr>",
+			{ noremap = true, silent = true, desc = "Add nearest heading as heading node" }
+		)
+
+		vim.api.nvim_set_keymap(
+			"n",
+			plugin.config.shorten_keymap_prefix .. "l", -- link
+			"<cmd>MindmapAddEdge lastest SimpleEdge nearest<cr>",
+			{ noremap = true, silent = true, desc = "Add SimpleEdge from lastest node to nearest node" }
+		)
+		vim.api.nvim_set_keymap(
+			"n",
+			plugin.config.shorten_keymap_prefix .. "e",
+			"<cmd>MindmapAddNearestHeadingAsHeadingNode<cr> | <cmd>MindmapAddEdge nearest SelfLoopSubheadingEdge nearest<cr>",
+			{ noremap = true, silent = true, desc = "Add SelfLoopSubheadingEdge from nearest node to nearest node" }
+		)
+		vim.api.nvim_set_keymap(
+			"n",
+			plugin.config.shorten_keymap_prefix .. "E",
+			"<cmd>MindmapAddNearestHeadingAsHeadingNode<cr> | <cmd>MindmapAddEdge nearest SelfLoopContentEdge nearest<cr>",
+			{ noremap = true, silent = true, desc = "Add SelfLoopContentEdge from nearest node to nearest node" }
+		)
+
+		----------
+		-- MindmapRemove
+		----------
+
+		vim.api.nvim_set_keymap(
+			"n",
+			plugin.config.shorten_keymap_prefix .. "r",
+			"<cmd>MindmapRemove nearest node<cr>",
+			{ noremap = true, silent = true, desc = "Remove nearest node" }
+		)
+
+		----------
+		-- MindmapSp
+		----------
+
+		vim.api.nvim_set_keymap(
+			"n",
+			plugin.config.shorten_keymap_prefix .. "s",
+			"<cmd>MindmapSp buffer<cr>",
+			{ noremap = true, silent = true, desc = "Review buffer edge" }
+		)
+	end
+
 	if plugin.config.enable_default_autocmd then
 		vim.api.nvim_create_autocmd("VimLeave", {
 			callback = function()
