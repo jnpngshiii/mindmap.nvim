@@ -684,4 +684,6 @@ end
 
 --------------------
 
+require("mindmap.experiment.queries.init")
+
 return user_func
