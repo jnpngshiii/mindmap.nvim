@@ -34,6 +34,10 @@ local utils = require("mindmap.utils")
 ---@field default_alg_cls_method table<string, function> Default class method for all algorithms. Example: `baz(cls, self, ...)`.
 ---
 ---@field version integer Version of the graph.
+---@field undo_stack table<string, table> Stack of undo operations.
+---@field redo_stack table<string, table> Stack of redo operations.
+---@field undo_redo_limit integer Limit of undo and redo operations.
+---@field current_operation table? Current operation.
 ---
 ---@field logger Logger Logger of the graph.
 ---@field node_sub_cls table<NodeType, PrototypeNode> Registered sub node classes of the graph.
@@ -263,6 +267,10 @@ function Graph:new(
 		default_alg_cls_method = default_alg_cls_method or {},
 		--
 		version = version or graph_version,
+		undo_stack = {},
+		redo_stack = {},
+		undo_redo_limit = 3,
+		current_operation = nil,
 	}
 
 	setmetatable(graph, self)
@@ -321,6 +329,10 @@ function Graph:new(
 	return graph
 end
 
+----------
+-- Basic Methods
+----------
+
 ---Add a node to the graph.
 ---If the node has `before_add_into_graph` and `after_add_into_graph` methods, they will be called before and after adding the node.
 ---@param node PrototypeNode Node to be added.
@@ -338,6 +350,15 @@ function Graph:add_node(node)
 	end
 
 	self.logger:info("Node", "Add " .. node.type .. " <" .. node.id .. ">.")
+
+	if self.current_operation then
+		self:record_sub_operation(
+			-- Redo
+			self:add_node(node),
+			-- Undo
+			self:remove_node(node.id)
+		)
+	end
 end
 
 ---Remove a node from the graph and all edges related to it using ID.
@@ -372,6 +393,15 @@ function Graph:remove_node(node_id)
 	self.nodes[node_id].state = "removed"
 	if self.nodes[node_id].after_remove_from_graph then
 		self.nodes[node_id]:after_remove_from_graph()
+	end
+
+	if self.current_operation then
+		self:record_sub_operation(
+			-- Redo
+			self:remove_node(node_id),
+			-- Undo
+			self:add_node(node)
+		)
 	end
 end
 
@@ -472,14 +502,13 @@ function Graph:get_sp_info_from_edge(edge_id)
 	-- TO   : Front
 	-- From : Back
 
-
 	local to_node = self.nodes[edge.to_node_id]
 	local front, _ = to_node:get_content(edge.type)
-  front = utils.limit_string_length(front, screen_width)
+	front = utils.limit_string_length(front, screen_width)
 
 	local from_node = self.nodes[edge.from_node_id]
 	local _, back = from_node:get_content(edge.type)
-  back = utils.limit_string_length(back, screen_width)
+	back = utils.limit_string_length(back, screen_width)
 
 	return front,
 		back,
@@ -636,6 +665,108 @@ function Graph:save()
 	local json_content = vim.fn.json_encode(graph_tbl)
 	json:write(json_content)
 	json:close()
+end
+
+----------
+-- Atomic Methods
+----------
+
+function Graph:begin_operation()
+	if self.current_operation then
+		self.logger:debug("Graph", "No Operation is in progress. Can not begin a new operation.")
+	end
+
+	-- Init current_operation
+	self.current_operation = {
+		operations = {},
+		inverses = {},
+	}
+end
+
+function Graph:record_sub_operation(operation, inverse)
+	if self.current_operation then
+		self.logger:debug("Graph", "No Operation is in progress. Can not record sub operation.")
+	end
+
+	-- Record the operation
+	table.insert(self.current_operation.operations, operation)
+	table.insert(self.current_operation.inverses, inverse)
+
+	-- Trigger the operation
+	operation()
+end
+
+function Graph:end_operation()
+	if not self.current_operation then
+		self.logger:debug("Graph", "No Operation is in progress. Can not end the operation.")
+	end
+
+	-- If no operation is recorded, do nothing.
+	if #self.current_operation.operations == 0 then
+		return
+	end
+
+	-- If the undo stack is full, remove the oldest operation.
+	if #self.undo_stack >= self.undo_redo_limit then
+		table.remove(self.undo_stack, 1)
+	end
+
+	-- Setup the undo stack
+	table.insert(self.undo_stack, {
+		redo = function()
+			for i = 1, #self.current_operation.operations do
+				self.current_operation.operations[i]()
+			end
+		end,
+		undo = function()
+			for i = #self.current_operation.inverses, 1, -1 do
+				self.current_operation.inverses[i]()
+			end
+		end,
+	})
+
+	-- Clean the redo stack, because a new operation is added.
+	self.redo_stack = {}
+
+	self.current_operation = nil
+end
+
+function Graph:undo()
+	local op = table.remove(self.undo_stack)
+	if not op then
+		self.logger:info("Graph", "No operation to undo.")
+		return false
+	end
+
+	-- Trigger the undo operation
+	op.undo()
+
+	-- Record the redo operation of the undo operation
+	if #self.redo_stack >= self.undo_redo_limit then
+		table.remove(self.redo_stack, 1)
+	end
+	table.insert(self.redo_stack, op)
+
+	return true
+end
+
+function Graph:redo()
+	local op = table.remove(self.redo_stack)
+	if not op then
+		self.logger:info("Graph", "No operation to redo.")
+		return false
+	end
+
+	-- Trigger the redo operation
+	op.redo()
+
+	-- Record the undo operation of the redo operation
+	if #self.undo_stack >= self.undo_redo_limit then
+		table.remove(self.undo_stack, 1)
+	end
+	table.insert(self.undo_stack, op)
+
+	return true
 end
 
 --------------------

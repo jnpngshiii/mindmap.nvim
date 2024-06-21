@@ -20,6 +20,7 @@ function user_func.MindmapAddNearestHeadingAsHeadingNode()
 	-- Get graph --
 
 	local found_graph = plugin.find_graph()
+	found_graph:begin_operation()
 
 	-- Get tree-sitter node --
 
@@ -53,6 +54,8 @@ function user_func.MindmapAddNearestHeadingAsHeadingNode()
 	-- Post action --
 	-- This action is manage by `node:after_add_into_graph(self)`,
 	-- which is auto called by `graph:add_node(node)`.
+
+	found_graph:end_operation()
 end
 
 vim.api.nvim_create_user_command("MindmapAddNearestHeadingAsHeadingNode", function()
@@ -65,10 +68,14 @@ end, {
 -- TODO: Merge into `MindmapAdd`
 function user_func.MindmapAddVisualSelectionAsExcerptNode()
 	local found_graph = plugin.find_graph()
+	found_graph:begin_operation()
+
 	local created_excerpt_node =
 		found_graph.node_sub_cls["ExcerptNode"]:create_using_latest_visual_selection(#found_graph.nodes + 1)
 
 	found_graph:add_node(created_excerpt_node)
+
+	found_graph:end_operation()
 end
 
 vim.api.nvim_create_user_command("MindmapAddVisualSelectionAsExcerptNode", function()
@@ -83,6 +90,8 @@ end, {
 ---@param to_node_location? string
 function user_func.MindmapAddEdge(from_node_location, edge_type, to_node_location)
 	local found_graph = plugin.find_graph()
+	found_graph:begin_operation()
+
 	if not found_graph.edge_sub_cls[edge_type] then
 		vim.notify("[MindmapAdd] Invalid `edge_type`. Type must register in graph first.", vim.log.levels.ERROR)
 		return
@@ -103,6 +112,8 @@ function user_func.MindmapAddEdge(from_node_location, edge_type, to_node_locatio
 			found_graph:add_edge(created_edge)
 		end
 	end
+
+	found_graph:end_operation()
 end
 
 vim.api.nvim_create_user_command("MindmapAddEdge", function(arg)
@@ -132,8 +143,9 @@ function user_func.MindmapRemove(location, node_or_edge_type)
 	node_or_edge_type = node_or_edge_type or ""
 
 	local found_graph = plugin.find_graph()
-	local nodes, _ = plugin.find_heading_nodes(found_graph, location)
+	found_graph:begin_operation()
 
+	local nodes, _ = plugin.find_heading_nodes(found_graph, location)
 	if node_or_edge_type == "node" or found_graph.node_sub_cls[node_or_edge_type] then
 		for id, node in pairs(nodes) do
 			if node_or_edge_type == "node" or node.type == node_or_edge_type then
@@ -164,6 +176,8 @@ function user_func.MindmapRemove(location, node_or_edge_type)
 		"[MindmapRemove] Invalid type `" .. node_or_edge_type .. "`. Type must register in graph first.",
 		vim.log.levels.WARN
 	)
+
+	found_graph:end_operation()
 end
 
 vim.api.nvim_create_user_command("MindmapRemove", function(arg)
@@ -229,6 +243,8 @@ function user_func.MindmapDisplay(location, show_type)
 	end
 
 	local found_graph = plugin.find_graph()
+	found_graph:begin_operation()
+
 	local _, ts_nodes = plugin.find_heading_nodes(found_graph, location)
 	local screen_width = vim.api.nvim_win_get_width(0) - 20
 
@@ -291,6 +307,8 @@ function user_func.MindmapDisplay(location, show_type)
 			end
 		end
 	end
+
+	found_graph:end_operation()
 end
 
 vim.api.nvim_create_user_command("MindmapDisplay", function(arg)
@@ -320,12 +338,17 @@ function user_func.MindmapClean(location, clean_type)
 		return
 	end
 
-	local _, ts_nodes = plugin.find_heading_nodes(plugin.find_graph(), location)
+	local found_graph = plugin.find_graph()
+	found_graph:begin_operation()
+
+	local _, ts_nodes = plugin.find_heading_nodes(found_graph, location)
 
 	for _, ts_node in pairs(ts_nodes) do
 		local start_row, _, _, _ = ts_node:range()
 		utils.clear_virtual_text(0, plugin.find_namespace(clean_type), start_row, start_row + 1)
 	end
+
+	found_graph:end_operation()
 end
 
 vim.api.nvim_create_user_command("MindmapClean", function(arg)
@@ -372,6 +395,32 @@ end, {
 	complete = function(arg_lead, cmd_line, cursor_pos)
 		return { "buffer", "all" }
 	end,
+})
+
+----------
+-- MindmapUndo / MindmapRedo
+----------
+
+function user_func.MindmapUndo()
+	local found_graph = plugin.find_graph()
+	found_graph:undo()
+end
+
+vim.api.nvim_create_user_command("MindmapUndo", function()
+	user_func.MindmapUndo()
+end, {
+	nargs = 0,
+})
+
+function user_func.MindmapRedo()
+	local found_graph = plugin.find_graph()
+	found_graph:redo()
+end
+
+vim.api.nvim_create_user_command("MindmapRedo", function()
+	user_func.MindmapRedo()
+end, {
+	nargs = 0,
 })
 
 ----------
@@ -670,6 +719,24 @@ function user_func.setup(user_config)
 			plugin.config.shorten_keymap_prefix .. "c",
 			"<cmd>MindmapClean buffer excerpt<cr>",
 			{ noremap = true, silent = true, desc = "Clean buffer excerpt" }
+		)
+
+		----------
+		-- MindmapUndo / MindmapRedo
+		----------
+
+		vim.api.nvim_set_keymap(
+			"n",
+			plugin.config.shorten_keymap_prefix .. "U",
+			"<cmd>MindmapUndo<cr>",
+			{ noremap = true, silent = true, desc = "Undo" }
+		)
+
+		vim.api.nvim_set_keymap(
+			"n",
+			plugin.config.shorten_keymap_prefix .. "R",
+			"<cmd>MindmapRedo<cr>",
+			{ noremap = true, silent = true, desc = "Redo" }
 		)
 	end
 
