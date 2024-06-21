@@ -4,6 +4,13 @@ local Layout = require("nui.layout")
 local Logger = require("mindmap.graph.logger")
 local utils = require("mindmap.utils")
 
+local function create_closure(func, ...)
+	local args = { ... }
+	return function()
+		return func(unpack(args))
+	end
+end
+
 --------------------
 -- Class Graph
 --------------------
@@ -354,9 +361,9 @@ function Graph:add_node(node)
 	if self.current_operation then
 		self:record_sub_operation(
 			-- Redo
-			self:add_node(node),
+			create_closure(self.add_node, self, node),
 			-- Undo
-			self:remove_node(node.id)
+			create_closure(self.remove_node, self, node.id)
 		)
 	end
 end
@@ -398,9 +405,9 @@ function Graph:remove_node(node_id)
 	if self.current_operation then
 		self:record_sub_operation(
 			-- Redo
-			self:remove_node(node_id),
+			create_closure(self.remove_node, node_id),
 			-- Undo
-			self:add_node(node)
+			create_closure(self.add_node, node)
 		)
 	end
 end
@@ -673,7 +680,8 @@ end
 
 function Graph:begin_operation()
 	if self.current_operation then
-		self.logger:debug("Graph", "No Operation is in progress. Can not begin a new operation.")
+		self.logger:debug("Graph", "An Operation is in progress. Can not begin a new operation.")
+		return
 	end
 
 	-- Init current_operation
@@ -684,27 +692,30 @@ function Graph:begin_operation()
 end
 
 function Graph:record_sub_operation(operation, inverse)
-	if self.current_operation then
+	if not self.current_operation then
 		self.logger:debug("Graph", "No Operation is in progress. Can not record sub operation.")
+		return
 	end
 
 	-- Record the operation
 	table.insert(self.current_operation.operations, operation)
 	table.insert(self.current_operation.inverses, inverse)
-
-	-- Trigger the operation
-	operation()
 end
 
 function Graph:end_operation()
 	if not self.current_operation then
 		self.logger:debug("Graph", "No Operation is in progress. Can not end the operation.")
+		return
 	end
 
 	-- If no operation is recorded, do nothing.
 	if #self.current_operation.operations == 0 then
 		return
 	end
+
+	-- NOTE: If use `self.current_operation` directly, it will cause an error.
+	local current_operation = self.current_operation
+	self.current_operation = nil
 
 	-- If the undo stack is full, remove the oldest operation.
 	if #self.undo_stack >= self.undo_redo_limit then
@@ -713,22 +724,20 @@ function Graph:end_operation()
 
 	-- Setup the undo stack
 	table.insert(self.undo_stack, {
-		redo = function()
-			for i = 1, #self.current_operation.operations do
-				self.current_operation.operations[i]()
+		redo_op = function()
+			for i = 1, #current_operation.operations do
+				current_operation.operations[i]()
 			end
 		end,
-		undo = function()
-			for i = #self.current_operation.inverses, 1, -1 do
-				self.current_operation.inverses[i]()
+		undo_op = function()
+			for i = #current_operation.inverses, 1, -1 do
+				current_operation.inverses[i]()
 			end
 		end,
 	})
 
 	-- Clean the redo stack, because a new operation is added.
 	self.redo_stack = {}
-
-	self.current_operation = nil
 end
 
 function Graph:undo()
@@ -739,7 +748,7 @@ function Graph:undo()
 	end
 
 	-- Trigger the undo operation
-	op.undo()
+	op.undo_op()
 
 	-- Record the redo operation of the undo operation
 	if #self.redo_stack >= self.undo_redo_limit then
@@ -758,7 +767,7 @@ function Graph:redo()
 	end
 
 	-- Trigger the redo operation
-	op.redo()
+	op.redo_op()
 
 	-- Record the undo operation of the redo operation
 	if #self.undo_stack >= self.undo_redo_limit then

@@ -11,7 +11,7 @@ local ts_utils = require("mindmap.ts_utils")
 local user_func = {}
 
 ----------
--- MindmapAdd
+-- MindmapAdd (Node)
 ----------
 
 ---@deprecated
@@ -29,6 +29,7 @@ function user_func.MindmapAddNearestHeadingAsHeadingNode()
 		nearest_heading_ts_node = nearest_heading_ts_node:parent()
 	end
 	if not nearest_heading_ts_node then
+		found_graph:end_operation()
 		return
 	end
 
@@ -38,6 +39,8 @@ function user_func.MindmapAddNearestHeadingAsHeadingNode()
 	local title_node, _, _ = ts_utils.parse_heading_node(nearest_heading_ts_node)
 	local id = tonumber(string.match(vim.treesitter.get_node_text(title_node, 0), "%d%d%d%d%d%d%d%d"))
 	if id then
+		vim.notify("Neatest heading is already a heading node with id `" .. id .. "`.", vim.log.levels.WARN)
+		found_graph:end_operation()
 		return
 	end
 
@@ -85,15 +88,61 @@ end, {
 	nargs = 0,
 })
 
+----------
+-- MindmapRemove (Node)
+----------
+
+function user_func.MindmapRemove(location, node_type)
+	local found_graph = plugin.find_graph()
+	found_graph:begin_operation()
+
+	if node_type and found_graph.node_sub_cls[node_type] then
+		vim.notify(
+			"[MindmapRemove] Invalid type `" .. node_type .. "`. Type must register in graph first.",
+			vim.log.levels.WARN
+		)
+		found_graph:end_operation()
+		return
+	end
+
+	local nodes, _ = plugin.find_heading_nodes(found_graph, location)
+	for id, node in pairs(nodes) do
+		if not node_type or node.type == node_type then
+			found_graph:remove_node(id)
+		end
+	end
+
+	found_graph:end_operation()
+end
+
+vim.api.nvim_create_user_command("MindmapRemove", function(arg)
+	user_func.MindmapRemove(arg.fargs[1], arg.fargs[2])
+end, {
+	nargs = "*",
+	---@diagnostic disable-next-line: unused-local
+	complete = function(arg_lead, cmd_line, cursor_pos)
+		if cursor_pos == 14 then
+			return { "lastest", "nearest", "-telescope", "buffer" }
+		else
+			return { "node", "edge" }
+		end
+	end,
+})
+
+----------
+-- MindmapLink (Edge)
+----------
+
 ---@param from_node_location string
 ---@param edge_type string
 ---@param to_node_location? string
-function user_func.MindmapAddEdge(from_node_location, edge_type, to_node_location)
+function user_func.MindmapLink(from_node_location, edge_type, to_node_location)
 	local found_graph = plugin.find_graph()
 	found_graph:begin_operation()
 
 	if not found_graph.edge_sub_cls[edge_type] then
 		vim.notify("[MindmapAdd] Invalid `edge_type`. Type must register in graph first.", vim.log.levels.ERROR)
+		found_graph:end_operation()
 		return
 	end
 
@@ -116,8 +165,8 @@ function user_func.MindmapAddEdge(from_node_location, edge_type, to_node_locatio
 	found_graph:end_operation()
 end
 
-vim.api.nvim_create_user_command("MindmapAddEdge", function(arg)
-	user_func.MindmapAddEdge(arg.fargs[1], arg.fargs[2], arg.fargs[3])
+vim.api.nvim_create_user_command("MindmapLink", function(arg)
+	user_func.MindmapLink(arg.fargs[1], arg.fargs[2], arg.fargs[3])
 end, {
 	nargs = "*",
 	---@diagnostic disable-next-line: unused-local
@@ -136,98 +185,8 @@ end, {
 })
 
 ----------
--- MindmapRemove
+-- MindmapUnlink (Edge)
 ----------
-
-function user_func.MindmapRemove(location, node_or_edge_type)
-	node_or_edge_type = node_or_edge_type or ""
-
-	local found_graph = plugin.find_graph()
-	found_graph:begin_operation()
-
-	local nodes, _ = plugin.find_heading_nodes(found_graph, location)
-	if node_or_edge_type == "node" or found_graph.node_sub_cls[node_or_edge_type] then
-		for id, node in pairs(nodes) do
-			if node_or_edge_type == "node" or node.type == node_or_edge_type then
-				found_graph:remove_node(id)
-			end
-		end
-	end
-
-	if node_or_edge_type == "edge" or found_graph.edge_sub_cls[node_or_edge_type] then
-		for _, node in pairs(nodes) do
-			for _, edge_id in ipairs(node.incoming_edge_ids) do
-				local edge = found_graph.edges[edge_id]
-				if node_or_edge_type == "edge" or edge.type == node_or_edge_type then
-					found_graph:remove_edge(edge_id)
-				end
-			end
-			-- TODO: Don not handle outgoing edge here.
-			for _, edge_id in ipairs(node.outcoming_edge_ids) do
-				local edge = found_graph.edges[edge_id]
-				if node_or_edge_type == "edge" or edge.type == node_or_edge_type then
-					found_graph:remove_edge(edge_id)
-				end
-			end
-		end
-	end
-
-	vim.notify(
-		"[MindmapRemove] Invalid type `" .. node_or_edge_type .. "`. Type must register in graph first.",
-		vim.log.levels.WARN
-	)
-
-	found_graph:end_operation()
-end
-
-vim.api.nvim_create_user_command("MindmapRemove", function(arg)
-	user_func.MindmapRemove(arg.fargs[1], arg.fargs[2])
-end, {
-	nargs = "*",
-	---@diagnostic disable-next-line: unused-local
-	complete = function(arg_lead, cmd_line, cursor_pos)
-		if cursor_pos == 14 then
-			return { "lastest", "nearest", "-telescope", "buffer" }
-		else
-			return { "node", "edge" }
-		end
-	end,
-})
-
-----------
--- MindmapSp
-----------
-
-function user_func.MindmapSp(location)
-	local found_graph = plugin.find_graph()
-	local heading_nodes, _ = plugin.find_heading_nodes(found_graph, location)
-
-	vim.notify("Reviewing `" .. location .. "` start.")
-
-	for _, node in pairs(heading_nodes) do
-		for _, edge_id in ipairs(node.incoming_edge_ids) do
-			if found_graph.edges[edge_id].due_at < tonumber(os.time()) then
-				local status = found_graph:show_card(edge_id)
-				if status == "quit" then
-					vim.notify("Reviewing `" .. location .. "` end.")
-					return
-				end
-			end
-		end
-	end
-
-	vim.notify("Reviewing `" .. location .. "` end.")
-end
-
-vim.api.nvim_create_user_command("MindmapSp", function(arg)
-	user_func.MindmapSp(arg.fargs[1])
-end, {
-	nargs = "*",
-	---@diagnostic disable-next-line: unused-local
-	complete = function(arg_lead, cmd_line, cursor_pos)
-		return { "lastest", "nearest", "-telescope", "buffer", "-graph" }
-	end,
-})
 
 ----------
 -- MindmapDisplay
@@ -366,6 +325,71 @@ end, {
 })
 
 ----------
+-- MindmapUndo
+----------
+
+function user_func.MindmapUndo()
+	local found_graph = plugin.find_graph()
+	found_graph:undo()
+end
+
+vim.api.nvim_create_user_command("MindmapUndo", function()
+	user_func.MindmapUndo()
+end, {
+	nargs = 0,
+})
+
+----------
+-- MindmapRedo
+----------
+
+function user_func.MindmapRedo()
+	local found_graph = plugin.find_graph()
+	found_graph:redo()
+end
+
+vim.api.nvim_create_user_command("MindmapRedo", function()
+	user_func.MindmapRedo()
+end, {
+	nargs = 0,
+})
+
+----------
+-- MindmapReview
+----------
+
+function user_func.MindmapReview(location)
+	local found_graph = plugin.find_graph()
+	local heading_nodes, _ = plugin.find_heading_nodes(found_graph, location)
+
+	vim.notify("Reviewing `" .. location .. "` start.")
+
+	for _, node in pairs(heading_nodes) do
+		for _, edge_id in ipairs(node.incoming_edge_ids) do
+			if found_graph.edges[edge_id].due_at < tonumber(os.time()) then
+				local status = found_graph:show_card(edge_id)
+				if status == "quit" then
+					vim.notify("Reviewing `" .. location .. "` end.")
+					return
+				end
+			end
+		end
+	end
+
+	vim.notify("Reviewing `" .. location .. "` end.")
+end
+
+vim.api.nvim_create_user_command("MindmapReview", function(arg)
+	user_func.MindmapReview(arg.fargs[1])
+end, {
+	nargs = "*",
+	---@diagnostic disable-next-line: unused-local
+	complete = function(arg_lead, cmd_line, cursor_pos)
+		return { "lastest", "nearest", "-telescope", "buffer", "-graph" }
+	end,
+})
+
+----------
 -- MindmapSave
 ----------
 
@@ -398,32 +422,6 @@ end, {
 })
 
 ----------
--- MindmapUndo / MindmapRedo
-----------
-
-function user_func.MindmapUndo()
-	local found_graph = plugin.find_graph()
-	found_graph:undo()
-end
-
-vim.api.nvim_create_user_command("MindmapUndo", function()
-	user_func.MindmapUndo()
-end, {
-	nargs = 0,
-})
-
-function user_func.MindmapRedo()
-	local found_graph = plugin.find_graph()
-	found_graph:redo()
-end
-
-vim.api.nvim_create_user_command("MindmapRedo", function()
-	user_func.MindmapRedo()
-end, {
-	nargs = 0,
-})
-
-----------
 -- MindmapTest
 ----------
 
@@ -450,18 +448,18 @@ function user_func.setup(user_config)
 
 	if plugin.config.enable_default_keymap then
 		----------
-		-- MindmapAdd
+		-- MindmapAdd (Node)
 		----------
 
 		vim.api.nvim_set_keymap(
 			"n",
-			plugin.config.keymap_prefix .. "An",
+			plugin.config.keymap_prefix .. "an",
 			"<cmd>MindmapAddNearestHeadingAsHeadingNode<cr>",
 			{ noremap = true, silent = true, desc = "Add nearest heading as heading node" }
 		)
 		vim.api.nvim_set_keymap(
 			"n",
-			plugin.config.keymap_prefix .. "Ae",
+			plugin.config.keymap_prefix .. "ae",
 			"<cmd>MindmapAddVisualSelectionAsExcerptNode<cr>",
 			{ noremap = true, silent = true, desc = "Add visual selection as excerpt node" }
 		)
@@ -471,27 +469,9 @@ function user_func.setup(user_config)
 			"<cmd>MindmapAddVisualSelectionAsExcerptNode<cr>",
 			{ noremap = true, silent = true, desc = "Add visual selection as excerpt node" }
 		)
-		vim.api.nvim_set_keymap(
-			"n",
-			plugin.config.keymap_prefix .. "aln",
-			"<cmd>MindmapAddEdge lastest SimpleEdge nearest<cr>",
-			{ noremap = true, silent = true, desc = "Add SimpleEdge from lastest node to nearest node" }
-		)
-		vim.api.nvim_set_keymap(
-			"n",
-			plugin.config.keymap_prefix .. "ann",
-			"<cmd>MindmapAddEdge nearest SelfLoopSubheadingEdge nearest<cr>",
-			{ noremap = true, silent = true, desc = "Add SelfLoopSubheadingEdge from nearest node to nearest node" }
-		)
-		vim.api.nvim_set_keymap(
-			"n",
-			plugin.config.keymap_prefix .. "anN",
-			"<cmd>MindmapAddEdge nearest SelfLoopContentEdge nearest<cr>",
-			{ noremap = true, silent = true, desc = "Add SelfLoopContentEdge from nearest node to nearest node" }
-		)
 
 		----------
-		-- MindmapRemove
+		-- MindmapRemove (Node)
 		----------
 
 		vim.api.nvim_set_keymap(
@@ -520,39 +500,31 @@ function user_func.setup(user_config)
 		)
 
 		----------
-		-- MindmapSp
+		-- MindmapLink (Edge)
 		----------
 
 		vim.api.nvim_set_keymap(
 			"n",
-			plugin.config.keymap_prefix .. "sl",
-			"<cmd>MindmapSp lastest<cr>",
-			{ noremap = true, silent = true, desc = "Review lastest edge" }
+			plugin.config.keymap_prefix .. "lln",
+			"<cmd>MindmapLink lastest SimpleEdge nearest<cr>",
+			{ noremap = true, silent = true, desc = "Add SimpleEdge from lastest node to nearest node" }
 		)
 		vim.api.nvim_set_keymap(
 			"n",
-			plugin.config.keymap_prefix .. "sn",
-			"<cmd>MindmapSp nearest<cr>",
-			{ noremap = true, silent = true, desc = "Review nearest edge" }
+			plugin.config.keymap_prefix .. "lnn",
+			"<cmd>MindmapLink nearest SelfLoopSubheadingEdge nearest<cr>",
+			{ noremap = true, silent = true, desc = "Add SelfLoopSubheadingEdge from nearest node to nearest node" }
 		)
 		vim.api.nvim_set_keymap(
 			"n",
-			plugin.config.keymap_prefix .. "st",
-			"<cmd>MindmapSp telescope<cr>",
-			{ noremap = true, silent = true, desc = "Review telescope edge" }
+			plugin.config.keymap_prefix .. "lnN",
+			"<cmd>MindmapLink nearest SelfLoopContentEdge nearest<cr>",
+			{ noremap = true, silent = true, desc = "Add SelfLoopContentEdge from nearest node to nearest node" }
 		)
-		vim.api.nvim_set_keymap(
-			"n",
-			plugin.config.keymap_prefix .. "sb",
-			"<cmd>MindmapSp buffer<cr>",
-			{ noremap = true, silent = true, desc = "Review buffer edge" }
-		)
-		vim.api.nvim_set_keymap(
-			"n",
-			plugin.config.keymap_prefix .. "sg",
-			"<cmd>MindmapSp graph<cr>",
-			{ noremap = true, silent = true, desc = "Review graph edge" }
-		)
+
+		----------
+		-- MindmapUnlink (Edge)
+		----------
 
 		----------
 		-- MindmapDisplay
@@ -635,6 +607,57 @@ function user_func.setup(user_config)
 			"<cmd>MindmapClean buffer sp_info<cr>",
 			{ noremap = true, silent = true, desc = "Clean buffer sp info" }
 		)
+
+		----------
+		-- MindmapUndo
+		----------
+
+		----------
+		-- MindmapRedo
+		----------
+
+		----------
+		-- MindmapReview
+		----------
+
+		vim.api.nvim_set_keymap(
+			"n",
+			plugin.config.keymap_prefix .. "sl",
+			"<cmd>MindmapReview lastest<cr>",
+			{ noremap = true, silent = true, desc = "Review lastest edge" }
+		)
+		vim.api.nvim_set_keymap(
+			"n",
+			plugin.config.keymap_prefix .. "sn",
+			"<cmd>MindmapReview nearest<cr>",
+			{ noremap = true, silent = true, desc = "Review nearest edge" }
+		)
+		vim.api.nvim_set_keymap(
+			"n",
+			plugin.config.keymap_prefix .. "st",
+			"<cmd>MindmapReview telescope<cr>",
+			{ noremap = true, silent = true, desc = "Review telescope edge" }
+		)
+		vim.api.nvim_set_keymap(
+			"n",
+			plugin.config.keymap_prefix .. "sb",
+			"<cmd>MindmapReview buffer<cr>",
+			{ noremap = true, silent = true, desc = "Review buffer edge" }
+		)
+		vim.api.nvim_set_keymap(
+			"n",
+			plugin.config.keymap_prefix .. "sg",
+			"<cmd>MindmapReview graph<cr>",
+			{ noremap = true, silent = true, desc = "Review graph edge" }
+		)
+
+		----------
+		-- MindmapSave
+		----------
+
+		----------
+		-- MindmapTest
+		----------
 	end
 
 	if plugin.config.enable_shorten_keymap then
@@ -642,14 +665,12 @@ function user_func.setup(user_config)
 
 		if plugin.config.shorten_keymap_prefix == "m" then
 			vim.api.nvim_set_keymap("n", "M", "m", { noremap = true })
+			-- vim.api.nvim_set_keymap("n", "m", "M", { noremap = true })
 		end
 
 		----------
-		-- MindmapAdd
+		-- MindmapAdd (Node)
 		----------
-
-		-- Add and Remove
-		-- Link and Unlink
 
 		vim.api.nvim_set_keymap(
 			"n",
@@ -658,27 +679,8 @@ function user_func.setup(user_config)
 			{ noremap = true, silent = true, desc = "Add nearest heading as heading node" }
 		)
 
-		vim.api.nvim_set_keymap(
-			"n",
-			plugin.config.shorten_keymap_prefix .. "l", -- link
-			"<cmd>MindmapAddEdge lastest SimpleEdge nearest<cr>",
-			{ noremap = true, silent = true, desc = "Add SimpleEdge from lastest node to nearest node" }
-		)
-		vim.api.nvim_set_keymap(
-			"n",
-			plugin.config.shorten_keymap_prefix .. "e",
-			"<cmd>MindmapAddNearestHeadingAsHeadingNode<cr> | <cmd>MindmapAddEdge nearest SelfLoopSubheadingEdge nearest<cr>",
-			{ noremap = true, silent = true, desc = "Add SelfLoopSubheadingEdge from nearest node to nearest node" }
-		)
-		vim.api.nvim_set_keymap(
-			"n",
-			plugin.config.shorten_keymap_prefix .. "E",
-			"<cmd>MindmapAddNearestHeadingAsHeadingNode<cr> | <cmd>MindmapAddEdge nearest SelfLoopContentEdge nearest<cr>",
-			{ noremap = true, silent = true, desc = "Add SelfLoopContentEdge from nearest node to nearest node" }
-		)
-
 		----------
-		-- MindmapRemove
+		-- MindmapRemove (Node)
 		----------
 
 		vim.api.nvim_set_keymap(
@@ -689,15 +691,31 @@ function user_func.setup(user_config)
 		)
 
 		----------
-		-- MindmapSp
+		-- MindmapLink (Edge)
 		----------
 
 		vim.api.nvim_set_keymap(
 			"n",
-			plugin.config.shorten_keymap_prefix .. "s",
-			"<cmd>MindmapSp buffer<cr>",
-			{ noremap = true, silent = true, desc = "Review buffer edge" }
+			plugin.config.shorten_keymap_prefix .. "l", -- link
+			"<cmd>MindmapLink lastest SimpleEdge nearest<cr>",
+			{ noremap = true, silent = true, desc = "Add SimpleEdge from lastest node to nearest node" }
 		)
+		vim.api.nvim_set_keymap(
+			"n",
+			plugin.config.shorten_keymap_prefix .. "s",
+			"<cmd>MindmapAddNearestHeadingAsHeadingNode<cr> | <cmd>MindmapLink nearest SelfLoopSubheadingEdge nearest<cr>",
+			{ noremap = true, silent = true, desc = "Add SelfLoopSubheadingEdge from nearest node to nearest node" }
+		)
+		vim.api.nvim_set_keymap(
+			"n",
+			plugin.config.shorten_keymap_prefix .. "S",
+			"<cmd>MindmapAddNearestHeadingAsHeadingNode<cr> | <cmd>MindmapLink nearest SelfLoopContentEdge nearest<cr>",
+			{ noremap = true, silent = true, desc = "Add SelfLoopContentEdge from nearest node to nearest node" }
+		)
+
+		----------
+		-- MindmapUnlink (Edge)
+		----------
 
 		----------
 		-- MindmapDisplay
@@ -722,7 +740,7 @@ function user_func.setup(user_config)
 		)
 
 		----------
-		-- MindmapUndo / MindmapRedo
+		-- MindmapUndo
 		----------
 
 		vim.api.nvim_set_keymap(
@@ -732,20 +750,51 @@ function user_func.setup(user_config)
 			{ noremap = true, silent = true, desc = "Undo" }
 		)
 
+		----------
+		-- MindmapRedo
+		----------
+
 		vim.api.nvim_set_keymap(
 			"n",
 			plugin.config.shorten_keymap_prefix .. "R",
 			"<cmd>MindmapRedo<cr>",
 			{ noremap = true, silent = true, desc = "Redo" }
 		)
+
+		----------
+		-- MindmapReview
+		----------
+
+		vim.api.nvim_set_keymap(
+			"n",
+			plugin.config.shorten_keymap_prefix .. "r",
+			"<cmd>MindmapReview buffer<cr>",
+			{ noremap = true, silent = true, desc = "Review buffer edge" }
+		)
+
+		----------
+		-- MindmapSave
+		----------
+
+		----------
+		-- MindmapTest
+		----------
 	end
 
 	if plugin.config.enable_default_autocmd then
+		----------
+		-- MindmapSave
+		----------
+
 		vim.api.nvim_create_autocmd("VimLeave", {
 			callback = function()
 				user_func.MindmapSave("all")
 			end,
 		})
+
+		----------
+		-- MindmapTest
+		----------
 	end
 end
 
