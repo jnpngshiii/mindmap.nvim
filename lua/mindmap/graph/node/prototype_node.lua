@@ -10,21 +10,23 @@ local utils = require("mindmap.utils")
 ---@class PrototypeNode
 ---Mandatory fields:
 ---@field id NodeID ID of the node.
+---@field type NodeType Type of the node.
 ---@field file_name string Name of the file where the node is from.
 ---@field rel_file_path string Relative path to the project root of the file where the node is from.
 ---Optional fields:
 ---@field data table Data of the node. Subclass should put there own data in this field.
----@field type NodeType Type of the node.
 ---@field tag table<string, string> Tag of the node. Experimental.
 ---@field state string State of the node. Default to "active". Can be "active", "removed", and "archived". Experimental.
 ---@field version integer Version of the node. Experimental.
 ---@field created_at integer Created time of the node in UNIX timestemp format.
 ---@field incoming_edge_ids EdgeID[] Ids of incoming edges to this node.
 ---@field outcoming_edge_ids EdgeID[] Ids of outcoming edges from this node.
+---
 ---@field cache table<string, any> Cache of the node.
 local PrototypeNode = {}
+PrototypeNode.__index = PrototypeNode
 
-local prototype_node_version = 6
+local prototype_node_version = 7
 -- v0: Initial version.
 -- v1: Add `tag` field.
 -- v2: Remove `id` field.
@@ -32,18 +34,19 @@ local prototype_node_version = 6
 -- v4: Factory.
 -- v5: Add `id` field and `state` field.
 -- v6: Add `[before|after]_[add_into|remove_from]_graph` methods.
+-- v7: Move `[from|to]_table` methods to `NodeFactory`.
 
 ----------
--- Instance Method
+-- Basic Method
 ----------
 
 ---Create a new node.
+---@param type NodeType Type of the node.
 ---@param id NodeID ID of the node.
 ---@param file_name string Name of the file where the node is from.
 ---@param rel_file_path string Relative path to the project root of the file where the node is from.
 ---
 ---@param data? table Data of the node. Subclass should put there own data in this field.
----@param type? NodeType Type of the node.
 ---@param tag? table<string, string> Tag of the node.
 ---@param state? string State of the node. Default to "active". Can be "active", "removed", and "archived".
 ---@param version? integer Version of the node.
@@ -52,12 +55,12 @@ local prototype_node_version = 6
 ---@param outcoming_edge_ids? EdgeID[] Ids of outcoming edges from this node.
 ---@return PrototypeNode _ The created node.
 function PrototypeNode:new(
+	type,
 	id,
 	file_name,
 	rel_file_path,
 	--
 	data,
-	type,
 	tag,
 	state,
 	version,
@@ -66,53 +69,25 @@ function PrototypeNode:new(
 	outcoming_edge_ids
 )
 	local prototype_node = {
+		type = type,
 		id = id,
 		file_name = file_name,
 		rel_file_path = rel_file_path,
 		--
 		data = data or {},
-		type = type or "PrototypeNode",
 		tag = tag or {},
 		state = state or "active",
 		version = version or prototype_node_version,
 		created_at = created_at or tonumber(os.time()),
 		incoming_edge_ids = incoming_edge_ids or {},
 		outcoming_edge_ids = outcoming_edge_ids or {},
+		--
 		cache = {},
 	}
-
-	setmetatable(prototype_node, self)
-	self.__index = self
+	prototype_node.__index = prototype_node
+	setmetatable(prototype_node, PrototypeNode)
 
 	return prototype_node
-end
-
----@abstract
----Handle the node before adding into the graph.
----@diagnostic disable-next-line: unused-vararg
-function PrototypeNode:before_add_into_graph(...)
-	-- error("[PrototypeNode] Please implement function `before_add_into_graph` in subclass.")
-end
-
----@abstract
----Handle the node after adding into the graph.
----@diagnostic disable-next-line: unused-vararg
-function PrototypeNode:after_add_into_graph(...)
-	-- error("[PrototypeNode] Please implement function `after_add_into_graph` in subclass.")
-end
-
----@abstract
----Handle the node before removing from the graph.
----@diagnostic disable-next-line: unused-vararg
-function PrototypeNode:before_remove_from_graph(...)
-	-- error("[PrototypeNode] Please implement function `before_remove_from_graph` in subclass.")
-end
-
----@abstract
----Handle the node after removing from the graph.
----@diagnostic disable-next-line: unused-vararg
-function PrototypeNode:after_remove_from_graph(...)
-	-- error("[PrototypeNode] Please implement function `after_remove_from_graph` in subclass.")
 end
 
 ---Add incoming edge to the node.
@@ -167,23 +142,38 @@ function PrototypeNode:get_content(edge_type)
 	error("[PrototypeNode] Please implement function `get_content` in subclass.")
 end
 
+----------
+-- Graph Method
+-- TODO: How to remove there methods?
+----------
+
 ---@abstract
----Convert the node to a table.
+---Handle the node before adding into the graph.
 ---@diagnostic disable-next-line: unused-vararg
-function PrototypeNode:to_table(...)
-	error("[PrototypeNode] Please implement function `to_table` in subclass.")
+function PrototypeNode:before_add_into_graph(...)
+	-- error("[PrototypeNode] Please implement function `before_add_into_graph` in subclass.")
 end
 
 ---@abstract
----Convert the table to a node.
+---Handle the node after adding into the graph.
 ---@diagnostic disable-next-line: unused-vararg
-function PrototypeNode:from_table(...)
-	error("[PrototypeNode] Please implement function `to_table` in subclass.")
+function PrototypeNode:after_add_into_graph(...)
+	-- error("[PrototypeNode] Please implement function `after_add_into_graph` in subclass.")
 end
 
-----------
--- Class Method
-----------
+---@abstract
+---Handle the node before removing from the graph.
+---@diagnostic disable-next-line: unused-vararg
+function PrototypeNode:before_remove_from_graph(...)
+	-- error("[PrototypeNode] Please implement function `before_remove_from_graph` in subclass.")
+end
+
+---@abstract
+---Handle the node after removing from the graph.
+---@diagnostic disable-next-line: unused-vararg
+function PrototypeNode:after_remove_from_graph(...)
+	-- error("[PrototypeNode] Please implement function `after_remove_from_graph` in subclass.")
+end
 
 --------------------
 

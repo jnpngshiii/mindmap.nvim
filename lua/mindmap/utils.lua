@@ -289,6 +289,23 @@ function utils.limit_string_length(str_or_list, limitation)
 	return result
 end
 
+---Get the latest visual selection.
+---@return table _ { start_row, start_col, end_row, end_col }
+function utils.get_latest_visual_selection()
+	-- FIXME: The first call will return { 0, 0 } for both marks
+	local start_row = vim.api.nvim_buf_get_mark(0, "<")[1]
+	local start_col = vim.api.nvim_buf_get_mark(0, "<")[2]
+	local end_row = vim.api.nvim_buf_get_mark(0, ">")[1]
+	local end_col = vim.api.nvim_buf_get_mark(0, ">")[2]
+
+	return {
+		start_row = start_row,
+		start_col = start_col,
+		end_row = end_row,
+		end_col = end_col,
+	}
+end
+
 --------------------
 -- Deprecated functions
 --------------------
