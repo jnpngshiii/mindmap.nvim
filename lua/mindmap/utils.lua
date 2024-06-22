@@ -306,6 +306,17 @@ function utils.get_latest_visual_selection()
 	}
 end
 
+---Create a closure.
+---@param func function Function to be wrapped.
+---@param ... any Arguments to be passed to the function.
+---@return function _ The closure.
+function utils.create_closure(func, ...)
+	local args = { ... }
+	return function()
+		return func(unpack(args))
+	end
+end
+
 --------------------
 -- Deprecated functions
 --------------------

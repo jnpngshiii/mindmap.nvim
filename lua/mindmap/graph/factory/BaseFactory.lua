@@ -90,7 +90,7 @@ end
 
 ---Create a registered class.
 ---@param registered_type string Registered type.
----@param ...? any Information to create the class.
+---@param ... any Information to create the class.
 ---@return table? _ The created class.
 function BaseFactory:create(registered_type, ...)
 	local registered_cls = self:get_registered_class(registered_type)
