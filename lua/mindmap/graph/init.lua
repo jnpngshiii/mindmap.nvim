@@ -778,6 +778,17 @@ function Graph:redo()
 	return true
 end
 
+---@deprecated
+---Create a savepoint of the graph.
+function Graph:create_savepoint()
+	self.logger:debug("Graph", "Create a savepoint.")
+
+	return {
+		nodes = vim.deepcopy(self.nodes),
+		edges = vim.deepcopy(self.edges),
+	}
+end
+
 --------------------
 -- class Method
 --------------------
