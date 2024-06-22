@@ -23,20 +23,20 @@ end
 ---@field show_log_in_nvim boolean Show log in Neovim. Default: false.
 ---
 ---@field default_node_type string Default type of the node. Default: "SimpleNode".
----@field node_prototype_cls PrototypeNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
+---@field node_prototype_cls BaseNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
 ---@field node_sub_cls_info table<NodeType, table> Information of the sub node classes. Must have `data`, `ins_methods` and `cls_methods` fields.
 ---@field default_node_ins_method table<string, function> Default instance method for all nodes. Example: `foo(self, ...)`.
 ---@field default_node_cls_method table<string, function> Default class method for all nodes. Example: `foo(cls, self, ...)`.
 ---
 ---@field default_edge_type string Default type of the edge. Default: "SimpleEdge".
----@field edge_prototype_cls PrototypeEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
+---@field edge_prototype_cls BaseEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
 ---@field edge_sub_cls_info table<EdgeType, table> Information of the sub node classes. Must have `data`, `ins_methods` and `cls_methods` fields.
 ---@field default_edge_ins_method table<string, function> Default instance method for all edges. Example: `bar(self, ...)`.
 ---@field default_edge_cls_method table<string, function> Default class method for all edges. Example: `bar(cls, self, ...)`.
 ---
 ---@field alg_type string Type of the algorithm used in space repetition. Default to "SM2Alg".
----@field alg_prototype_cls PrototypeAlg Prototype of the algorithm. Used to create sub algorithm classes. Must have a `new` method and a `data` field.
----@field alg_sub_cls_info table<AlgType, PrototypeAlg> Information of the sub algorithm classes. Must have `data`, `ins_methods` and `cls_methods` fields.
+---@field alg_prototype_cls BaseAlg Prototype of the algorithm. Used to create sub algorithm classes. Must have a `new` method and a `data` field.
+---@field alg_sub_cls_info table<AlgType, BaseAlg> Information of the sub algorithm classes. Must have `data`, `ins_methods` and `cls_methods` fields.
 ---@field default_alg_ins_method table<string, function> Default instance method for all algorithms. Example: `baz(self, ...)`.
 ---@field default_alg_cls_method table<string, function> Default class method for all algorithms. Example: `baz(cls, self, ...)`.
 ---
@@ -47,11 +47,11 @@ end
 ---@field current_operation table? Current operation.
 ---
 ---@field logger Logger Logger of the graph.
----@field node_sub_cls table<NodeType, PrototypeNode> Registered sub node classes of the graph.
----@field edge_sub_cls table<EdgeType, PrototypeEdge> Registered sub edge classes of the graph.
----@field nodes table<NodeID, PrototypeNode> Nodes in the graph.
----@field edges table<EdgeID, PrototypeEdge> Edges in the graph.
----@field alg PrototypeAlg Algorithm of the graph.
+---@field node_sub_cls table<NodeType, BaseNode> Registered sub node classes of the graph.
+---@field edge_sub_cls table<EdgeType, BaseEdge> Registered sub edge classes of the graph.
+---@field nodes table<NodeID, BaseNode> Nodes in the graph.
+---@field edges table<EdgeID, BaseEdge> Edges in the graph.
+---@field alg BaseAlg Algorithm of the graph.
 local Graph = {}
 
 local graph_version = 2
@@ -150,20 +150,20 @@ end
 ---@param show_log_in_nvim boolean Show log in Neovim. Default: true.
 ---
 ---@param default_node_type string Default type of the node. Default: "SimpleNode".
----@param node_prototype_cls PrototypeNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
+---@param node_prototype_cls BaseNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
 ---@param node_sub_cls_info table<NodeType, table> Information of the sub node classes. Must have `data`, `ins_methods` and `cls_methods` fields.
 ---@param default_node_ins_method table<string, function> Default instance method for all nodes. Example: `foo(self, ...)`.
 ---@param default_node_cls_method table<string, function> Default class method for all nodes. Example: `foo(cls, self, ...)`.
 ---
 ---@param default_edge_type string Default type of the edge. Default: "SimpleEdge".
----@param edge_prototype_cls PrototypeEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
+---@param edge_prototype_cls BaseEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
 ---@param edge_sub_cls_info table<EdgeType, table> Information of the sub node classes. Must have `data`, `ins_methods` and `cls_methods` fields.
 ---@param default_edge_ins_method table<string, function> Default instance method for all edges. Example: `bar(self, ...)`.
 ---@param default_edge_cls_method table<string, function> Default class method for all edges. Example: `bar(cls, self, ...)`.
 ---
 ---@param alg_type string Type of the algorithm used in space repetition. Default to "SM2Alg".
----@param alg_prototype_cls PrototypeAlg Prototype of the algorithm. Used to create sub algorithm classes. Must have a `new` method and a `data` field.
----@param alg_sub_cls_info table<AlgType, PrototypeAlg> Information of the sub algorithm classes. Must have `data`, `ins_methods` and `cls_methods` fields.
+---@param alg_prototype_cls BaseAlg Prototype of the algorithm. Used to create sub algorithm classes. Must have a `new` method and a `data` field.
+---@param alg_sub_cls_info table<AlgType, BaseAlg> Information of the sub algorithm classes. Must have `data`, `ins_methods` and `cls_methods` fields.
 ---@param default_alg_ins_method table<string, function> Default instance method for all algorithms. Example: `baz(self, ...)`.
 ---@param default_alg_cls_method table<string, function> Default class method for all algorithms. Example: `baz(cls, self, ...)`.
 ---
@@ -342,7 +342,7 @@ end
 
 ---Add a node to the graph.
 ---If the node has `before_add_into_graph` and `after_add_into_graph` methods, they will be called before and after adding the node.
----@param node PrototypeNode Node to be added.
+---@param node BaseNode Node to be added.
 ---@return nil _ This function does not return anything.
 function Graph:add_node(node)
 	if node.before_add_into_graph then
@@ -414,7 +414,7 @@ end
 
 ---Add a edge to the graph.
 ---If the edge has `before_add_into_graph` and `after_add_into_graph` methods, they will be called before and after adding the edge.
----@param edge PrototypeEdge Edge to be added.
+---@param edge BaseEdge Edge to be added.
 ---@return nil _ This function does not return anything.
 function Graph:add_edge(edge)
 	if edge.before_add_into_graph then

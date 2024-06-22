@@ -21,20 +21,20 @@ local plugin = {}
 ---Graph configuration:
 ---  Node:
 ---@field default_node_type string Default type of the node. Default: "SimpleNode".
----@field node_prototype_cls PrototypeNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
+---@field node_prototype_cls BaseNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
 ---@field node_sub_cls_info table<NodeType, table> Information of the sub node classes. Must have `data`, `ins_methods` and `cls_methods` fields.
 ---@field default_node_ins_method table<string, function> Default instance method for all nodes. Example: `foo(self, ...)`.
 ---@field default_node_cls_method table<string, function> Default class method for all nodes. Example: `foo(cls, self, ...)`.
 ---  Edge:
 ---@field default_edge_type string Default type of the edge. Default: "SimpleEdge".
----@field edge_prototype_cls PrototypeEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
+---@field edge_prototype_cls BaseEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
 ---@field edge_sub_cls_info table<EdgeType, table> Information of the sub node classes. Must have `data`, `ins_methods` and `cls_methods` fields.
 ---@field default_edge_ins_method table<string, function> Default instance method for all edges. Example: `bar(self, ...)`.
 ---@field default_edge_cls_method table<string, function> Default class method for all edges. Example: `bar(cls, self, ...)`.
 ---Space repetition configuration:
 ---@field alg_type string Type of the algorithm used in space repetition. Default to "SM2Alg".
----@field alg_prototype_cls PrototypeAlg Prototype of the algorithm. Used to create sub algorithm classes. Must have a `new` method and a `data` field.
----@field alg_sub_cls_info table<AlgType, PrototypeAlg> Information of the sub algorithm classes. Must have `data`, `ins_methods` and `cls_methods` fields.
+---@field alg_prototype_cls BaseAlg Prototype of the algorithm. Used to create sub algorithm classes. Must have a `new` method and a `data` field.
+---@field alg_sub_cls_info table<AlgType, BaseAlg> Information of the sub algorithm classes. Must have `data`, `ins_methods` and `cls_methods` fields.
 ---@field default_alg_ins_method table<string, function> Default instance method for all algorithms. Example: `baz(self, ...)`.
 ---@field default_alg_cls_method table<string, function> Default class method for all algorithms. Example: `baz(cls, self, ...)`.
 ---Behavior configuration:
@@ -161,7 +161,7 @@ end
 
 ---Find nodes and its corresponding tree-sitter nodes in the given location.
 ---@param location string|TSNode Location to find nodes. Location must be TSNode, "lastest", "nearest", "telescope" or "buffer".
----@return table<NodeID, PrototypeNode> nodes, table<NodeID, TSNode> ts_nodes Found nodes and its corresponding tree-sitter nodes.
+---@return table<NodeID, BaseNode> nodes, table<NodeID, TSNode> ts_nodes Found nodes and its corresponding tree-sitter nodes.
 function plugin.find_heading_nodes(graph, location)
 	if
 		type(location) ~= "userdata"

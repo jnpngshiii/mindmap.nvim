@@ -11,7 +11,7 @@ local SimpleAlg = {}
 
 ---Answer the card with "easy".
 ---@param self SimpleAlg The algorithm.
----@param edge PrototypeEdge The edge.
+---@param edge BaseEdge The edge.
 ---@return nil _
 ---@diagnostic disable-next-line: unused-local
 function SimpleAlg.answer_easy(self, edge)
@@ -31,7 +31,7 @@ end
 
 ---Answer the card with "good".
 ---@param self SimpleAlg The algorithm.
----@param edge PrototypeEdge The edge.
+---@param edge BaseEdge The edge.
 ---@diagnostic disable-next-line: unused-local
 ---@return nil _
 ---@diagnostic disable-next-line: unused-local
@@ -50,7 +50,7 @@ end
 
 ---Answer the card with "again".
 ---@param self SimpleAlg The algorithm.
----@param edge PrototypeEdge The edge.
+---@param edge BaseEdge The edge.
 ---@diagnostic disable-next-line: unused-local
 ---@return nil _
 ---@diagnostic disable-next-line: unused-local

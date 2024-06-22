@@ -25,10 +25,10 @@ end
 ---Register a class.
 ---@param type_to_be_registered string Type to be registered.
 ---@param cls_to_be_registered table Class to be registered.
----@param cls_to_be_inherited? table Class to be inherited. Default: `self.base_cls`.
+---@param type_to_be_inherited? string Type of a registered class to be inherited. If not provided, use `self.base_cls` instead. Default: nil.
 ---@return boolean _ Whether the class is registered.
-function BaseFactory:register(type_to_be_registered, cls_to_be_registered, cls_to_be_inherited)
-	cls_to_be_inherited = cls_to_be_inherited or self.base_cls
+function BaseFactory:register(type_to_be_registered, cls_to_be_registered, type_to_be_inherited)
+	local cls_to_be_inherited = self:get_registered_class(type_to_be_inherited or "") or self.base_cls
 
 	if self.registered_cls[type_to_be_registered] then
 		vim.notify(
@@ -70,7 +70,7 @@ end
 function BaseFactory:get_registered_class(registered_type)
 	local registered_cls = self.registered_cls[registered_type]
 	if not registered_cls then
-		vim.notify("Type `" .. registered_type .. "` is not registered. Aborte getting.", vim.log.levels.ERROR)
+		vim.notify("Type `" .. registered_type .. "` is not registered. Aborte getting.", vim.log.levels.WARN)
 		return
 	end
 
@@ -100,53 +100,6 @@ function BaseFactory:create(registered_type, ...)
 	end
 
 	return registered_cls:new(...)
-end
-
----Convert a instance to a table.
----@param ins table The instance to be converted.
----@return table _ The converted table.
-function BaseFactory:to_table(ins)
-	return {
-		type = ins.type,
-		id = ins.id,
-		file_name = ins.file_name,
-		rel_file_path = ins.rel_file_path,
-		--
-		data = ins.data,
-		tag = ins.tag,
-		state = ins.state,
-		version = ins.version,
-		created_at = ins.created_at,
-		incoming_edge_ids = ins.incoming_edge_ids,
-		outcoming_edge_ids = ins.outcoming_edge_ids,
-	}
-end
-
----Convert a table to a instance.
----@param registered_type string Which registered type the table should be converted to.
----@param tbl table The table to be converted.
----@return table? _ The converted instance.
-function BaseFactory:from_table(registered_type, tbl)
-	local registered_cls = self:get_registered_class(registered_type)
-	if not registered_cls then
-		vim.notify("Type `" .. registered_type .. "` is not registered. Aborte converting.", vim.log.levels.ERROR)
-		return
-	end
-
-	return registered_cls:new(
-		tbl.type,
-		tbl.id,
-		tbl.file_name,
-		tbl.rel_file_path,
-		--
-		tbl.data,
-		tbl.tag,
-		tbl.state,
-		tbl.version,
-		tbl.created_at,
-		tbl.incoming_edge_ids,
-		tbl.outcoming_edge_ids
-	)
 end
 
 --------------------

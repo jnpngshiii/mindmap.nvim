@@ -35,9 +35,8 @@ function BaseAlg:new(data, version)
 		data = data or {},
 		version = version or base_alg_version,
 	}
-
-	setmetatable(base_alg, self)
-	self.__index = self
+	base_alg.__index = base_alg
+	setmetatable(base_alg, BaseAlg)
 
 	return base_alg
 end

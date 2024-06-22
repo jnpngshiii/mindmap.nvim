@@ -103,9 +103,8 @@ function BaseEdge:new(
 		again_count = again_count or 0,
 		cache = {},
 	}
-
-	setmetatable(base_edge, self)
-	self.__index = self
+	base_edge.__index = base_edge
+	setmetatable(base_edge, BaseEdge)
 
 	return base_edge
 end
