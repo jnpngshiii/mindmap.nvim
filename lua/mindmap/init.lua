@@ -1,5 +1,3 @@
-local nts_utils = require("nvim-treesitter.ts_utils")
-
 local plugin = require("mindmap.plugin")
 local utils = require("mindmap.utils")
 local ts_utils = require("mindmap.ts_utils")
@@ -14,69 +12,88 @@ local user_func = {}
 -- MindmapAdd (Node)
 ----------
 
----@deprecated
--- TODO: Merge into `MindmapAdd`
-function user_func.MindmapAddNearestHeadingAsHeadingNode()
-	-- Get graph --
-
+function user_func.MindmapAdd(location, node_type)
 	local found_graph = plugin.find_graph()
+	local found_nodes, found_ts_nodes = plugin.find_node(found_graph, location)
+	if not #found_nodes or #found_ts_nodes then
+		vim.notify("[Func] No nearest heading node found. Abort adding.", vim.log.levels.WARN)
+	end
+
+	-- Transaction --
+
 	found_graph:begin_operation()
 
-	-- Get tree-sitter node --
+	for _, ts_node in pairs(found_ts_nodes) do
+		-- Pre action --
+		-- TODO: This action is manage by `node:before_add_into_graph(self)`,
+		-- which is auto called by `graph:add_node(node)`.
+		-- Avoid adding the same heading node
+		local title_node, _, _ = ts_utils.parse_heading_node(ts_node)
+		local id = tonumber(string.match(vim.treesitter.get_node_text(title_node, 0), "%d%d%d%d%d%d%d%d"))
 
-	local nearest_heading_ts_node = nts_utils.get_node_at_cursor()
-	while nearest_heading_ts_node and not nearest_heading_ts_node:type():match("^heading%d$") do
-		nearest_heading_ts_node = nearest_heading_ts_node:parent()
+		-- Add node --
+		if not id then
+			local file_name, _, rel_file_path, _ = unpack(utils.get_file_info())
+			local created_heading_node =
+				-- TODO: how to use ...?
+				found_graph.node_factory:create(node_type, #found_graph.nodes + 1, file_name, rel_file_path)
+			created_heading_node.cache.ts_node = nearest_heading_ts_node
+			created_heading_node.cache.ts_node_bufnr = vim.api.nvim_get_current_buf()
+			found_graph:add_node(created_heading_node)
+		else
+			vim.notify(
+				"[Func] Treesitter node is already a heading node with id `" .. id .. "`. Abort adding.",
+				vim.log.levels.WARN
+			)
+		end
+
+		-- Post action --
+		-- This action is manage by `node:after_add_into_graph(self)`,
+		-- which is auto called by `graph:add_node(node)`.
 	end
-	if not nearest_heading_ts_node then
-		found_graph:end_operation()
-		return
-	end
 
-	-- Pre action --
-
-	-- Avoid adding the same heading node
-	local title_node, _, _ = ts_utils.parse_heading_node(nearest_heading_ts_node)
-	local id = tonumber(string.match(vim.treesitter.get_node_text(title_node, 0), "%d%d%d%d%d%d%d%d"))
-	if id then
-		vim.notify("Neatest heading is already a heading node with id `" .. id .. "`.", vim.log.levels.WARN)
-		found_graph:end_operation()
-		return
-	end
-
-	-- Add node --
-
-	local file_name, _, rel_file_path, _ = unpack(utils.get_file_info())
-	local created_heading_node =
-		found_graph.node_sub_cls["HeadingNode"]:new(#found_graph.nodes + 1, file_name, rel_file_path)
-	created_heading_node.cache.ts_node = nearest_heading_ts_node
-	created_heading_node.cache.ts_node_bufnr = vim.api.nvim_get_current_buf()
-
-	found_graph:add_node(created_heading_node)
-
-	-- Post action --
-	-- This action is manage by `node:after_add_into_graph(self)`,
-	-- which is auto called by `graph:add_node(node)`.
+	-- Transaction --
 
 	found_graph:end_operation()
 end
 
-vim.api.nvim_create_user_command("MindmapAddNearestHeadingAsHeadingNode", function()
-	user_func.MindmapAddNearestHeadingAsHeadingNode()
+vim.api.nvim_create_user_command("MindmapAdd", function(arg)
+	user_func.MindmapAdd(arg.fargs[1], arg.fargs[2])
 end, {
-	nargs = 0,
+	nargs = "*",
+	---@diagnostic disable-next-line: unused-local
+	complete = function(arg_lead, cmd_line, cursor_pos)
+		if cursor_pos == 14 then
+			return { "lastest", "nearest", "-telescope", "buffer" }
+		else
+			return plugin.found_graph.node_factory:get_registered_types()
+		end
+	end,
 })
 
 ---@deprecated
 -- TODO: Merge into `MindmapAdd`
 function user_func.MindmapAddVisualSelectionAsExcerptNode()
 	local found_graph = plugin.find_graph()
+
+	-- Transaction --
+
 	found_graph:begin_operation()
 
-	local created_excerpt_node =
-		found_graph.node_sub_cls["ExcerptNode"]:create_using_latest_visual_selection(#found_graph.nodes + 1)
+	-- Add node --
 
+	local visual_selection_range = unpack(utils.get_latest_visual_selection())
+	local file_name, _, rel_file_path, _ = unpack(utils.get_file_info())
+	local created_excerpt_node = found_graph.node_factory:create(
+		"ExcerptNode",
+		#found_graph.nodes + 1,
+		file_name,
+		rel_file_path,
+		visual_selection_range
+	)
 	found_graph:add_node(created_excerpt_node)
+
+	-- Transaction --
 
 	found_graph:end_operation()
 end
@@ -96,7 +113,7 @@ function user_func.MindmapRemove(location, node_type)
 	local found_graph = plugin.find_graph()
 	found_graph:begin_operation()
 
-	if node_type and found_graph.node_sub_cls[node_type] then
+	if node_type and found_graph.node_factory:get_registered_class(node_type) then
 		vim.notify(
 			"[MindmapRemove] Invalid type `" .. node_type .. "`. Type must register in graph first.",
 			vim.log.levels.WARN
@@ -124,7 +141,7 @@ end, {
 		if cursor_pos == 14 then
 			return { "lastest", "nearest", "-telescope", "buffer" }
 		else
-			return { "node", "edge" }
+			return {}
 		end
 	end,
 })
@@ -140,8 +157,8 @@ function user_func.MindmapLink(from_node_location, edge_type, to_node_location)
 	local found_graph = plugin.find_graph()
 	found_graph:begin_operation()
 
-	if not found_graph.edge_sub_cls[edge_type] then
-		vim.notify("[MindmapAdd] Invalid `edge_type`. Type must register in graph first.", vim.log.levels.ERROR)
+	if not found_graph.edge_factory:get_registered_class(edge_type) then
+		vim.notify("[MindmapLink] Invalid `edge_type`. Type must register in graph first.", vim.log.levels.ERROR)
 		found_graph:end_operation()
 		return
 	end
@@ -156,8 +173,9 @@ function user_func.MindmapLink(from_node_location, edge_type, to_node_location)
 
 	for _, from_node in pairs(from_nodes) do
 		for _, to_node in pairs(to_nodes) do
-			local created_edge =
-				found_graph.edge_sub_cls[edge_type]:new(#found_graph.edges + 1, from_node.id, to_node.id)
+			local created_edge = found_graph.edge_factory
+				:get_registered_class(edge_type)
+				:new(#found_graph.edges + 1, from_node.id, to_node.id)
 			found_graph:add_edge(created_edge)
 		end
 	end
@@ -172,12 +190,7 @@ end, {
 	---@diagnostic disable-next-line: unused-local
 	complete = function(arg_lead, cmd_line, cursor_pos)
 		if cursor_pos == 15 then
-			-- FIXME: nil
-			local tbl = {}
-			for _, edge_cls_type in pairs(plugin.config.edge_sub_cls_info) do
-				table.insert(tbl, edge_cls_type)
-			end
-			return tbl
+			return plugin.found_graph.edge_factory:get_registered_types()
 		else
 			return { "lastest", "nearest", "-telescope", "buffer" }
 		end
@@ -454,7 +467,7 @@ function user_func.setup(user_config)
 		vim.api.nvim_set_keymap(
 			"n",
 			plugin.config.keymap_prefix .. "an",
-			"<cmd>MindmapAddNearestHeadingAsHeadingNode<cr>",
+			"<cmd>MindmapAdd nearest HeadingNode<cr>",
 			{ noremap = true, silent = true, desc = "Add nearest heading as heading node" }
 		)
 		vim.api.nvim_set_keymap(
@@ -675,7 +688,7 @@ function user_func.setup(user_config)
 		vim.api.nvim_set_keymap(
 			"n",
 			plugin.config.shorten_keymap_prefix .. "a",
-			"<cmd>MindmapAddNearestHeadingAsHeadingNode<cr>",
+			"<cmd>MindmapAdd nearest HeadingNode<cr>",
 			{ noremap = true, silent = true, desc = "Add nearest heading as heading node" }
 		)
 
@@ -703,13 +716,13 @@ function user_func.setup(user_config)
 		vim.api.nvim_set_keymap(
 			"n",
 			plugin.config.shorten_keymap_prefix .. "s",
-			"<cmd>MindmapAddNearestHeadingAsHeadingNode<cr> | <cmd>MindmapLink nearest SelfLoopSubheadingEdge nearest<cr>",
+			"<cmd>MindmapAdd nearest HeadingNode<cr> | <cmd>MindmapLink nearest SelfLoopSubheadingEdge nearest<cr>",
 			{ noremap = true, silent = true, desc = "Add SelfLoopSubheadingEdge from nearest node to nearest node" }
 		)
 		vim.api.nvim_set_keymap(
 			"n",
 			plugin.config.shorten_keymap_prefix .. "S",
-			"<cmd>MindmapAddNearestHeadingAsHeadingNode<cr> | <cmd>MindmapLink nearest SelfLoopContentEdge nearest<cr>",
+			"<cmd>MindmapAdd nearest HeadingNode<cr> | <cmd>MindmapLink nearest SelfLoopContentEdge nearest<cr>",
 			{ noremap = true, silent = true, desc = "Add SelfLoopContentEdge from nearest node to nearest node" }
 		)
 

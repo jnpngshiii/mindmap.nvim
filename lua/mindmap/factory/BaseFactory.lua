@@ -53,6 +53,7 @@ function BaseFactory:register(type_to_be_registered, cls_to_be_registered, type_
 			ins.__index = ins
 			setmetatable(ins, cls_to_be_registered)
 
+			---@cast ins BaseFactory
 			return ins
 		end
 	end

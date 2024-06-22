@@ -52,9 +52,9 @@ local graph_version = 3
 ---Logger:
 ---@param logger Logger Logger of the graph.
 ---Transaction:
----@param undo_redo_limit integer Limit of undo and redo operations.
+---@param undo_redo_limit? integer Limit of undo and redo operations. Default: 3.
 ---Others:
----@param version integer Version of the graph.
+---@param version? integer Version of the graph. Default: `graph_version`.
 ---@return Graph _ The new graph.
 function Graph:new(
 	-- Basic:
@@ -116,10 +116,6 @@ function Graph:new(
 
 	return graph
 end
-
-----------
--- Basic Methods
-----------
 
 ---Add a node to the graph.
 ---If the node has `before_add_into_graph` and `after_add_into_graph` methods,
@@ -715,9 +711,9 @@ function Graph:create_savepoint()
 	}
 end
 
---------------------
+----------
 -- class Method
---------------------
+----------
 
 --------------------
 

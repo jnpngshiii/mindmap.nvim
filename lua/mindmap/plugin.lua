@@ -4,7 +4,31 @@ local finders = require("telescope.finders")
 local pickers = require("telescope.pickers")
 local sorters = require("telescope.sorters")
 
-local Graph = require("mindmap.graph.init")
+-- Factory:
+local BaseFactory = require("mindmap.factory.BaseFactory")
+local NodeFactory = require("mindmap.factory.NodeFactory")
+local EdgeFactory = require("mindmap.factory.EdgeFactory")
+local AlgFactory = require("mindmap.factory.AlgFactory")
+-- Node:
+local BaseNode = require("mindmap.node.BaseNode")
+local SimpleNode = require("mindmap.node.SimpleNode")
+local HeadingNode = require("mindmap.node.HeadingNode")
+local ExcerptNode = require("mindmap.node.ExcerptNode")
+-- Edge:
+local BaseEdge = require("mindmap.edge.BaseEdge")
+local SimpleEdge = require("mindmap.edge.SimpleEdge")
+local SelfLoopContentEdge = require("mindmap.edge.SelfLoopContentEdge")
+local SelfLoopSubheadingEdge = require("mindmap.edge.SelfLoopSubheadingEdge")
+-- Alg:
+local BaseAlg = require("mindmap.alg.BaseAlg")
+local SimpleAlg = require("mindmap.alg.SimpleAlg")
+local SM2Alg = require("mindmap.alg.SM2Alg")
+local AnkiAlg = require("mindmap.alg.AnkiAlg")
+-- Logger:
+local Logger = require("mindmap.logger")
+-- Graph:
+local Graph = require("mindmap.graph")
+-- Utils:
 local utils = require("mindmap.utils")
 local ts_utils = require("mindmap.ts_utils")
 
@@ -15,83 +39,53 @@ local plugin = {}
 --------------------
 
 ---@class plugin.config
----Logger configuration:
+---Node:
+---@field base_node BaseNode Base node class.
+---@field node_factory NodeFactory Factory of the node.
+---Edge:
+---@field base_edge BaseEdge Base edge class.
+---@field edge_factory EdgeFactory Factory of the edge.
+---Alg:
+---@field base_alg BaseAlg Base algorithm class.
+---@field alg_factory AlgFactory Factory of the algorithm.
+---@field alg_type string Type of the algorithm. Default: "SimpleAlg".
+---Logger:
 ---@field log_level string Log level of the graph. Default: "INFO".
 ---@field show_log_in_nvim boolean Show log in Neovim. Default: true.
----Graph configuration:
----  Node:
----@field default_node_type string Default type of the node. Default: "SimpleNode".
----@field node_prototype_cls BaseNode Prototype of the node. Used to create sub node classes. Must have a `new` method and a `data` field.
----@field node_sub_cls_info table<NodeType, table> Information of the sub node classes. Must have `data`, `ins_methods` and `cls_methods` fields.
----@field default_node_ins_method table<string, function> Default instance method for all nodes. Example: `foo(self, ...)`.
----@field default_node_cls_method table<string, function> Default class method for all nodes. Example: `foo(cls, self, ...)`.
----  Edge:
----@field default_edge_type string Default type of the edge. Default: "SimpleEdge".
----@field edge_prototype_cls BaseEdge Prototype of the edge. Used to create sub edge classes. Must have a `new` method and a `data` field.
----@field edge_sub_cls_info table<EdgeType, table> Information of the sub node classes. Must have `data`, `ins_methods` and `cls_methods` fields.
----@field default_edge_ins_method table<string, function> Default instance method for all edges. Example: `bar(self, ...)`.
----@field default_edge_cls_method table<string, function> Default class method for all edges. Example: `bar(cls, self, ...)`.
----Space repetition configuration:
----@field alg_type string Type of the algorithm used in space repetition. Default to "SM2Alg".
----@field alg_prototype_cls BaseAlg Prototype of the algorithm. Used to create sub algorithm classes. Must have a `new` method and a `data` field.
----@field alg_sub_cls_info table<AlgType, BaseAlg> Information of the sub algorithm classes. Must have `data`, `ins_methods` and `cls_methods` fields.
----@field default_alg_ins_method table<string, function> Default instance method for all algorithms. Example: `baz(self, ...)`.
----@field default_alg_cls_method table<string, function> Default class method for all algorithms. Example: `baz(cls, self, ...)`.
 ---Behavior configuration:
----  Automatic behavior:
----@field show_excerpt_after_add boolean Show excerpt after adding a node. Default: true.
----@field show_excerpt_after_bfread boolean ...
----@field show_sp_info_after_bfread boolean ...
 ---  Default behavior:
 ---@field enable_default_keymap boolean Enable default keymap. Default: true.
 ---@field keymap_prefix string Prefix of the keymap. Default: "<localleader>m".
 ---@field enable_shorten_keymap boolean Enable shorten keymap. Default: false.
 ---@field shorten_keymap_prefix string Prefix of the shorten keymap. Default: "m".
 ---@field enable_default_autocmd boolean Enable default atuocmd. Default: true.
+---  Automatic behavior:
+---@field show_excerpt_after_add boolean ...
+---@field show_excerpt_after_bfread boolean ...
 plugin.config = {
-	-- Logger configuration:
+	-- Node:
+	base_node = BaseNode,
+	node_factory = NodeFactory,
+	-- Edge:
+	base_edge = BaseEdge,
+	edge_factory = EdgeFactory,
+	-- Alg:
+	base_alg = BaseAlg,
+	alg_factory = AlgFactory,
+	alg_type = "SimpleAlg",
+	-- Logger:
 	log_level = "INFO",
 	show_log_in_nvim = true,
-	-- Graph configuration:
-	--   Node:
-	default_node_type = "SimpleNode",
-	node_prototype_cls = require("mindmap.graph.node.prototype_node"),
-	node_sub_cls_info = {
-		ExcerptNode = require("mindmap.graph.node.excerpt_node"),
-		HeadingNode = require("mindmap.graph.node.heading_node"),
-		SimpleNode = require("mindmap.graph.node.simple_node"),
-	},
-	default_node_ins_method = require("mindmap.graph.node.default_ins_method"),
-	default_node_cls_method = require("mindmap.graph.node.default_cls_method"),
-	--   Edge:
-	default_edge_type = "SimpleEdge",
-	edge_prototype_cls = require("mindmap.graph.edge.prototype_edge"),
-	edge_sub_cls_info = {
-		SelfLoopContentEdge = require("mindmap.graph.edge.self_loop_content_edge"),
-		SelfLoopSubheadingEdge = require("mindmap.graph.edge.self_loop_subheading_edge"),
-		SimpleEdge = require("mindmap.graph.edge.simple_edge"),
-	},
-	default_edge_ins_method = require("mindmap.graph.edge.default_ins_method"),
-	default_edge_cls_method = require("mindmap.graph.edge.default_cls_method"),
-	-- Space repetitionconfiguration:
-	alg_type = "SimpleAlg", -- TODO: "SM2Alg"
-	alg_prototype_cls = require("mindmap.graph.alg.prototype_alg"),
-	alg_sub_cls_info = {
-		AnkiAlg = require("mindmap.graph.alg.anki_alg"),
-		SimpleAlg = require("mindmap.graph.alg.simple_alg"),
-		SM2Alg = require("mindmap.graph.alg.sm2_alg"),
-	},
-	default_alg_ins_method = require("mindmap.graph.alg.default_ins_method"),
-	default_alg_cls_method = require("mindmap.graph.alg.default_cls_method"),
 	-- Behavior configuration:
-	--   Automatic behavior:
-	show_excerpt_after_add = true,
 	--   Default behavior:
 	enable_default_keymap = true,
 	keymap_prefix = "<localleader>m",
 	enable_shorten_keymap = false,
 	shorten_keymap_prefix = "m",
 	enable_default_autocmd = true,
+	--   Automatic behavior:
+	show_excerpt_after_add = true,
+	show_excerpt_after_bfread = true,
 }
 
 --------------------
@@ -122,41 +116,43 @@ function plugin.find_namespace(namespace)
 	return plugin.cache.namespaces[namespace]
 end
 
----Find the registered graph using `save_path` and return it.
+---Find the registered graph using `save_dir` and return it.
 ---If the graph does not exist, create it first.
----@param save_path? string Save path of the graph to find.
+---@param save_dir? string Dir to load and save the graph. The graph will be saved in `{self.save_dir}/.mindmap.json`. Default: {current_project_path}.
 ---@return Graph graph Found or created graph.
-function plugin.find_graph(save_path)
-	save_path = save_path or utils.get_file_info()[4]
-	if not plugin.cache.graphs[save_path] then
+function plugin.find_graph(save_dir)
+	save_dir = save_dir or utils.get_file_info()[4]
+	if not plugin.cache.graphs[save_dir] then
+		local node_factory = plugin.config.node_factory:new(plugin.config.base_node)
+		node_factory:register("SimpleNode", SimpleNode)
+		node_factory:register("HeadingNode", HeadingNode)
+		node_factory:register("ExcerptNode", ExcerptNode)
+		local edge_factory = plugin.config.edge_factory:new(plugin.config.base_edge)
+		edge_factory:register("SimpleEdge", SimpleEdge)
+		edge_factory:register("SelfLoopContentEdge", SelfLoopContentEdge)
+		edge_factory:register("SelfLoopSubheadingEdge", SelfLoopSubheadingEdge)
+		local alg_factory = plugin.config.alg_factory:new(plugin.config.base_alg)
+		alg_factory:register("SimpleAlg", SimpleAlg)
+		alg_factory:register("SM2Alg", SM2Alg)
+		alg_factory:register("AnkiAlg", AnkiAlg)
+		local logger = Logger:new(plugin.config.log_level, plugin.config.show_log_in_nvim)
+
 		local created_graph = Graph:new(
-			save_path,
-			--
-			plugin.config.log_level,
-			plugin.config.show_log_in_nvim,
-			--
-			plugin.config.default_node_type,
-			plugin.config.node_prototype_cls,
-			plugin.config.node_sub_cls_info,
-			plugin.config.default_node_ins_method,
-			plugin.config.default_node_cls_method,
-			--
-			plugin.config.default_edge_type,
-			plugin.config.edge_prototype_cls,
-			plugin.config.edge_sub_cls_info,
-			plugin.config.default_edge_ins_method,
-			plugin.config.default_edge_cls_method,
-			--
-			plugin.config.alg_type,
-			plugin.config.alg_prototype_cls,
-			plugin.config.alg_sub_cls_info,
-			plugin.config.default_alg_ins_method,
-			plugin.config.default_alg_cls_method
+			-- Basic:
+			save_dir,
+			-- Node:
+			node_factory,
+			-- Edge:
+			edge_factory,
+			-- Alg:
+			alg_factory:create(plugin.config.alg_type),
+			-- Logger:
+			logger
 		)
-		plugin.cache.graphs[created_graph.save_path] = created_graph
+		plugin.cache.graphs[created_graph.save_dir] = created_graph
 	end
 
-	return plugin.cache.graphs[save_path]
+	return plugin.cache.graphs[save_dir]
 end
 
 ---Find nodes and its corresponding tree-sitter nodes in the given location.
