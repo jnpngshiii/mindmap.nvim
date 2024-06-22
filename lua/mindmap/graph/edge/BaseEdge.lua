@@ -1,11 +1,11 @@
 --------------------
--- Class PrototypeEdge
+-- Class BaseEdge
 --------------------
 
 ---@alias EdgeID integer
 ---@alias EdgeType string
 
----@class PrototypeEdge
+---@class BaseEdge
 ---Mandatory fields:
 ---@field id EdgeID ID of the edge.
 ---@field from_node_id NodeID Where this edge is from.
@@ -25,9 +25,10 @@
 ---@field ease_count integer Count of answer of the edge. Used in space repetition. Auto generated and updated.
 ---@field again_count integer Count of answer of the edge. Used in space repetition. Auto generated and updated.
 ---@field cache table Cache of the edge. Save temporary data to avoid recalculation. Auto generated and updated.
-local PrototypeEdge = {}
+local BaseEdge = {}
+BaseEdge.__index = BaseEdge
 
-local prototype_edge_version = 8
+local base_edge_version = 10
 -- v0: Initial version.
 -- v1: Add `tag` field.
 -- v2: Remove `id` field.
@@ -38,9 +39,10 @@ local prototype_edge_version = 8
 -- v7: Add `answer_count` field and `again_count` field.
 -- v8: Add `[before|after]_[add_into|remove_from]_graph` methods.
 -- v9: Add `ease_count` field.
+-- v10: Rename to `BaseEdge`.
 
 ----------
--- Instance Method
+-- Basic Method
 ----------
 
 ---Create a new edge.
@@ -61,8 +63,8 @@ local prototype_edge_version = 8
 ---@param answer_count? integer Count of answer of the edge.
 ---@param ease_count? integer Count of answer of the edge.
 ---@param again_count? integer Count of answer of the edge.
----@return PrototypeEdge _ The created edge.
-function PrototypeEdge:new(
+---@return BaseEdge _ The created edge.
+function BaseEdge:new(
 	id,
 	from_node_id,
 	to_node_id,
@@ -78,82 +80,73 @@ function PrototypeEdge:new(
 	ease,
 	interval,
 	answer_count,
-  ease_count,
+	ease_count,
 	again_count
 )
-	local prototype_edge = {
+	local base_edge = {
 		id = id,
 		from_node_id = from_node_id,
 		to_node_id = to_node_id,
 		--
 		data = data or {},
-		type = type or "PrototypeEdge",
+		type = type or "BaseEdge",
 		tag = tag or {},
 		state = state or "active",
-		version = version or prototype_edge_version, -- TODO: add merge function
+		version = version or base_edge_version, -- TODO: add merge function
 		created_at = created_at or tonumber(os.time()),
 		updated_at = updated_at or tonumber(os.time()),
 		due_at = due_at or 0,
 		ease = ease or 250,
 		interval = interval or 1,
 		answer_count = answer_count or 0,
-    ease_count = ease_count or 0,
+		ease_count = ease_count or 0,
 		again_count = again_count or 0,
 		cache = {},
 	}
 
-	setmetatable(prototype_edge, self)
+	setmetatable(base_edge, self)
 	self.__index = self
 
-	return prototype_edge
+	return base_edge
 end
+
+----------
+-- Graph Method
+-- TODO: How to remove there methods?
+----------
 
 ---@abstract
 ---Handle the edge before adding into the graph.
+---@return nil _ This function does not return anything.
 ---@diagnostic disable-next-line: unused-vararg
-function PrototypeEdge:before_add_into_graph(...)
-	-- error("[PrototypeEdge] Please implement function `before_add_into_graph` in subclass.")
+function BaseEdge:before_add_into_graph(...)
+	-- error("[BaseEdge] Please implement function `before_add_into_graph` in subclass.")
 end
 
 ---@abstract
 ---Handle the edge after adding into the graph.
+---@return nil _ This function does not return anything.
 ---@diagnostic disable-next-line: unused-vararg
-function PrototypeEdge:after_add_into_graph(...)
-	-- error("[PrototypeEdge] Please implement function `after_add_into_graph` in subclass.")
+function BaseEdge:after_add_into_graph(...)
+	-- error("[BaseEdge] Please implement function `after_add_into_graph` in subclass.")
 end
 
 ---@abstract
 ---Handle the edge before removing from the graph.
+---@return nil _ This function does not return anything.
 ---@diagnostic disable-next-line: unused-vararg
-function PrototypeEdge:before_remove_from_graph(...)
-	-- error("[PrototypeEdge] Please implement function `before_remove_from_graph` in subclass.")
+function BaseEdge:before_remove_from_graph(...)
+	-- error("[BaseEdge] Please implement function `before_remove_from_graph` in subclass.")
 end
 
 ---@abstract
 ---Handle the edge after removing from the graph.
+---@return nil _ This function does not return anything.
 ---@diagnostic disable-next-line: unused-vararg
-function PrototypeEdge:after_remove_from_graph(...)
-	-- error("[PrototypeEdge] Please implement function `after_remove_from_graph` in subclass.")
+function BaseEdge:after_remove_from_graph(...)
+	-- error("[BaseEdge] Please implement function `after_remove_from_graph` in subclass.")
 end
-
----@abstract
----Convert the edge to a table.
----@diagnostic disable-next-line: unused-vararg
-function PrototypeEdge:to_table(...)
-	error("[PrototypeEdge] Please implement function `to_table` in subclass.")
-end
-
----@abstract
----Convert the table to a edge.
----@diagnostic disable-next-line: unused-vararg
-function PrototypeEdge:from_table(...)
-	error("[PrototypeEdge] Please implement function `from_table` in subclass.")
-end
-
-----------
--- Class Method
-----------
 
 --------------------
 
-return PrototypeEdge
+return BaseEdge
