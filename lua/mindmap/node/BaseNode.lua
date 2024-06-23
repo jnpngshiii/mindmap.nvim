@@ -9,24 +9,20 @@ local utils = require("mindmap.utils")
 
 ---@class BaseNode
 ---Mandatory fields:
----@field id NodeID ID of the node.
----@field type NodeType Type of the node.
----@field file_name string Name of the file where the node is from.
----@field rel_file_path string Relative path to the project root of the file where the node is from.
+---@field _type NodeType Type of the node.
+---@field _id NodeID ID of the node.
+---@field _file_name string Name of the file where the node is from.
+---@field _rel_file_dir string Relative dir to the project dir of the file where the node is from.
 ---Optional fields:
----@field data table Data of the node. Subclass should put there own data in this field.
----@field tag table<string, string> Tag of the node. Experimental.
----@field state string State of the node. Default to "active". Can be "active", "removed", and "archived". Experimental.
----@field version integer Version of the node. Experimental.
----@field created_at integer Created time of the node in UNIX timestemp format.
----@field incoming_edge_ids EdgeID[] Ids of incoming edges to this node.
----@field outcoming_edge_ids EdgeID[] Ids of outcoming edges from this node.
----
----@field cache table<string, any> Cache of the node.
+---@field _data table Data of the node. Subclass should put there own data in this field.
+---@field _cache table Cache of the node.
+---@field _created_at integer Created time of the node in UNIX timestemp format.
+---@field _state string State of the edge. Can be "active", "removed", and "archived". Default: "active".
+---@field _version integer Version of the node.
 local BaseNode = {}
 BaseNode.__index = BaseNode
 
-local base_node_version = 8
+local base_node_version = 10
 -- v0: Initial version.
 -- v1: Add `tag` field.
 -- v2: Remove `id` field.
@@ -36,54 +32,49 @@ local base_node_version = 8
 -- v6: Add `[before|after]_[add_into|remove_from]_graph` methods.
 -- v7: Move `[from|to]_table` methods to `NodeFactory`.
 -- v8: Rename to `BaseNode`.
+-- v9: Remove `tag`, `incoming_edge_ids`, `outcoming_edge_ids` fields, and rename `rel_file_path` to `rel_file_dir`.
+-- v10: Rename `field` to `_field`.
 
 ----------
 -- Basic Method
 ----------
 
 ---Create a new node.
----@param type NodeType Type of the node.
----@param id NodeID ID of the node.
----@param file_name string Name of the file where the node is from.
----@param rel_file_path string Relative path to the project root of the file where the node is from.
----
----@param data? table Data of the node. Subclass should put there own data in this field.
----@param tag? table<string, string> Tag of the node.
----@param state? string State of the node. Default to "active". Can be "active", "removed", and "archived".
----@param version? integer Version of the node.
----@param created_at? integer Created time of the node in UNIX timestemp format.
----@param incoming_edge_ids? EdgeID[] Ids of incoming edges to this node.
----@param outcoming_edge_ids? EdgeID[] Ids of outcoming edges from this node.
+---Mandatory fields:
+---@param _type NodeType Type of the node.
+---@param _id NodeID ID of the node.
+---@param _file_name string Name of the file where the node is from.
+---@param _rel_file_dir string Relative dir to the project dir of the file where the node is from.
+---Optional fields:
+---@param _data? table Data of the node. Subclass should put there own data in this field.
+---@param _cache? table of the node.
+---@param _created_at? integer Created time of the node in UNIX timestemp format.
+---@param _state? string State of the node. Default to "active". Can be "active", "removed", and "archived".
+---@param _version? integer Version of the node.
 ---@return BaseNode _ The created node.
 function BaseNode:new(
-	type,
-	id,
-	file_name,
-	rel_file_path,
+	_type,
+	_id,
+	_file_name,
+	_rel_file_dir,
 	--
-	data,
-	tag,
-	state,
-	version,
-	created_at,
-	incoming_edge_ids,
-	outcoming_edge_ids
+	_data,
+	_cache,
+	_created_at,
+	_state,
+	_version
 )
 	local base_node = {
-		type = type,
-		id = id,
-		file_name = file_name,
-		rel_file_path = rel_file_path,
+		_type = type,
+		_id = _id,
+		_file_name = _file_name,
+		_rel_file_dir = _rel_file_dir,
 		--
-		data = data or {},
-		tag = tag or {},
-		state = state or "active",
-		version = version or base_node_version,
-		created_at = created_at or tonumber(os.time()),
-		incoming_edge_ids = incoming_edge_ids or {},
-		outcoming_edge_ids = outcoming_edge_ids or {},
-		--
-		cache = {},
+		_data = _data or {},
+		_cache = _cache or {},
+		_created_at = _created_at or tonumber(os.time()),
+		_state = _state or "active",
+		_version = _version or base_node_version,
 	}
 	base_node.__index = base_node
 	setmetatable(base_node, BaseNode)
@@ -91,48 +82,10 @@ function BaseNode:new(
 	return base_node
 end
 
----Add incoming edge to the node.
----@param incoming_edge_id EdgeID ID of the incoming edge to be added.
----@return nil _ This function does not return anything.
-function BaseNode:add_incoming_edge_id(incoming_edge_id)
-	table.insert(self.incoming_edge_ids, incoming_edge_id)
-end
-
----Remove incoming edge from the node.
----@param incoming_edge_id EdgeID ID of the incoming edge to be removed.
----@return nil _ This function does not return anything.
-function BaseNode:remove_incoming_edge_id(incoming_edge_id)
-	for i = 1, #self.incoming_edge_ids do
-		if self.incoming_edge_ids[i] == incoming_edge_id then
-			table.remove(self.incoming_edge_ids, i)
-			break
-		end
-	end
-end
-
----Add outcoming edge to the node.
----@param outcoming_edge_id EdgeID ID of the outcoming edge to be added.
----@return nil _ This function does not return anything.
-function BaseNode:add_outcoming_edge_id(outcoming_edge_id)
-	table.insert(self.outcoming_edge_ids, outcoming_edge_id)
-end
-
----Remove outcoming edge from the node.
----@param outcoming_edge_id EdgeID ID of the outcoming edge to be removed.
----@return nil _ This function does not return anything.
-function BaseNode:remove_outcoming_edge_id(outcoming_edge_id)
-	for i = 1, #self.outcoming_edge_ids do
-		if self.outcoming_edge_ids[i] == outcoming_edge_id then
-			table.remove(self.outcoming_edge_ids, i)
-			break
-		end
-	end
-end
-
 ---Get the absolute path of the file where the node is from.
 ---@return string _ The absolute path of the file.
 function BaseNode:get_abs_path()
-	return utils.get_abs_path(self.rel_file_path, utils.get_file_info()[4]) .. "/" .. self.file_name
+	return utils.get_abs_path(self._rel_file_dir, utils.get_file_info()[4]) .. "/" .. self._file_name
 end
 
 ---@abstract
@@ -141,7 +94,8 @@ end
 ---@return string[] front, string[] back Content of the node.
 ---@diagnostic disable-next-line: unused-local
 function BaseNode:get_content(edge_type)
-	error("[BaseNode] Please implement function `get_content` in subclass.")
+	vim.notify("[BaseNode] Method `get_content` is not implemented.")
+	return {}, {}
 end
 
 ----------
@@ -154,7 +108,7 @@ end
 ---@return nil _ This function does not return anything.
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:before_add_into_graph(...)
-	-- error("[BaseNode] Please implement function `before_add_into_graph` in subclass.")
+	vim.notify("[BaseNode] Method `before_add_into_graph` is not implemented.")
 end
 
 ---@abstract
@@ -162,7 +116,7 @@ end
 ---@return nil _ This function does not return anything.
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:after_add_into_graph(...)
-	-- error("[BaseNode] Please implement function `after_add_into_graph` in subclass.")
+	vim.notify("[BaseNode] Method `after_add_into_graph` is not implemented.")
 end
 
 ---@abstract
@@ -170,7 +124,7 @@ end
 ---@return nil _ This function does not return anything.
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:before_remove_from_graph(...)
-	-- error("[BaseNode] Please implement function `before_remove_from_graph` in subclass.")
+	vim.notify("[BaseNode] Method `before_remove_from_graph` is not implemented.")
 end
 
 ---@abstract
@@ -178,7 +132,7 @@ end
 ---@return nil _ This function does not return anything.
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:after_remove_from_graph(...)
-	-- error("[BaseNode] Please implement function `after_remove_from_graph` in subclass.")
+	vim.notify("[BaseNode] Method `after_remove_from_graph` is not implemented.")
 end
 
 --------------------

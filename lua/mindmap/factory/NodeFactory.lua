@@ -14,18 +14,16 @@ setmetatable(NodeFactory, BaseFactory)
 ---@return table _ The converted table.
 function NodeFactory:to_table(node)
 	return {
-		type = node.type,
-		id = node.id,
-		file_name = node.file_name,
-		rel_file_path = node.rel_file_path,
+		_type = node._type,
+		_id = node._id,
+		_file_name = node._file_name,
+		_rel_file_dir = node._rel_file_dir,
 		--
-		data = node.data,
-		tag = node.tag,
-		state = node.state,
-		version = node.version,
-		created_at = node.created_at,
-		incoming_edge_ids = node.incoming_edge_ids,
-		outcoming_edge_ids = node.outcoming_edge_ids,
+		_data = node._data,
+		-- _cache = node._cache,
+		_created_at = node._created_at,
+		_state = node._state,
+		_version = node._version,
 	}
 end
 
@@ -44,18 +42,16 @@ function NodeFactory:from_table(registered_type, tbl)
 	end
 
 	return registered_cls:new(
-		tbl.type,
-		tbl.id,
-		tbl.file_name,
-		tbl.rel_file_path,
+		tbl._type,
+		tbl._id,
+		tbl._file_name,
+		tbl._rel_file_dir,
 		--
-		tbl.data,
-		tbl.tag,
-		tbl.state,
-		tbl.version,
-		tbl.created_at,
-		tbl.incoming_edge_ids,
-		tbl.outcoming_edge_ids
+		tbl._data,
+		{}, -- tbl._cache,
+		tbl._created_at,
+		tbl._state,
+		tbl._version
 	)
 end
 
