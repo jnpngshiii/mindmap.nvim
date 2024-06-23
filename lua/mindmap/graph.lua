@@ -420,6 +420,117 @@ function Graph:remove_edge(edge_id)
 	return true
 end
 
+---Get a node from the graph using ID.
+---@param node_id NodeID ID of the node to get.
+---@param force? boolean Whether to force get the node.
+---@return BaseNode? _ The node.
+function Graph:get_node(node_id, force)
+	local node = self.nodes[node_id]
+	if not node then
+		self.logger:warn("Graph", "Can not get node <" .. node_id .. ">. Node does not exist.")
+		return
+	end
+
+	if node.state == "removed" then
+		if force then
+			return node
+		else
+			self.logger:warn("Graph", "Can not get node <" .. node_id .. ">. Node has been removed.")
+			return
+		end
+	end
+
+	return node
+end
+
+---Get an edge from the graph using ID.
+---@param edge_id EdgeID ID of the edge to get.
+---@param force? boolean Whether to force get the edge.
+---@return BaseEdge? _ The edge.
+function Graph:get_edge(edge_id, force)
+	local edge = self.edges[edge_id]
+	if not edge then
+		self.logger:warn("Graph", "Can not get edge <" .. edge_id .. ">. Edge does not exist.")
+		return
+	end
+	if edge.state == "removed" then
+		if force then
+			return edge
+		else
+			self.logger:warn("Graph", "Can not get edge <" .. edge_id .. ">. Edge has been removed.")
+			return
+		end
+	end
+	return edge
+end
+
+---Get the latest node from the graph.
+---@return BaseNode? _ The latest node.
+function Graph:get_latest_node()
+	for i in #self.nodes, 1, -1 do
+		if self.nodes[i].state == "active" then
+			return self.nodes[i]
+		end
+	end
+end
+
+---Get the latest edge from the graph.
+---@return BaseEdge? _ The latest edge.
+function Graph:get_latest_edge()
+	for i in #self.edges, 1, -1 do
+		if self.edges[i].state == "active" then
+			return self.edges[i]
+		end
+	end
+end
+
+---@deprecated
+---Create a savepoint of the graph.
+function Graph:create_savepoint()
+	self.logger:debug("Graph", "Create a savepoint.")
+
+	return {
+		nodes = vim.deepcopy(self.nodes),
+		edges = vim.deepcopy(self.edges),
+	}
+end
+
+---Save a graph to a JSON file.
+-- TODO: update
+function Graph:save()
+	local graph_tbl = {
+		-- save_dir = self.save_dir,
+		--
+		-- log_level = self.log_level,
+		-- show_log_in_nvim = self.show_log_in_nvim,
+		--
+		nodes = {},
+		edges = {},
+	}
+
+	for node_id, node in ipairs(self.nodes) do
+		graph_tbl.nodes[node_id] = node:to_table()
+	end
+	for edge_id, edge in ipairs(self.edges) do
+		graph_tbl.edges[edge_id] = edge:to_table()
+	end
+
+	local json_path = self.save_dir .. "/" .. ".mindmap.json"
+	local json, _ = io.open(json_path, "w")
+	if not json then
+		self.logger:error("Graph", "Can not open file `" .. json_path .. "`. Skip saving.")
+		return
+	end
+
+	local json_content = vim.fn.json_encode(graph_tbl)
+	json:write(json_content)
+	json:close()
+end
+
+----------
+-- Spaced Repetition Methods
+----------
+
 ---Spaced repetition function: get spaced repetition information from the edge.
 ---@param edge_id EdgeID ID of the edge.
 ---@return string[] front, string[] back, integer created_at, integer updated_at, integer due_at, integer ease, integer interval, integer answer_count, integer ease_count, integer again_count The spaced repetition information.
@@ -564,38 +675,6 @@ function Graph:show_card(edge_id)
 	return status
 end
 
----Save a graph to a JSON file.
--- TODO: update
-function Graph:save()
-	local graph_tbl = {
-		-- save_dir = self.save_dir,
-		--
-		-- log_level = self.log_level,
-		-- show_log_in_nvim = self.show_log_in_nvim,
-		--
-		nodes = {},
-		edges = {},
-	}
-
-	for node_id, node in ipairs(self.nodes) do
-		graph_tbl.nodes[node_id] = node:to_table()
-	end
-	for edge_id, edge in ipairs(self.edges) do
-		graph_tbl.edges[edge_id] = edge:to_table()
-	end
-
-	local json_path = self.save_dir .. "/" .. ".mindmap.json"
-	local json, _ = io.open(json_path, "w")
-	if not json then
-		self.logger:error("Graph", "Can not open file `" .. json_path .. "`. Skip saving.")
-		return
-	end
-
-	local json_content = vim.fn.json_encode(graph_tbl)
-	json:write(json_content)
-	json:close()
-end
-
 ----------
 -- Transaction Methods
 ----------
@@ -605,6 +684,7 @@ function Graph:begin_operation()
 		self.logger:debug("Graph", "An Operation is in progress. Can not begin a new operation.")
 		return
 	end
+	self.logger:debug("Graph", "Begin a new operation.")
 
 	-- Init current_operation
 	self.current_operation = {
@@ -618,6 +698,7 @@ function Graph:record_sub_operation(operation, inverse)
 		self.logger:debug("Graph", "No Operation is in progress. Can not record sub operation.")
 		return
 	end
+	self.logger:debug("Graph", "Record a sub operation.")
 
 	-- Record the operation
 	table.insert(self.current_operation.operations, operation)
@@ -629,9 +710,11 @@ function Graph:end_operation()
 		self.logger:debug("Graph", "No Operation is in progress. Can not end the operation.")
 		return
 	end
+	self.logger:debug("Graph", "End the operation.")
 
 	-- If no operation is recorded, do nothing.
 	if #self.current_operation.operations == 0 then
+		self.current_operation = nil
 		return
 	end
 
@@ -698,17 +781,6 @@ function Graph:redo()
 	table.insert(self.undo_stack, op)
 
 	return true
-end
-
----@deprecated
----Create a savepoint of the graph.
-function Graph:create_savepoint()
-	self.logger:debug("Graph", "Create a savepoint.")
-
-	return {
-		nodes = vim.deepcopy(self.nodes),
-		edges = vim.deepcopy(self.edges),
-	}
 end
 
 ----------

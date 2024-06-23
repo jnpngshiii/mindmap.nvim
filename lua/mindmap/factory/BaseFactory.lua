@@ -28,22 +28,28 @@ end
 ---@param type_to_be_inherited? string Type of a registered class to be inherited. If not provided, use `self.base_cls` instead. Default: nil.
 ---@return boolean _ Whether the class is registered.
 function BaseFactory:register(type_to_be_registered, cls_to_be_registered, type_to_be_inherited)
-	local cls_to_be_inherited = self:get_registered_class(type_to_be_inherited or "") or self.base_cls
+	local cls_to_be_inherited = self:get_registered_class(type_to_be_inherited or "type_to_be_inherited not provided")
+		or self.base_cls
 
 	if self.registered_cls[type_to_be_registered] then
 		vim.notify(
-			"Type `" .. type_to_be_registered .. "` already registered. Aborte registering.",
+			"[BaseFactory] Type `" .. type_to_be_registered .. "` already registered. Abort registering.",
 			vim.log.levels.WARN
 		)
 		return false
 	end
 	if not cls_to_be_inherited.new or type(cls_to_be_inherited.new) ~= "function" then
-		vim.notify("Class to be inherited does not have a `new` method. Aborte registering.", vim.log.levels.ERROR)
+		vim.notify(
+			"[BaseFactory] Class to be inherited does not have a `new` method. Abort registering.",
+			vim.log.levels.ERROR
+		)
 		return false
 	end
 	if not cls_to_be_registered.new or type(cls_to_be_registered.new) ~= "function" then
 		vim.notify(
-			"Class `" .. type_to_be_registered .. "` does not have a `new` method. Bind a `new` method to the class.",
+			"[BaseFactory] Class `"
+				.. type_to_be_registered
+				.. "` does not have a `new` method. Bind a `new` method to the class.",
 			vim.log.levels.WARN
 		)
 
@@ -71,7 +77,10 @@ end
 function BaseFactory:get_registered_class(registered_type)
 	local registered_cls = self.registered_cls[registered_type]
 	if not registered_cls then
-		vim.notify("Type `" .. registered_type .. "` is not registered. Aborte getting.", vim.log.levels.WARN)
+		vim.notify(
+			"[BaseFactory] Type `" .. registered_type .. "` is not registered. Abort getting.",
+			vim.log.levels.WARN
+		)
 		return
 	end
 
@@ -96,7 +105,10 @@ end
 function BaseFactory:create(registered_type, ...)
 	local registered_cls = self:get_registered_class(registered_type)
 	if not registered_cls then
-		vim.notify("Type `" .. registered_type .. "` is not registered. Aborte creating.", vim.log.levels.ERROR)
+		vim.notify(
+			"[BaseFactory] Type `" .. registered_type .. "` is not registered. Abort creating.",
+			vim.log.levels.ERROR
+		)
 		return
 	end
 

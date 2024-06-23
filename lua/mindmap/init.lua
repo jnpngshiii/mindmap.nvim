@@ -14,10 +14,7 @@ local user_func = {}
 
 function user_func.MindmapAdd(location, node_type)
 	local found_graph = plugin.find_graph()
-	local found_nodes, found_ts_nodes = plugin.find_node(found_graph, location)
-	if not #found_nodes or #found_ts_nodes then
-		vim.notify("[Func] No nearest heading node found. Abort adding.", vim.log.levels.WARN)
-	end
+	local _, found_ts_nodes = plugin.find_heading_nodes(found_graph, location)
 
 	-- Transaction --
 

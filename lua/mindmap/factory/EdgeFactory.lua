@@ -1,9 +1,13 @@
+local BaseFactory = require("mindmap.factory.BaseFactory")
+
 --------------------
 -- Class EdgeFactory
 --------------------
 
 ---@class EdgeFactory : BaseFactory
 local EdgeFactory = {}
+EdgeFactory.__index = EdgeFactory
+setmetatable(EdgeFactory, BaseFactory)
 
 ---Convert a edge to a table.
 ---@param edge BaseEdge The edge to be converted.
@@ -37,7 +41,7 @@ end
 function EdgeFactory:from_table(registered_type, tbl)
 	local registered_cls = self:get_registered_class(registered_type)
 	if not registered_cls then
-		vim.notify("Type `" .. registered_type .. "` is not registered. Aborte converting.", vim.log.levels.ERROR)
+		vim.notify("[EdgeFactory] Type `" .. registered_type .. "` is not registered. Aborte converting.", vim.log.levels.ERROR)
 		return
 	end
 

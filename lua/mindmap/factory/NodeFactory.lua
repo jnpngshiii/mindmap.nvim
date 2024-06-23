@@ -1,9 +1,13 @@
+local BaseFactory = require("mindmap.factory.BaseFactory")
+
 --------------------
 -- Class NodeFactory
 --------------------
 
 ---@class NodeFactory : BaseFactory
 local NodeFactory = {}
+NodeFactory.__index = NodeFactory
+setmetatable(NodeFactory, BaseFactory)
 
 ---Convert a node to a table.
 ---@param node BaseNode The node to be converted.
@@ -32,7 +36,10 @@ end
 function NodeFactory:from_table(registered_type, tbl)
 	local registered_cls = self:get_registered_class(registered_type)
 	if not registered_cls then
-		vim.notify("Type `" .. registered_type .. "` is not registered. Aborte converting.", vim.log.levels.ERROR)
+		vim.notify(
+			"[EdgeFactory] Type `" .. registered_type .. "` is not registered. Aborte converting.",
+			vim.log.levels.ERROR
+		)
 		return
 	end
 
