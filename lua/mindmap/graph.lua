@@ -420,48 +420,56 @@ function Graph:remove_edge(edge_id)
 	return true
 end
 
----Get a node from the graph using ID.
----@param node_id NodeID ID of the node to get.
----@param force? boolean Whether to force get the node.
----@return BaseNode? _ The node.
-function Graph:get_node(node_id, force)
-	local node = self.nodes[node_id]
-	if not node then
-		self.logger:warn("Graph", "Can not get node <" .. node_id .. ">. Node does not exist.")
-		return
-	end
+---Find nodes in the graph by conditions.
+---@param conditions table<string, any> Conditions to find nodes.
+---@return BaseNode[] _ The found nodes.
+function Graph:find_nodes(conditions)
+	conditions = conditions or {}
 
-	if node.state == "removed" then
-		if force then
-			return node
-		else
-			self.logger:warn("Graph", "Can not get node <" .. node_id .. ">. Node has been removed.")
-			return
+	local results = {}
+	for _, node in pairs(self.nodes) do
+		local match = true
+
+		for field, condition in pairs(conditions) do
+			if type(condition) == "function" then
+				if not condition(node[field]) then
+					match = false
+					break
+				end
+			elseif node[field] ~= condition then
+				match = false
+				break
+			end
+		end
+
+		if match then
+			table.insert(results, node)
 		end
 	end
 
-	return node
+	return results
 end
 
----Get an edge from the graph using ID.
----@param edge_id EdgeID ID of the edge to get.
----@param force? boolean Whether to force get the edge.
----@return BaseEdge? _ The edge.
-function Graph:get_edge(edge_id, force)
-	local edge = self.edges[edge_id]
-	if not edge then
-		self.logger:warn("Graph", "Can not get edge <" .. edge_id .. ">. Edge does not exist.")
-		return
-	end
-	if edge.state == "removed" then
-		if force then
-			return edge
-		else
-			self.logger:warn("Graph", "Can not get edge <" .. edge_id .. ">. Edge has been removed.")
-			return
+function Graph:query_edges(conditions)
+	local results = {}
+	for id, edge in pairs(self.edges) do
+		local match = true
+		for key, value in pairs(conditions) do
+			if type(value) == "function" then
+				if not value(edge[key]) then
+					match = false
+					break
+				end
+			elseif edge[key] ~= value then
+				match = false
+				break
+			end
+		end
+		if match then
+			table.insert(results, edge)
 		end
 	end
-	return edge
+	return results
 end
 
 ---Get the latest node from the graph.
