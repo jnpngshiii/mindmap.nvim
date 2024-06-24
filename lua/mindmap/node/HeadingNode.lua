@@ -116,7 +116,7 @@ function HeadingNode:before_remove_from_graph()
 	local bufnr, is_temp_buf = utils.get_bufnr(abs_path, true)
 	local ts_node = ts_utils.get_heading_node_by_id(self._id, bufnr)
 	if not ts_node then
-		vim.notify("Can not find the treesitter node with id: " .. self._id .. ". Aborted.", vim.log.levels.ERROR)
+		vim.notify("[HeadingNode] Can not find the treesitter node with id: `" .. self._id .. "`. Aborted.", vim.log.levels.ERROR)
 		return
 	end
 

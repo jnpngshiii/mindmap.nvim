@@ -234,7 +234,7 @@ function utils.get_bufnr(bufnr_or_file_path, create_buf_if_not_exist)
 
 			vim.api.nvim_win_set_buf(0, bufnr)
 		else
-			vim.notify('Failed to read file: "' .. bufnr_or_file_path .. '".', vim.log.levels.ERROR)
+			vim.notify("[Utils] Failed to read file: `" .. bufnr_or_file_path .. "`.", vim.log.levels.ERROR)
 		end
 	end
 

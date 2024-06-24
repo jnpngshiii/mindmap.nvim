@@ -167,9 +167,9 @@ function plugin.find_heading_nodes(graph, location)
 		and location ~= "buffer"
 	then
 		vim.notify(
-			"[plugin.find_heading_nodes] Invalid location `"
+			"[Func] Invalid location `"
 				.. location
-				.. '`. Location must be TSNode, "lastest", "nearest", "telescope" or "buffer"',
+				.. "`. Location must be TSNode, `lastest`, `nearest`, `telescope` or `buffer`",
 			vim.log.levels.ERROR
 		)
 		return {}, {}
