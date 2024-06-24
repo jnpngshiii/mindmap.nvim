@@ -14,10 +14,10 @@ local HeadingNode = {}
 -- Basic Method
 ----------
 
----Get the tree-sitter node of the heading.
+---Get the treesitter node of the heading.
 ---If the node is in the cache, return it.
 ---If not, cache it.
----@return TSNode _ The tree-sitter node.
+---@return TSNode _ The treesitter node.
 function HeadingNode:get_ts_node()
 	local bufnr, is_temp_buf = utils.get_bufnr(self:get_abs_path(), true)
 
@@ -101,7 +101,7 @@ function HeadingNode:before_remove_from_graph()
 	local bufnr, is_temp_buf = utils.get_bufnr(abs_path, true)
 	local ts_node = ts_utils.get_heading_node_by_id(self._id, bufnr)
 	if not ts_node then
-		vim.notify("Can not find the tree-sitter node with id: " .. self._id .. ". Aborted.", vim.log.levels.ERROR)
+		vim.notify("Can not find the treesitter node with id: " .. self._id .. ". Aborted.", vim.log.levels.ERROR)
 		return
 	end
 

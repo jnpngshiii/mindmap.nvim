@@ -155,9 +155,9 @@ function plugin.find_graph(save_dir)
 	return plugin.cache.graphs[save_dir]
 end
 
----Find nodes and its corresponding tree-sitter nodes in the given location.
+---Find nodes and its corresponding treesitter nodes in the given location.
 ---@param location string|TSNode Location to find nodes. Location must be TSNode, "lastest", "nearest", "telescope" or "buffer".
----@return table<NodeID, BaseNode> nodes, table<NodeID, TSNode> ts_nodes Found nodes and its corresponding tree-sitter nodes.
+---@return table<NodeID, BaseNode> nodes, table<NodeID, TSNode> ts_nodes Found nodes and its corresponding treesitter nodes.
 function plugin.find_heading_nodes(graph, location)
 	if
 		type(location) ~= "userdata"

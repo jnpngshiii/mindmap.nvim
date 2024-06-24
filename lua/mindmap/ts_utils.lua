@@ -109,9 +109,9 @@ function ts_utils.get_heading_node_by_id(id, bufnr)
 	return heading_nodes[id]
 end
 
----Replace the text of the given tree-sitter node.
+---Replace the text of the given treesitter node.
 ---@param text string|string[] The new text. Each element is a line.
----@param node TSNode The tree-sitter node.
+---@param node TSNode The treesitter node.
 ---@param bufnr? integer The buffer number.
 ---@return nil _ This function does not return anything.
 function ts_utils.replace_node_text(text, node, bufnr)
