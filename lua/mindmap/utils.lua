@@ -209,36 +209,35 @@ function utils.get_file_content(bufnr_or_file_path, start_row, end_row, start_co
 	return range_content
 end
 
----Get the buffer number from the buffer number or file path.
----@param bufnr_or_file_path? integer|string Buffer number or file path. Default: 0.
----@param create_buf_if_not_exist? boolean|string Create a new buffer if the buffer does not exist, and how to create it. Can be nil, true, false, "h" or "v". Default: nil.
----@return integer bufnr, boolean is_temp_buf Buffer number and whether it is a temp buffer.
-function utils.get_bufnr(bufnr_or_file_path, create_buf_if_not_exist)
-	local bufnr = vim.fn.bufnr(bufnr_or_file_path or 0)
+---Execute a function with an existing or temporary buffer and automatically clean up if necessary.
+---@param file_path string File path to check or read into a temporary buffer.
+---@param callback function Function to execute with the buffer. Receives buffer number as the first argument.
+---@param ... any Arguments to be passed to the callback function.
+function utils.with_temp_bufnr(file_path, callback, ...)
+	local bufnr = vim.fn.bufnr(file_path)
 	local is_temp_buf = false
 
-	if bufnr == -1 and create_buf_if_not_exist and type(bufnr_or_file_path) == "string" then
-		local ok, content = pcall(vim.fn.readfile, bufnr_or_file_path)
+	if bufnr == -1 then
+		bufnr = vim.api.nvim_create_buf(false, true)
+		is_temp_buf = true
 
-		if ok then
-			bufnr = vim.api.nvim_create_buf(false, true)
-			vim.api.nvim_buf_set_lines(bufnr, 0, -1, true, content)
-
-			if create_buf_if_not_exist == "h" then
-				vim.cmd("new")
-			elseif create_buf_if_not_exist == "v" then
-				vim.cmd("vnew")
-			else
-				is_temp_buf = true
-			end
-
-			vim.api.nvim_win_set_buf(0, bufnr)
-		else
-			vim.notify("[Utils] Failed to read file: `" .. bufnr_or_file_path .. "`.", vim.log.levels.ERROR)
+		local ok, content = pcall(vim.fn.readfile, file_path)
+		if not ok then
+			vim.notify("[Utils] Failed to read file: `" .. file_path .. "`.", vim.log.levels.ERROR)
+			vim.api.nvim_buf_delete(bufnr, { force = true })
+			return
 		end
+
+		vim.api.nvim_buf_set_lines(bufnr, 0, -1, true, content)
 	end
 
-	return bufnr, is_temp_buf
+	local result = { callback(bufnr, ...) }
+
+	if is_temp_buf then
+		vim.api.nvim_buf_delete(bufnr, { force = true })
+	end
+
+	return unpack(result)
 end
 
 ---Remove fields that are not string, number, or boolean in a table.

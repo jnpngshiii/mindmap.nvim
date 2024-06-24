@@ -14,65 +14,62 @@ local HeadingNode = {}
 -- Basic Method
 ----------
 
----Get the treesitter node and its buffer number of the `HeadingNode`.
----@return TSNode ts_node, number ts_node_bufnr Treesitter node and its buffer number.
-function HeadingNode:get_ts_node()
-	if self._cache.ts_node and type(self._cache.ts_node) == "userdata" then
-		return self._cache.ts_node, self._cache.ts_node_bufnr
-	end
-	local ts_node, ts_node_bufnr
+---Get the treesitter node of the `HeadingNode`.
+---@param bufnr? number The buffer number.
+---@return TSNode? ts_node The treesitter node.
+function HeadingNode:get_ts_node(bufnr)
+	bufnr = bufnr or self._cache.ts_node_bufnr
 
-	local bufnr, is_temp_buf = utils.get_bufnr(self:get_abs_path(), true)
+	if self._cache.ts_node and type(self._cache.ts_node) == "userdata" then
+		return self._cache.ts_node
+	end
+
 	local heading_node = ts_utils.get_heading_nodes(self._id, bufnr)[self._id]
 	if not heading_node then
 		vim.notify(
 			"[HeadingNode] Can not find the treesitter node with id: `" .. self._id .. "`. Abort getting.",
 			vim.log.levels.ERROR
 		)
-		return ts_node, ts_node_bufnr
+		return
 	end
 
-	if is_temp_buf then
-		vim.api.nvim_buf_delete(bufnr, { force = true })
-	else
-		self._cache.ts_node = heading_node
-		self._cache.ts_node_bufnr = bufnr
-	end
-	return ts_node, ts_node_bufnr
+	self._cache.ts_node = heading_node
+	self._cache.ts_node_bufnr = bufnr
+	return heading_node
 end
 
 ---Get the content of the node.
 ---@param edge_type EdgeType Type of the edge.
 ---@return string[] front, string[] back Content of the node.
----@diagnostic disable-next-line: unused-local
 function HeadingNode:get_content(edge_type)
-	local front, back = {}, {}
-
-	local bufnr, is_temp_buf = utils.get_bufnr(self:get_abs_path(), true)
-	local heading_node = ts_utils.get_heading_node_by_id(self._id, bufnr) -- TODO: UPDATE
-	if not heading_node then
-		return {}, {}
-	end
-
-	local title_node, content_node, sub_heading_nodes = ts_utils.parse_heading_node(heading_node)
-	front = utils.split_string(vim.treesitter.get_node_text(title_node, bufnr), "\n")
-	if not content_node and not #sub_heading_nodes then
-		back = { "[Error] Can not find content_node or sub_heading_nodes." }
-	end
-
-	if content_node and edge_type == "SelfLoopContentEdge" then
-		back = utils.split_string(vim.treesitter.get_node_text(content_node, bufnr), "\n")
-	elseif sub_heading_nodes and edge_type == "SelfLoopSubheadingEdge" then
-		for _, sub_heading_node in ipairs(sub_heading_nodes) do
-			table.insert(back, utils.split_string(vim.treesitter.get_node_text(sub_heading_node, bufnr), "\n")[1])
+	local _f = function(bufnr)
+		local ts_node = self:get_ts_node(bufnr)
+		if not ts_node then
+			return { "No treesitter node found." }, { "No treesitter node found." }
 		end
+		local title_node, content_node, sub_heading_nodes = ts_utils.parse_heading_node(ts_node)
+		if not title_node then
+			return { "No title node found." }, { "No title node found." }
+		end
+
+		local front = utils.split_string(vim.treesitter.get_node_text(title_node, bufnr), "\n")
+		local back = {}
+
+		if content_node and edge_type == "SelfLoopContentEdge" then
+			back = utils.split_string(vim.treesitter.get_node_text(content_node, bufnr), "\n")
+		elseif sub_heading_nodes and edge_type == "SelfLoopSubheadingEdge" then
+			for _, sub_heading_node in ipairs(sub_heading_nodes) do
+				table.insert(back, utils.split_string(vim.treesitter.get_node_text(sub_heading_node, bufnr), "\n"))
+			end
+		else
+			back = { "No back found." }
+		end
+
+		return front, back
 	end
 
-	if is_temp_buf then
-		vim.api.nvim_buf_delete(bufnr, { force = true })
-	end
-
-	return front, back
+	---@diagnostic disable-next-line: return-type-mismatch
+	return utils.with_temp_bufnr(self:get_abs_path(), _f)
 end
 
 ----------
@@ -82,10 +79,25 @@ end
 ---Handle the node after adding into the graph.
 ---@return nil _ This function does not return anything.
 function HeadingNode:after_add_into_graph()
-	-- Use cache
-	if type(self._cache.ts_node) == "userdata" and type(self._cache.ts_node_bufnr) == "number" then
-		local ts_node_title, _, _ = ts_utils.parse_heading_node(self._cache.ts_node)
-		local node_text = vim.treesitter.get_node_text(ts_node_title, 0)
+	local _f = function(bufnr)
+		local ts_node = self:get_ts_node(bufnr)
+		if not ts_node then
+			vim.notify(
+				"[HeadingNode] Can not find the treesitter node. Failed to call `after_add_into_graph`.",
+				vim.log.levels.ERROR
+			)
+			return
+		end
+		local ts_node_title, _, _ = ts_utils.parse_heading_node(ts_node)
+		if not ts_node_title then
+			vim.notify(
+				"[HeadingNode] Can not find the title node. Failed to call `after_add_into_graph`.",
+				vim.log.levels.ERROR
+			)
+			return
+		end
+
+		local node_text = vim.treesitter.get_node_text(ts_node_title, bufnr)
 		ts_utils.replace_node_text(
 			string.gsub(node_text, "$", " %%" .. string.format("%08d", self._id) .. "%%"),
 			ts_node_title,
@@ -93,45 +105,41 @@ function HeadingNode:after_add_into_graph()
 		)
 	end
 
-	-- TODO: add else
+	---@diagnostic disable-next-line: return-type-mismatch
+	return utils.with_temp_bufnr(self:get_abs_path(), _f)
 end
 
 ---Handle the node before removing from the graph.
 ---@return nil _ This function does not return anything.
 function HeadingNode:before_remove_from_graph()
-	-- Use cache
-	if type(self._cache.ts_node) == "userdata" and type(self._cache.ts_node_bufnr) == "number" then
-		local ts_node_title, _, _ = ts_utils.parse_heading_node(self._cache.ts_node)
-		local node_text = vim.treesitter.get_node_text(ts_node_title, 0)
+	local _f = function(bufnr)
+		local ts_node = self:get_ts_node(bufnr)
+		if not ts_node then
+			vim.notify(
+				"[HeadingNode] Can not find the treesitter node. Failed to call `before_remove_from_graph`.",
+				vim.log.levels.ERROR
+			)
+			return
+		end
+		local ts_node_title, _, _ = ts_utils.parse_heading_node(ts_node)
+		if not ts_node_title then
+			vim.notify(
+				"[HeadingNode] Can not find the title node. Failed to call `before_remove_from_graph`.",
+				vim.log.levels.ERROR
+			)
+			return
+		end
+
+		local node_text = vim.treesitter.get_node_text(ts_node_title, bufnr)
 		ts_utils.replace_node_text(
 			string.gsub(node_text, " %%" .. string.format("%08d", self._id) .. "%%", ""),
 			ts_node_title,
 			self._cache.ts_node_bufnr
 		)
-
-		return
 	end
 
-	local abs_path = self:get_abs_path()
-	local bufnr, is_temp_buf = utils.get_bufnr(abs_path, true)
-	local ts_node = ts_utils.get_heading_node_by_id(self._id, bufnr)
-	if not ts_node then
-		vim.notify("[HeadingNode] Can not find the treesitter node with id: `" .. self._id .. "`. Aborted.", vim.log.levels.ERROR)
-		return
-	end
-
-	local ts_node_title, _, _ = ts_utils.parse_heading_node(ts_node)
-
-	local node_text = vim.treesitter.get_node_text(ts_node_title, 0)
-	ts_utils.replace_node_text(
-		string.gsub(node_text, " %%" .. string.format("%08d", self._id) .. "%%", ""),
-		ts_node_title,
-		bufnr
-	)
-
-	if is_temp_buf then
-		vim.api.nvim_buf_delete(bufnr, { force = true })
-	end
+	---@diagnostic disable-next-line: return-type-mismatch
+	return utils.with_temp_bufnr(self:get_abs_path(), _f)
 end
 
 --------------------

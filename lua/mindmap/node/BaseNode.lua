@@ -16,6 +16,7 @@ local utils = require("mindmap.utils")
 ---Optional fields:
 ---@field _data table Data of the node. Subclass should put there own data in this field.
 ---@field _cache table Cache of the node.
+---@field _cache.abs_file_path string See: `BaseNode.get_abs_path`.
 ---@field _created_at integer Created time of the node in UNIX timestemp format.
 ---@field _state string State of the edge. Can be "active", "removed", and "archived". Default: "active".
 ---@field _version integer Version of the node.
@@ -85,7 +86,14 @@ end
 ---Get the absolute path of the file where the node is from.
 ---@return string _ The absolute path of the file.
 function BaseNode:get_abs_path()
-	return utils.get_abs_path(self._rel_file_dir, utils.get_file_info()[4]) .. "/" .. self._file_name
+	if self._cache.abs_file_path then
+		return self._cache.abs_file_path
+	end
+
+	local abs_file_path = utils.get_abs_path(self._rel_file_dir, utils.get_file_info()[4]) .. "/" .. self._file_name
+
+	self._cache.abs_file_path = abs_file_path
+	return abs_file_path
 end
 
 ---@abstract
