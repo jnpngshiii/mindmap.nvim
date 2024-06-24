@@ -6,24 +6,39 @@ local ts_utils = require("mindmap.ts_utils")
 --------------------
 
 ---@class HeadingNode : BaseNode
----@field _cache.ts_node userdata|nil See: `after_add_into_graph`
----@field _cache.ts_node_bufnr number|nil See: `after_add_into_graph`
+---@field _cache.ts_node userdata|nil See: `HeadingNode.get_ts_node`.
+---@field _cache.ts_node_bufnr number|nil See: `HeadingNode.get_ts_node`.
 local HeadingNode = {}
 
 ----------
 -- Basic Method
 ----------
 
----Get the treesitter node of the heading.
----If the node is in the cache, return it.
----If not, cache it.
----@return TSNode _ The treesitter node.
+---Get the treesitter node and its buffer number of the `HeadingNode`.
+---@return TSNode ts_node, number ts_node_bufnr Treesitter node and its buffer number.
 function HeadingNode:get_ts_node()
+	if self._cache.ts_node and type(self._cache.ts_node) == "userdata" then
+		return self._cache.ts_node, self._cache.ts_node_bufnr
+	end
+	local ts_node, ts_node_bufnr
+
 	local bufnr, is_temp_buf = utils.get_bufnr(self:get_abs_path(), true)
+	local heading_node = ts_utils.get_heading_nodes(self._id, bufnr)[self._id]
+	if not heading_node then
+		vim.notify(
+			"[HeadingNode] Can not find the treesitter node with id: `" .. self._id .. "`. Abort getting.",
+			vim.log.levels.ERROR
+		)
+		return ts_node, ts_node_bufnr
+	end
 
 	if is_temp_buf then
 		vim.api.nvim_buf_delete(bufnr, { force = true })
+	else
+		self._cache.ts_node = heading_node
+		self._cache.ts_node_bufnr = bufnr
 	end
+	return ts_node, ts_node_bufnr
 end
 
 ---Get the content of the node.
