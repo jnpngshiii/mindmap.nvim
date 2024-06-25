@@ -305,11 +305,13 @@ end
 ---Find nodes based on given criteria.
 ---@param criteria table The criteria to match nodes against.
 ---Example:
----  `Graph.find_nodes({
+---  ```
+---  Graph.find_nodes({
 ---    {"_type", "SimpleNode"},
 ---    {"_state", "active"},
 ---    {"_hello", function(field) return field == "Hello" end}
----  })`
+---  })
+---  ```
 ---@return table matched_nodes The nodes matching the criteria.
 function Graph:find_nodes(criteria)
 	local function _matcher(_, item)
@@ -336,11 +338,13 @@ end
 
 ---Find edges based on given criteria.
 ---Example:
----  `Graph.find_edges({
+---  ```
+---  Graph.find_edges({
 ---    {"_type", "SimpleEdge"},
 ---    {"_state", "active"},
 ---    {"_hello", function(field) return field == "Hello" end}
----  })`
+---  })
+---  ```
 ---@param criteria table The criteria to match edges against.
 ---@return table matched_edges The edges matching the criteria.
 function Graph:find_edges(criteria)

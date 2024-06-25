@@ -88,7 +88,11 @@ end
 --------------------
 
 ---Convert relative path (target_path) to absolute path according to reference path (reference_path).
----Example: get_abs_path("../a/b", "/c/d") -> "/c/a/b"
+---Example:
+---  ```
+---  local _s = get_abs_path("../a/b", "/c/d")
+---  print(_s) -- "/c/a/b"
+---  ```
 ---@param target_path string A path to be converted to an absolute path.
 ---@param reference_path string A reference path.
 ---@return string abs_path The resulting absolute path.
@@ -113,7 +117,11 @@ function utils.get_abs_path(target_path, reference_path)
 end
 
 ---Convert absolute path (target_path) to relative path according to reference path (reference_path).
----Example: get_rel_path("/a/b/c", "/a/b/d") -> "../c"
+---Example:
+---  ```
+---  local _s = get_rel_path("/a/b/c", "/a/b/d")
+---  print(_s) -- "../c"
+---  ```
 ---@param target_path string A path to be converted to a relative path.
 ---@param reference_path string A reference path.
 ---@return string rel_path The resulting relative path.
@@ -223,6 +231,16 @@ function utils.get_latest_visual_selection()
 end
 
 ---Execute a function with an existing or temporary buffer and automatically clean up if necessary.
+---Example:
+---  ```
+---  local func_needs_temp_bufnr = function(bufnr, str1, str2)
+---    -- Do some stuff...
+---    return str1, str2
+---  end
+---  local _s1, _s2 = utils.with_temp_bufnr(file_path, func_needs_temp_bufnr, "Hello", "World")
+---  print(_s1) -- "Hello"
+---  print(_s2) -- "World"
+---  ```
 ---@param file_path string File path to check or read into a temporary buffer.
 ---@param callback function Function to execute with the buffer. Receives buffer number as the first argument.
 ---@param ... any Arguments to be passed to the callback function.
