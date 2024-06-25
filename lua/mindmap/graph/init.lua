@@ -322,6 +322,66 @@ end
 -- R
 -----
 
+function Graph:find_nodes(criteria)
+	local result = {}
+
+	for _, node in pairs(self.nodes) do
+		local matches = true
+		for _, condition in ipairs(criteria) do
+			local field, value_or_func = condition[1], condition[2]
+			local node_value = node[field]
+
+			if type(value_or_func) == "function" then
+				if not value_or_func(node_value) then
+					matches = false
+					break
+				end
+			else
+				if node_value ~= value_or_func then
+					matches = false
+					break
+				end
+			end
+		end
+
+		if matches then
+			table.insert(result, node)
+		end
+	end
+
+	return result
+end
+
+function Graph:find_edges(criteria)
+	local result = {}
+
+	for _, edge in pairs(self.edges) do
+		local matches = true
+		for _, condition in ipairs(criteria) do
+			local field, value_or_func = condition[1], condition[2]
+			local edge_value = edge[field]
+
+			if type(value_or_func) == "function" then
+				if not value_or_func(edge_value) then
+					matches = false
+					break
+				end
+			else
+				if edge_value ~= value_or_func then
+					matches = false
+					break
+				end
+			end
+		end
+
+		if matches then
+			table.insert(result, edge)
+		end
+	end
+
+	return result
+end
+
 -----
 -- U
 -----
