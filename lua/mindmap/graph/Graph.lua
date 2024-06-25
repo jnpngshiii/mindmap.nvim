@@ -30,6 +30,7 @@ local utils = require("mindmap.utils")
 ---Lock:
 ---@field lock Lock Lock for the graph.
 ---Others:
+---@field thread_num integer Number of threads to use. Default: `3`.
 ---@field version integer Version of the graph.
 local Graph = {}
 Graph.__index = Graph
@@ -54,12 +55,13 @@ local graph_version = 6
 ---@param alg BaseAlg Algorithm for the graph.
 ---@param logger Logger Logger for the graph.
 ---@param undo_redo_limit? integer Limit of undo and redo operations. Default: `3`.
+---@param thread_num? integer Number of threads to use. Default: `3`.
 ---@param version? integer Version of the graph.
 ---@return Graph graph The new graph.
-function Graph:new(save_dir, node_factory, edge_factory, alg, logger, undo_redo_limit, version)
+function Graph:new(save_dir, node_factory, edge_factory, alg, logger, undo_redo_limit, thread_num, version)
 	local graph = {
 		-- Basic:
-		save_dir = save_dir or {utils.get_file_info()}[4],
+		save_dir = save_dir,
 		--   Node:
 		node_factory = node_factory,
 		nodes = {},
@@ -78,6 +80,7 @@ function Graph:new(save_dir, node_factory, edge_factory, alg, logger, undo_redo_
 		-- Lock:
 		lock = Lock:new(),
 		-- Others:
+		thread_num = thread_num or 3,
 		version = version or graph_version,
 	}
 	graph.__index = graph
@@ -302,79 +305,64 @@ end
 ---Find nodes based on given criteria.
 ---@param criteria table The criteria to match nodes against.
 ---Example:
----  {
+---  `Graph.find_nodes({
 ---    {"_type", "SimpleNode"},
 ---    {"_state", "active"},
----    {"content", function(field) return field == "Hello" end}
----  }
+---    {"_hello", function(field) return field == "Hello" end}
+---  })`
 ---@return table matched_nodes The nodes matching the criteria.
 function Graph:find_nodes(criteria)
-	local result = {}
-
-	for _, node in pairs(self.nodes) do
-		local matches = true
+	local function _matcher(_, item)
 		for _, condition in ipairs(criteria) do
 			local field, value_or_func = condition[1], condition[2]
-			local node_value = node[field]
+			local field_value = item[field]
 
 			if type(value_or_func) == "function" then
-				if not value_or_func(node_value) then
-					matches = false
-					break
+				if not value_or_func(field_value) then
+					return nil
 				end
 			else
-				if node_value ~= value_or_func then
-					matches = false
-					break
+				if field_value ~= value_or_func then
+					return nil
 				end
 			end
 		end
 
-		if matches then
-			table.insert(result, node)
-		end
+		return item
 	end
 
-	return result
+	return utils.pfor(self.nodes, _matcher, self.thread_num)
 end
 
 ---Find edges based on given criteria.
 ---Example:
----  {
+---  `Graph.find_edges({
 ---    {"_type", "SimpleEdge"},
 ---    {"_state", "active"},
----    {"content", function(field) return field == "Hello" end}
----  }
+---    {"_hello", function(field) return field == "Hello" end}
+---  })`
 ---@param criteria table The criteria to match edges against.
 ---@return table matched_edges The edges matching the criteria.
 function Graph:find_edges(criteria)
-	local result = {}
-
-	for _, edge in pairs(self.edges) do
-		local matches = true
+	local function _matcher(_, item)
 		for _, condition in ipairs(criteria) do
 			local field, value_or_func = condition[1], condition[2]
-			local edge_value = edge[field]
+			local field_value = item[field]
 
 			if type(value_or_func) == "function" then
-				if not value_or_func(edge_value) then
-					matches = false
-					break
+				if not value_or_func(field_value) then
+					return nil
 				end
 			else
-				if edge_value ~= value_or_func then
-					matches = false
-					break
+				if field_value ~= value_or_func then
+					return nil
 				end
 			end
 		end
-
-		if matches then
-			table.insert(result, edge)
-		end
+		return item
 	end
 
-	return result
+	return utils.pfor(self.edges, _matcher, self.thread_num)
 end
 
 -----

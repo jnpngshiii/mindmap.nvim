@@ -326,16 +326,16 @@ end
 
 ---Process items in parallel using multiple coroutines.
 ---@param iterator table The table or list to iterate over.
----@param thread_num integer The number of coroutines to use for parallel processing. Default: `3`.
 ---@param func function The function to apply to each item in the iterator.
 ---It should accept two parameters:
 ---  key: The key of the current item in the iterator.
 ---  value: The value of the current item in the iterator.
 ---It should return a value to be stored in the results table,
 ---or nil if no result should be stored for this item.
+---@param thread_num? integer The number of coroutines to use for parallel processing. Default: `3`.
 ---@return table results A table containing the results of processing each item.
 ---The keys in this table correspond to the keys in the input iterator.
-function utils.pfor(iterator, thread_num, func)
+function utils.pfor(iterator, func, thread_num)
 	thread_num = thread_num or 3
 
 	local results = {}
