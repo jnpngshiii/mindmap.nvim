@@ -60,6 +60,8 @@ local plugin = {}
 ---@field enable_shorten_keymap boolean Enable shorten keymap. Default: `false`.
 ---@field shorten_keymap_prefix string Prefix of the shorten keymap. Default: `"m"`.
 ---@field enable_default_autocmd boolean Enable default autocmd. Default: `true`.
+---@field undo_redo_limit integer Maximum number of undo and redo operations. Default: `3`.
+---@field thread_num integer Number of threads to use. Default: `3`.
 ---  Automatic behavior:
 ---@field show_excerpt_after_add boolean Show excerpt after adding a node.
 ---@field show_excerpt_after_bfread boolean Show excerpt after reading a buffer.
@@ -123,6 +125,7 @@ end
 ---@return Graph found_graph Found or created graph.
 function plugin.find_graph(save_dir)
 	save_dir = save_dir or unpack({ utils.get_file_info() })[4]
+
 	if not plugin.cache.graphs[save_dir] then
 		local node_factory = plugin.config.node_factory:new(plugin.config.base_node)
 		node_factory:register("SimpleNode", SimpleNode)
@@ -139,16 +142,16 @@ function plugin.find_graph(save_dir)
 		local logger = Logger:new(plugin.config.log_level, plugin.config.show_log_in_nvim)
 
 		local created_graph = Graph:new(
-			-- Basic:
 			save_dir,
-			-- Node:
+			---@diagnostic disable-next-line: param-type-mismatch
 			node_factory,
-			-- Edge:
+			---@diagnostic disable-next-line: param-type-mismatch
 			edge_factory,
-			-- Alg:
+			---@diagnostic disable-next-line: param-type-mismatch
 			alg_factory:create(plugin.config.alg_type),
-			-- Logger:
-			logger
+			logger,
+			plugin.config.undo_redo_limit,
+			plugin.config.thread_num
 		)
 		plugin.cache.graphs[created_graph.save_dir] = created_graph
 	end
@@ -156,11 +159,10 @@ function plugin.find_graph(save_dir)
 	return plugin.cache.graphs[save_dir]
 end
 
----TODO:
----Find nodes and their corresponding treesitter nodes in the given location.
+---Find `HeadingNode`s in the given location.
 ---@param graph Graph The graph to search in.
 ---@param location string|TSNode Location to find nodes. Location must be TSNode, "latest", "nearest", "telescope" or "buffer".
----@return table<NodeID, BaseNode> found_nodes, table<NodeID, TSNode> found_ts_nodes Found nodes and their corresponding treesitter nodes.
+---@return table<NodeID, BaseNode> found_nodes The found nodes.
 function plugin.find_heading_nodes(graph, location)
 	if
 		type(location) ~= "userdata"
@@ -176,38 +178,45 @@ function plugin.find_heading_nodes(graph, location)
 			),
 			vim.log.levels.ERROR
 		)
-		return {}, {}
+		return {}
 	end
 
 	if type(location) == "userdata" then
 		local title_ts_node, _, _ = ts_utils.parse_heading_node(location)
+		if not title_ts_node then
+			vim.notify(
+				"[Func] Cannot find the title treesitter node of the given treesitter node. Abort finding.",
+				vim.log.levels.ERROR
+			)
+			return {}
+		end
+
 		local title_ts_node_text = vim.treesitter.get_node_text(title_ts_node, 0)
-		local nearest_node_id = tonumber(string.match(title_ts_node_text, "%d%d%d%d%d%d%d%d"))
+		local id = tonumber(string.match(title_ts_node_text, "%d%d%d%d%d%d%d%d"))
+		if not id then
+			vim.notify(
+				"[Func] Cannot find the ID of the given node. Automatically add it to the graph.",
+				vim.log.levels.WARN
+			)
 
-		local nearest_node
-		if nearest_node_id then
-			nearest_node = graph.nodes[nearest_node_id]
-		else
-			-- TODO: auto add node if not exist
+			id = #graph.nodes + 1
+			local file_name, _, rel_file_path, _ = utils.get_file_info()
+			graph:add_node("HeadingNode", id, file_name, rel_file_path, {}, { ts_node = location })
+		end
+		if graph.nodes[id]._state ~= "active" then
+			return {}
 		end
 
-		if nearest_node and nearest_node.state == "active" then
-			return { [nearest_node.id] = nearest_node }, { [nearest_node.id] = location }
-		else
-			return {}, {}
-		end
+		return { [id] = graph.nodes[id] }
 	end
 
 	if location == "latest" then
-		-- The process here is a little bit different.
 		local latest_node = graph.nodes[#graph.nodes]
-		local latest_ts_node
-
-		if latest_node.state == "active" then
-			return { [latest_node.id] = latest_node }, { [latest_node.id] = latest_ts_node }
-		else
-			return {}, {}
+		if not latest_node._state ~= "active" then
+			return {}
 		end
+
+		return latest_node
 	end
 
 	if location == "nearest" then
