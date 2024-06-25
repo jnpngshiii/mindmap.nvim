@@ -1,11 +1,12 @@
+-- nvim-treesitter:
 local nts_utils = require("nvim-treesitter.ts_utils")
+-- telescope:
 local actions = require("telescope.actions")
 local finders = require("telescope.finders")
 local pickers = require("telescope.pickers")
 local sorters = require("telescope.sorters")
 
 -- Factory:
-local BaseFactory = require("mindmap.factory.BaseFactory")
 local NodeFactory = require("mindmap.factory.NodeFactory")
 local EdgeFactory = require("mindmap.factory.EdgeFactory")
 local AlgFactory = require("mindmap.factory.AlgFactory")
@@ -21,13 +22,13 @@ local SelfLoopContentEdge = require("mindmap.edge.SelfLoopContentEdge")
 local SelfLoopSubheadingEdge = require("mindmap.edge.SelfLoopSubheadingEdge")
 -- Alg:
 local BaseAlg = require("mindmap.alg.BaseAlg")
+local AnkiAlg = require("mindmap.alg.AnkiAlg")
 local SimpleAlg = require("mindmap.alg.SimpleAlg")
 local SM2Alg = require("mindmap.alg.SM2Alg")
-local AnkiAlg = require("mindmap.alg.AnkiAlg")
 -- Logger:
-local Logger = require("mindmap.logger")
+local Logger = require("mindmap.graph.Logger")
 -- Graph:
-local Graph = require("mindmap.graph")
+local Graph = require("mindmap.graph.Graph")
 -- Utils:
 local utils = require("mindmap.utils")
 local ts_utils = require("mindmap.ts_utils")
