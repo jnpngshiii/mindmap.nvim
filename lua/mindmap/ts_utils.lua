@@ -2,19 +2,19 @@ local ts_utils = {}
 
 ---Get the root node in the given buffer.
 ---@param bufnr? integer The buffer number. Default: `0`.
----@return TSNode? root_node The root node.
+---@return TSNode? root_node The root node of the buffer.
 function ts_utils.get_root_node(bufnr)
 	bufnr = bufnr or 0
 
 	local lang_tree = vim.treesitter.get_parser(bufnr, "norg")
 	if not lang_tree then
-		vim.notify("[TSUtils] Can not get norg tree in the given buffer", vim.log.levels.ERROR)
+		vim.notify("[TSUtils] Cannot get norg tree in the given buffer", vim.log.levels.ERROR)
 		return
 	end
 
 	local neorg_doc_tree = lang_tree:parse()[1]
 	if not neorg_doc_tree then
-		vim.notify("[TSUtils] Can not parse norg tree in the given buffer", vim.log.levels.ERROR)
+		vim.notify("[TSUtils] Cannot parse norg tree in the given buffer", vim.log.levels.ERROR)
 		return
 	end
 
@@ -24,7 +24,7 @@ end
 ---Get all heading nodes matched the given id in the given buffer.
 ---@param id integer The id of the heading node. Default: `%d%d%d%d%d%d%d%d`.
 ---@param bufnr? integer The buffer number. Default: `0`.
----@return table<NodeID, TSNode> heading_nodes The heading nodes.
+---@return table<NodeID, TSNode> heading_nodes The table of heading nodes indexed by their IDs.
 function ts_utils.get_heading_nodes(id, bufnr)
 	id = id or "%d%d%d%d%d%d%d%d"
 	bufnr = bufnr or 0
@@ -60,7 +60,7 @@ function ts_utils.get_heading_nodes(id, bufnr)
 end
 
 ---Get the title node, content node, and sub heading nodes in the given heading node.
----@param heading_node TSNode The heading node.
+---@param heading_node TSNode The heading node to parse.
 ---@return TSNode? title_node, TSNode? content_node, TSNode[] sub_heading_nodes The title node, content node, and sub heading nodes.
 function ts_utils.parse_heading_node(heading_node)
 	local title_node, content_node, sub_heading_nodes = nil, nil, {}
@@ -68,7 +68,7 @@ function ts_utils.parse_heading_node(heading_node)
 	local sub_heading_level = tonumber(string.match(heading_node:type(), "%d")) + 1
 	if not sub_heading_level then
 		vim.notify(
-			"[TSUtils] Node `" .. heading_node:type() .. "` is not a heading node. Abort parsing.",
+			string.format("[TSUtils] Node `%s` is not a heading node. Abort parsing.", heading_node:type()),
 			vim.log.levels.ERROR
 		)
 		return title_node, content_node, sub_heading_nodes
@@ -95,7 +95,6 @@ function ts_utils.parse_heading_node(heading_node)
 			content_node = content_node or sub_node
 		elseif parsed_query.captures[index] == "sub_heading" then
 			table.insert(sub_heading_nodes, sub_node)
-		else
 		end
 	end
 
@@ -104,9 +103,9 @@ end
 
 ---Replace the text of the given treesitter node.
 ---@param text string|string[] The text used to replace the node text. Each element of the array is a line.
----@param node TSNode The treesitter node.
+---@param node TSNode The treesitter node to replace.
 ---@param bufnr? integer The buffer number. Default: `0`.
----@return nil _ This function does not return anything.
+---@return nil
 function ts_utils.replace_node_text(text, node, bufnr)
 	if type(text) == "string" then
 		text = { text }

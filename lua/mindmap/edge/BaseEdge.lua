@@ -9,20 +9,20 @@
 ---Mandatory fields:
 ---@field _type EdgeType Type of the edge.
 ---@field _id EdgeID ID of the edge.
----@field _from NodeID ID of the node where the edge is from.
----@field _to NodeID ID of the node where the edge is to.
+---@field _from NodeID ID of the node where the edge starts.
+---@field _to NodeID ID of the node where the edge ends.
 ---Optional fields:
----@field _data table Data of the node. Subclass should put there own field in this field.
----@field _cache table Cache of the edge.
----@field _created_at integer Created time of the edge in UNIX timestemp format.
----@field _updated_at integer Updated time of the edge in UNIX timestemp format.
----@field _due_at integer Due time of the edge in UNIX timestemp format.
----@field _ease integer Ease of the edge.
+---@field _data table Custom data of the edge (subclasses should add their own fields here).
+---@field _cache table Cache storage for the edge.
+---@field _created_at integer Creation time of the edge (UNIX timestamp).
+---@field _updated_at integer Last update time of the edge (UNIX timestamp).
+---@field _due_at integer Due time of the edge (UNIX timestamp).
+---@field _ease integer Ease factor of the edge.
 ---@field _interval integer Interval of the edge.
----@field _answer_count integer Count of total answer of the edge.
----@field _ease_count integer Count of esae answer of the edge.
----@field _again_count integer Count of again answer of the edge.
----@field _state string State of the edge. Can be "active", "removed", and "archived". Default: "active".
+---@field _answer_count integer Total number of answers for the edge.
+---@field _ease_count integer Number of "easy" answers for the edge.
+---@field _again_count integer Number of "again" answers for the edge.
+---@field _state string State of the edge ("active", "removed", or "archived"). Default: `"active"`.
 ---@field _version integer Version of the edge.
 local BaseEdge = {}
 BaseEdge.__index = BaseEdge
@@ -49,22 +49,22 @@ local base_edge_version = 12
 ---Create a new edge.
 ---@param _type EdgeType Type of the edge.
 ---@param _id EdgeID ID of the edge.
----@param _from NodeID ID of the node where the edge is from.
----@param _to NodeID ID of the node where the edge is to.
+---@param _from NodeID ID of the node where the edge starts.
+---@param _to NodeID ID of the node where the edge ends.
 ---Optional fields:
----@param _data table Data of the node. Subclass should put there own field in this field.
----@param _cache table Cache of the edge.
----@param _created_at integer Created time of the edge in UNIX timestemp format.
----@param _updated_at integer Updated time of the edge in UNIX timestemp format.
----@param _due_at integer Due time of the edge in UNIX timestemp format.
----@param _ease integer Ease of the edge.
+---@param _data table Custom data of the edge (subclasses should add their own fields here).
+---@param _cache table Cache storage for the edge.
+---@param _created_at integer Creation time of the edge (UNIX timestamp).
+---@param _updated_at integer Last update time of the edge (UNIX timestamp).
+---@param _due_at integer Due time of the edge (UNIX timestamp).
+---@param _ease integer Ease factor of the edge.
 ---@param _interval integer Interval of the edge.
----@param _answer_count integer Count of total answer of the edge.
----@param _ease_count integer Count of esae answer of the edge.
----@param _again_count integer Count of again answer of the edge.
----@param _state string State of the edge. Can be "active", "removed", and "archived". Default: "active".
+---@param _answer_count integer Total number of answers for the edge.
+---@param _ease_count integer Number of "easy" answers for the edge.
+---@param _again_count integer Number of "again" answers for the edge.
+---@param _state string State of the edge ("active", "removed", or "archived"). Default: `"active"`.
 ---@param _version integer Version of the edge.
----@return BaseEdge _ The created edge.
+---@return BaseEdge base_edge The created edge.
 function BaseEdge:new(
 	_type,
 	_id,
@@ -111,36 +111,40 @@ end
 
 ----------
 -- Graph Method
--- TODO: How to remove there methods?
+-- TODO: How to remove these methods?
 ----------
 
 ---@abstract
----Handle the edge before adding into the graph.
----@return nil _ This function does not return anything.
+---Handle the edge before adding it to the graph.
+---@param ... any Additional arguments.
+---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseEdge:before_add_into_graph(...)
 	vim.notify("[BaseEdge] Method `before_add_into_graph` is not implemented.")
 end
 
 ---@abstract
----Handle the edge after adding into the graph.
----@return nil _ This function does not return anything.
+---Handle the edge after adding it to the graph.
+---@param ... any Additional arguments.
+---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseEdge:after_add_into_graph(...)
 	vim.notify("[BaseEdge] Method `after_add_into_graph` is not implemented.")
 end
 
 ---@abstract
----Handle the edge before removing from the graph.
----@return nil _ This function does not return anything.
+---Handle the edge before removing it from the graph.
+---@param ... any Additional arguments.
+---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseEdge:before_remove_from_graph(...)
 	vim.notify("[BaseEdge] Method `before_remove_from_graph` is not implemented.")
 end
 
 ---@abstract
----Handle the edge after removing from the graph.
----@return nil _ This function does not return anything.
+---Handle the edge after removing it from the graph.
+---@param ... any Additional arguments.
+---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseEdge:after_remove_from_graph(...)
 	vim.notify("[BaseEdge] Method `after_remove_from_graph` is not implemented.")

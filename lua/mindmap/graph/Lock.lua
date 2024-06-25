@@ -3,7 +3,7 @@
 --------------------
 
 ---@class Lock
----@field is_locked boolean Whether the lock is locked.
+---@field is_locked boolean Whether the lock is currently locked.
 Lock = {}
 Lock.__index = Lock
 
@@ -12,7 +12,7 @@ Lock.__index = Lock
 ----------
 
 ---Create a new lock.
----@return Lock _ The lock.
+---@return Lock lock The created lock.
 function Lock:new()
 	local lock = {
 		is_locked = false,
@@ -24,7 +24,7 @@ function Lock:new()
 end
 
 ---Acquire the lock.
----@return nil _ This method does not return anything.
+---@return nil
 function Lock:acquire()
 	while self.is_locked do
 		coroutine.yield()
@@ -33,7 +33,7 @@ function Lock:acquire()
 end
 
 ---Release the lock.
----@return nil _ This method does not return anything.
+---@return nil
 function Lock:release()
 	self.is_locked = false
 end

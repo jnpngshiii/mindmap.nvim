@@ -9,9 +9,9 @@ local EdgeFactory = {}
 EdgeFactory.__index = EdgeFactory
 setmetatable(EdgeFactory, BaseFactory)
 
----Convert a edge to a table.
+---Convert an edge to a table.
 ---@param edge BaseEdge The edge to be converted.
----@return table _ The converted table.
+---@return table edge_table The converted table.
 function EdgeFactory:to_table(edge)
 	return {
 		id = edge.id,
@@ -34,14 +34,17 @@ function EdgeFactory:to_table(edge)
 	}
 end
 
----Convert a table to a edge.
+---Convert a table to an edge.
 ---@param registered_type string Which registered type the table should be converted to.
 ---@param tbl table The table to be converted.
----@return BaseEdge? _ The converted edge.
+---@return BaseEdge? edge The converted edge or nil if conversion fails.
 function EdgeFactory:from_table(registered_type, tbl)
 	local registered_cls = self:get_registered_class(registered_type)
 	if not registered_cls then
-		vim.notify("[EdgeFactory] Type `" .. registered_type .. "` is not registered. Aborte converting.", vim.log.levels.ERROR)
+		vim.notify(
+			"[EdgeFactory] Type `" .. registered_type .. "` is not registered. Aborting conversion.",
+			vim.log.levels.ERROR
+		)
 		return
 	end
 

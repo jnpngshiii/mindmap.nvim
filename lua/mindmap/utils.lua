@@ -5,9 +5,9 @@ local utils = {}
 --------------------
 
 ---Match all patterns in the content.
----@param content string|string[]
----@param pattern string
----@return string[] _
+---@param content string|string[] The content to search in.
+---@param pattern string The pattern to match.
+---@return string[] matched_list List of all matched patterns.
 function utils.match_pattern(content, pattern)
 	local match_list = {}
 
@@ -28,9 +28,9 @@ function utils.match_pattern(content, pattern)
 end
 
 ---Split a string using the given separator.
----@param str string
----@param sep string
----@return table _
+---@param str string The string to split.
+---@param sep string The separator to use.
+---@return table parts The table of split parts.
 function utils.split_string(str, sep)
 	local parts = {}
 	for part in string.gmatch(str, "([^" .. sep .. "]+)") do
@@ -54,8 +54,8 @@ end
 ---@param namespace number Namespace.
 ---@param line_num integer Line number.
 ---@param text string|string[] Text to be added as virtual text.
----@param text_type? string Type of the virtual text. Default: "Comment".
----@return nil _ This function does not return anything.
+---@param text_type? string Type of the virtual text. Default: `"Comment"`.
+---@return nil
 function utils.add_virtual_text(bufnr, namespace, line_num, text, text_type)
 	if type(text) == "string" then
 		text = { text }
@@ -81,9 +81,9 @@ end
 ---Clear virtual text in the given buffer in the given namespace.
 ---@param bufnr integer Buffer number.
 ---@param namespace number Namespace.
----@param start_row? integer Start of range of lines to clear
----@param end_row? integer End of range of lines to clear (exclusive) or -1 to clear to end of buffer.
----@return nil _ This function does not return anything.
+---@param start_row? integer Start of range of lines to clear. Default: `0`.
+---@param end_row? integer End of range of lines to clear (exclusive) or -1 to clear to end of buffer. Default: `-1`.
+---@return nil
 function utils.clear_virtual_text(bufnr, namespace, start_row, end_row)
 	vim.api.nvim_buf_clear_namespace(bufnr, namespace, start_row or 0, end_row or -1)
 end
@@ -92,7 +92,7 @@ end
 ---Example: get_abs_path("../a/b", "/c/d") -> "/c/a/b"
 ---@param target_path string A path to be converted to an absolute path.
 ---@param reference_path string A reference path.
----@return string _
+---@return string abs_path The resulting absolute path.
 function utils.get_abs_path(target_path, reference_path)
 	local target_path_parts = utils.split_string(target_path, "/")
 	local reference_path_parts = utils.split_string(reference_path, "/")
@@ -117,7 +117,7 @@ end
 ---Example: get_rel_path("/a/b/c", "/a/b/d") -> "../c"
 ---@param target_path string A path to be converted to a relative path.
 ---@param reference_path string A reference path.
----@return string _
+---@return string rel_path The resulting relative path.
 function utils.get_rel_path(target_path, reference_path)
 	local target_parts = utils.split_string(target_path, "/")
 	local reference_parts = utils.split_string(reference_path, "/")
@@ -138,9 +138,10 @@ function utils.get_rel_path(target_path, reference_path)
 	return table.concat(rel_path, "/")
 end
 
+---TODO:
 ---Get the information of a buffer or a file.
 ---@param bufnr_or_file_path? integer|string Buffer number or file path of the file to be parsed.
----@return string[] _ { file_name, abs_file_path, rel_file_path, proj_path }
+---@return string[] file_info { file_name, abs_file_path, rel_file_path, proj_path }
 function utils.get_file_info(bufnr_or_file_path)
 	bufnr_or_file_path = bufnr_or_file_path or 0
 
@@ -168,7 +169,7 @@ end
 ---@param end_row? integer The end row of the range to be read.
 ---@param start_col? integer The start column of the range to be read.
 ---@param end_col? integer The end column of the range to be read.
----@return string[] _ { line1, line2, ... }
+---@return string[] content { line1, line2, ... }
 function utils.get_file_content(bufnr_or_file_path, start_row, end_row, start_col, end_col)
 	bufnr_or_file_path = bufnr_or_file_path or 0
 
@@ -213,6 +214,7 @@ end
 ---@param file_path string File path to check or read into a temporary buffer.
 ---@param callback function Function to execute with the buffer. Receives buffer number as the first argument.
 ---@param ... any Arguments to be passed to the callback function.
+---@return any result The result of the callback function.
 function utils.with_temp_bufnr(file_path, callback, ...)
 	local bufnr = vim.fn.bufnr(file_path)
 	local is_temp_buf = false
@@ -241,24 +243,24 @@ function utils.with_temp_bufnr(file_path, callback, ...)
 end
 
 ---Remove fields that are not string, number, or boolean in a table.
----@param tbl table
----@return table _
+---@param tbl table The table to process.
+---@return table processed_tbl The processed table with removed fields.
 function utils.remove_table_fields(tbl)
-	local proccessed_tbl = tbl
-	for k, v in pairs(proccessed_tbl) do
+	local processed_tbl = tbl
+	for k, v in pairs(processed_tbl) do
 		if type(v) == "table" then
 			utils.remove_table_fields(v)
 		elseif type(v) ~= "string" and type(v) ~= "number" and type(v) ~= "boolean" then
 			tbl[k] = nil
 		end
 	end
-	return proccessed_tbl
+	return processed_tbl
 end
 
 ---Limit the length of a string or a list of strings.
 ---@param str_or_list string|string[] String or list of strings to be limited.
 ---@param limitation integer Maximum length of each string.
----@return string[] _ The limited list of strings.
+---@return string[] limited_list The limited list of strings.
 function utils.limit_string_length(str_or_list, limitation)
 	local str
 	if type(str_or_list) == "table" then
@@ -288,8 +290,9 @@ function utils.limit_string_length(str_or_list, limitation)
 	return result
 end
 
+---TODO:
 ---Get the latest visual selection.
----@return table _ { start_row, start_col, end_row, end_col }
+---@return table selection { start_row, start_col, end_row, end_col }
 function utils.get_latest_visual_selection()
 	-- FIXME: The first call will return { 0, 0 } for both marks
 	local start_row = vim.api.nvim_buf_get_mark(0, "<")[1]
@@ -308,7 +311,7 @@ end
 ---Create a closure.
 ---@param func function Function to be wrapped.
 ---@param ... any Arguments to be passed to the function.
----@return function _ The closure.
+---@return function closure The closure.
 function utils.create_closure(func, ...)
 	local args = { ... }
 	return function()
@@ -319,6 +322,36 @@ end
 --------------------
 -- Deprecated functions
 --------------------
+
+local function parallel_process(data, thread_count, process_func)
+	local results = {}
+
+	local function worker(start_index)
+		local index = 0
+		for key, value in pairs(data) do
+			index = index + 1
+			if index % thread_count == start_index - 1 then
+				local result = process_func(key, value)
+				if result ~= nil then
+					results[key] = result
+				end
+			end
+		end
+	end
+
+	local threads = {}
+	for i = 1, thread_count do
+		threads[i] = coroutine.create(function()
+			worker(i)
+		end)
+	end
+
+	for _, thread in ipairs(threads) do
+		coroutine.resume(thread)
+	end
+
+	return results
+end
 
 --------------------
 

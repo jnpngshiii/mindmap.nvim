@@ -48,20 +48,20 @@ local plugin = {}
 ---Alg:
 ---@field base_alg BaseAlg Base algorithm class.
 ---@field alg_factory AlgFactory Factory of the algorithm.
----@field alg_type string Type of the algorithm. Default: "SimpleAlg".
+---@field alg_type string Type of the algorithm. Default: `"SimpleAlg"`.
 ---Logger:
----@field log_level string Log level of the graph. Default: "INFO".
----@field show_log_in_nvim boolean Show log in Neovim. Default: true.
+---@field log_level string Log level of the graph. Default: `"INFO"`.
+---@field show_log_in_nvim boolean Show log in Neovim. Default: `true`.
 ---Behavior configuration:
 ---  Default behavior:
----@field enable_default_keymap boolean Enable default keymap. Default: true.
----@field keymap_prefix string Prefix of the keymap. Default: "<localleader>m".
----@field enable_shorten_keymap boolean Enable shorten keymap. Default: false.
----@field shorten_keymap_prefix string Prefix of the shorten keymap. Default: "m".
----@field enable_default_autocmd boolean Enable default atuocmd. Default: true.
+---@field enable_default_keymap boolean Enable default keymap. Default: `true`.
+---@field keymap_prefix string Prefix of the keymap. Default: `"<localleader>m"`.
+---@field enable_shorten_keymap boolean Enable shorten keymap. Default: `false`.
+---@field shorten_keymap_prefix string Prefix of the shorten keymap. Default: `"m"`.
+---@field enable_default_autocmd boolean Enable default autocmd. Default: `true`.
 ---  Automatic behavior:
----@field show_excerpt_after_add boolean ...
----@field show_excerpt_after_bfread boolean ...
+---@field show_excerpt_after_add boolean Show excerpt after adding a node.
+---@field show_excerpt_after_bfread boolean Show excerpt after reading a buffer.
 plugin.config = {
 	-- Node:
 	base_node = BaseNode,
@@ -93,8 +93,8 @@ plugin.config = {
 --------------------
 
 ---@class plugin.cache
----@field graphs table<string, Graph> Graphs of different repo.
----@field namespaces table<string, integer> Namespaces of different virtual text.
+---@field graphs table<string, Graph> Graphs of different repos.
+---@field namespaces table<string, integer> Namespaces of different virtual texts.
 plugin.cache = {
 	graphs = {},
 	namespaces = {},
@@ -107,7 +107,7 @@ plugin.cache = {
 ---Find the registered namespace and return it.
 ---If the namespace does not exist, register it first.
 ---@param namespace string Namespace to find.
----@return integer namespace Found or created namespace.
+---@return integer namespace_id Found or created namespace ID.
 function plugin.find_namespace(namespace)
 	if not plugin.cache.namespaces[namespace] then
 		plugin.cache.namespaces[namespace] = vim.api.nvim_create_namespace("mindmap_" .. namespace)
@@ -118,8 +118,8 @@ end
 
 ---Find the registered graph using `save_dir` and return it.
 ---If the graph does not exist, create it first.
----@param save_dir? string Dir to load and save the graph. The graph will be saved in `{self.save_dir}/.mindmap.json`. Default: {current_project_path}.
----@return Graph graph Found or created graph.
+---@param save_dir? string Dir to load and save the graph. The graph will be saved in `{self.save_dir}/.mindmap.json`. Default: `{current_project_path}`.
+---@return Graph found_graph Found or created graph.
 function plugin.find_graph(save_dir)
 	save_dir = save_dir or utils.get_file_info()[4]
 	if not plugin.cache.graphs[save_dir] then
@@ -155,21 +155,24 @@ function plugin.find_graph(save_dir)
 	return plugin.cache.graphs[save_dir]
 end
 
----Find nodes and its corresponding treesitter nodes in the given location.
----@param location string|TSNode Location to find nodes. Location must be TSNode, "lastest", "nearest", "telescope" or "buffer".
----@return table<NodeID, BaseNode> nodes, table<NodeID, TSNode> ts_nodes Found nodes and its corresponding treesitter nodes.
+---TODO:
+---Find nodes and their corresponding treesitter nodes in the given location.
+---@param graph Graph The graph to search in.
+---@param location string|TSNode Location to find nodes. Location must be TSNode, "latest", "nearest", "telescope" or "buffer".
+---@return table<NodeID, BaseNode> found_nodes, table<NodeID, TSNode> found_ts_nodes Found nodes and their corresponding treesitter nodes.
 function plugin.find_heading_nodes(graph, location)
 	if
 		type(location) ~= "userdata"
-		and location ~= "lastest"
+		and location ~= "latest"
 		and location ~= "nearest"
 		and location ~= "telescope"
 		and location ~= "buffer"
 	then
 		vim.notify(
-			"[Func] Invalid location `"
-				.. location
-				.. "`. Location must be TSNode, `lastest`, `nearest`, `telescope` or `buffer`",
+			string.format(
+				"[Func] Invalid location `%s`. Location must be TSNode, `latest`, `nearest`, `telescope` or `buffer`",
+				location
+			),
 			vim.log.levels.ERROR
 		)
 		return {}, {}
@@ -194,13 +197,13 @@ function plugin.find_heading_nodes(graph, location)
 		end
 	end
 
-	if location == "lastest" then
-		-- The process here is a littel bit different.
-		local lastest_node = graph.nodes[#graph.nodes]
-		local lastest_ts_node
+	if location == "latest" then
+		-- The process here is a little bit different.
+		local latest_node = graph.nodes[#graph.nodes]
+		local latest_ts_node
 
-		if lastest_node.state == "active" then
-			return { [lastest_node.id] = lastest_node }, { [lastest_node.id] = lastest_ts_node }
+		if latest_node.state == "active" then
+			return { [latest_node.id] = latest_node }, { [latest_node.id] = latest_ts_node }
 		else
 			return {}, {}
 		end
@@ -271,7 +274,7 @@ function plugin.find_heading_nodes(graph, location)
 			})
 			:find()
 
-		-- TODO: ...
+		-- TODO: Implement telescope functionality
 	end
 
 	if location == "buffer" then

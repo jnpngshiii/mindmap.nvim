@@ -9,30 +9,28 @@ MINUTE_SECONDS = 60
 ---@alias AlgType string
 
 ---@class BaseAlg
----@field initial_ease integer Initial ease of the algorithm.
----@field initial_interval integer Initial interval of the algorithm.
----@field data table Data of the algorithm.
+---@field initial_ease integer Initial ease factor of the algorithm. Default: `250`.
+---@field initial_interval integer Initial interval of the algorithm in days. Default: `1`.
 ---@field version integer Version of the algorithm.
 local BaseAlg = {}
 BaseAlg.__index = BaseAlg
 
-local base_alg_version = 1
+local base_alg_version = 2
 -- v0: Initial version.
 -- v1: Rename to `BaseAlg`.
+-- v2: Remove `data` field.
 
 ----------
 -- Basic Method
 ----------
 
 ---Create a new algorithm.
----@param data? table Data of the algorithm.
 ---@param version? integer Version of the algorithm.
----@return BaseAlg _ The created algorithm.
-function BaseAlg:new(data, version)
+---@return BaseAlg base_alg The created algorithm.
+function BaseAlg:new(version)
 	local base_alg = {
 		initial_ease = 250,
 		initial_interval = 1,
-		data = data or {},
 		version = version or base_alg_version,
 	}
 	base_alg.__index = base_alg
@@ -43,36 +41,45 @@ end
 
 ---@abstract
 ---Answer the card with "easy".
----@return nil _ This function does not return anything.
----@diagnostic disable-next-line: unused-vararg
-function BaseAlg:answer_easy(...)
-	error("[BaseAlg] Please implement function `answer_easy` in subclass.")
+---@param edge BaseEdge The edge being reviewed.
+---@param ... any Additional arguments.
+---@return nil
+---@diagnostic disable-next-line: unused-local, unused-vararg
+function BaseAlg:answer_easy(edge, ...)
+	vim.notify("[BaseAlg] Method `answer_easy` is not implemented.", vim.log.levels.ERROR)
 end
 
 ---@abstract
 ---Answer the card with "good".
----@return nil _ This function does not return anything.
----@diagnostic disable-next-line: unused-vararg
-function BaseAlg:answer_good(...)
-	error("[BaseAlg] Please implement function `answer_good` in subclass.")
+---@param edge BaseEdge The edge being reviewed.
+---@param ... any Additional arguments.
+---@return nil
+---@diagnostic disable-next-line: unused-local, unused-vararg
+function BaseAlg:answer_good(edge, ...)
+	vim.notify("[BaseAlg] Method `answer_good` is not implemented.", vim.log.levels.ERROR)
 end
 
 ---@abstract
 ---Answer the card with "again".
----@return nil _ This function does not return anything.
----@diagnostic disable-next-line: unused-vararg
-function BaseAlg:answer_again(...)
-	error("[BaseAlg] Please implement function `answer_again` in subclass.")
+---@param edge BaseEdge The edge being reviewed.
+---@param ... any Additional arguments.
+---@return nil
+---@diagnostic disable-next-line: unused-local, unused-vararg
+function BaseAlg:answer_again(edge, ...)
+	vim.notify("[BaseAlg] Method `answer_again` is not implemented.", vim.log.levels.ERROR)
 end
 
 ----------
 -- Helper Method
 ----------
 
----Adjust the interval for 8 or more days.
----@param interval integer The interval.
----@param fuzz? integer The fuzz factor.
----@return integer The new interval.
+---Adjust the interval for 8 or more days with a random fuzz factor.
+---See: "Anki also applies a small amount of random “fuzz” to prevent cards that
+---  were introduced at the same time and given the same ratings from sticking
+---  together and always coming up for review on the same day."
+---@param interval integer The interval in days.
+---@param fuzz? integer The fuzz factor. Default is 3.
+---@return integer new_interval The new adjusted interval.
 function BaseAlg:random_adjust_interval(interval, fuzz)
 	fuzz = fuzz or 3
 

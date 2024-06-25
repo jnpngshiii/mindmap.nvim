@@ -11,73 +11,52 @@ local utils = require("mindmap.utils")
 
 ---@class Graph
 ---Basic:
----@field save_dir string Dir to load and save the graph. The graph will be saved in `{self.save_dir}/.mindmap.json`. Default: {current_project_path}.
+---@field save_dir string Directory to load and save the graph. The graph will be saved in `{self.save_dir}/.mindmap.json`. Default: `{current_project_path}`.
 ---  Node:
----@field node_factory NodeFactory Factory of the node.
+---@field node_factory NodeFactory Factory for creating nodes.
 ---@field nodes table<NodeID, BaseNode> Nodes in the graph.
 ---  Edge:
----@field edge_factory EdgeFactory Factory of the edge.
+---@field edge_factory EdgeFactory Factory for creating edges.
 ---@field edges table<EdgeID, BaseEdge> Edges in the graph.
 ---  Alg:
----@field alg BaseAlg Algorithm of the graph.
+---@field alg BaseAlg Algorithm for the graph.
 ---  Logger:
----@field logger Logger Logger of the graph.
+---@field logger Logger Logger for the graph.
 ---Transaction:
----@field current_transaction Transaction? Current transaction.
----@field undo_redo_limit integer Max number of undo and redo. Default: `3`.
----@field undo_stack Transaction[] Stack of transaction for undo.
----@field redo_stack Transaction[] Stack of transaction for redo.
+---@field current_transaction Transaction? Current active transaction.
+---@field undo_redo_limit integer Maximum number of undo and redo operations. Default: `3`.
+---@field undo_stack Transaction[] Stack of transactions for undo operations.
+---@field redo_stack Transaction[] Stack of transactions for redo operations.
 ---Lock:
----@field lock Lock Lock of the graph.
+---@field lock Lock Lock for the graph.
 ---Others:
 ---@field version integer Version of the graph.
 local Graph = {}
 Graph.__index = Graph
 
-local graph_version = 5
+local graph_version = 6
 -- v0: Initial version.
 -- v1: Add `alg` field.
 -- v2: Auto call `[before|after]_[add_into|remove_from]_graph`
 -- v3: Use factory to manage `[node|edge|alf]` classes.
 -- v4: Use `Transaction` class to manage transactions.
 -- v5: Update `load` and `save` methods.
+-- v6: Add `lock` and `transact` related methods.
 
 ----------
 -- Basic Method
 ----------
 
 ---Create a new graph.
----Basic:
----@param save_dir string Dir to load and save the graph. The graph will be saved in `{self.save_dir}/.mindmap.json`. Default: {current_project_path}.
----  Node:
----@param node_factory NodeFactory Factory of the node.
----  Edge:
----@param edge_factory EdgeFactory Factory of the edge.
----  Alg:
----@param alg BaseAlg Algorithm of the graph.
----  Logger:
----@param logger Logger Logger of the graph.
----Transaction:
----@param undo_redo_limit? integer Limit of undo and redo operations. Default: 3.
----Others:
----@param version? integer Version of the graph. Default: `graph_version`.
----@return Graph _ The new graph.
-function Graph:new(
-	-- Basic:
-	save_dir,
-	-- Node:
-	node_factory,
-	-- Edge:
-	edge_factory,
-	-- Alg:
-	alg,
-	-- Logger:
-	logger,
-	-- Transaction:
-	undo_redo_limit,
-	-- Others:
-	version
-)
+---@param save_dir string Directory to load and save the graph. The graph will be saved in `{self.save_dir}/.mindmap.json`. Default: `{current_project_path}`.
+---@param node_factory NodeFactory Factory for creating nodes.
+---@param edge_factory EdgeFactory Factory for creating edges.
+---@param alg BaseAlg Algorithm for the graph.
+---@param logger Logger Logger for the graph.
+---@param undo_redo_limit? integer Limit of undo and redo operations. Default: `3`.
+---@param version? integer Version of the graph.
+---@return Graph graph The new graph.
+function Graph:new(save_dir, node_factory, edge_factory, alg, logger, undo_redo_limit, version)
 	local graph = {
 		-- Basic:
 		save_dir = save_dir or utils.get_file_info()[4],
@@ -110,7 +89,7 @@ function Graph:new(
 end
 
 ---Load the graph from `{self.save_dir}/.mindmap.json`.
----@return nil _ This function does not return anything.
+---@return nil
 function Graph:load()
 	local json_path = self.save_dir .. "/" .. ".mindmap.json"
 	local json, _ = io.open(json_path, "w")
@@ -131,7 +110,7 @@ function Graph:load()
 end
 
 ---Save the graph to `{self.save_dir}/.mindmap.json`.
----@return nil _ This function does not return anything.
+---@return nil
 function Graph:save()
 	local graph_tbl = {
 		nodes = {},
@@ -157,7 +136,7 @@ function Graph:save()
 end
 
 ---Create a savepoint.
----@return table _ The savepoint.
+---@return table savepoint The created savepoint.
 function Graph:create_savepoint()
 	local savepoint = {
 		nodes = vim.deepcopy(self.nodes),
@@ -167,7 +146,8 @@ function Graph:create_savepoint()
 end
 
 ---Rollback to a savepoint.
----@return nil _ This method does not return anything.
+---@param savepoint table The savepoint to rollback to.
+---@return nil
 function Graph:rollback_savepoint(savepoint)
 	self.nodes = savepoint.nodes
 	self.edges = savepoint.edges
@@ -182,13 +162,11 @@ end
 -----
 
 ---Add a node to the graph.
----If `node.before_add_into_graph ~= nil` and / or `node.after_add_into_graph ~= nil`,
----`add_node` will automatically call these methods before and after adding the node.
----If `self.current_transaction ~= nil`,
----`add_node` will automatically record the its operation and inverse to the transaction.
+---If the node has `before_add_into_graph` or `after_add_into_graph` methods, they will be called automatically.
+---If a transaction is active, the operation and its inverse will be recorded automatically.
 ---@param node_or_node_type string|BaseNode Node or type of the node to be added.
----@param ... any Information to create the node.
----@return boolean _ Whether the node is added.
+---@param ... any Additional information to create the node.
+---@return boolean is_added Whether the node is added successfully.
 function Graph:add_node(node_or_node_type, ...)
 	local node
 	if type(node_or_node_type) == "table" then
@@ -250,13 +228,12 @@ function Graph:add_node(node_or_node_type, ...)
 	return true
 end
 
----Add a edge to the graph.
----If `edge.before_add_into_graph ~= nil` and / or `edge.after_add_into_graph ~= nil`,
----`add_edge` will automatically call these methods before and after adding the edge.
----If `self.current_transaction ~= nil`,
----`add_edge` will automatically record the its operation and inverse to the transaction.
+---Add an edge to the graph.
+---If the edge has `before_add_into_graph` or `after_add_into_graph` methods, they will be called automatically.
+---If a transaction is active, the operation and its inverse will be recorded automatically.
 ---@param edge_or_edge_type string|BaseEdge Edge or type of the edge to be added.
----@return boolean _ Whether the edge is added.
+---@param ... any Additional information to create the edge.
+---@return boolean is_added Whether the edge is added successfully.
 function Graph:add_edge(edge_or_edge_type, ...)
 	local edge
 	if type(edge_or_edge_type) == "table" then
@@ -322,6 +299,15 @@ end
 -- R
 -----
 
+---Find nodes based on given criteria.
+---@param criteria table The criteria to match nodes against.
+---Example:
+---  {
+---    {"_type", "SimpleNode"},
+---    {"_state", "active"},
+---    {"content", function(field) return field == "Hello" end}
+---  }
+---@return table matched_nodes The nodes matching the criteria.
 function Graph:find_nodes(criteria)
 	local result = {}
 
@@ -352,6 +338,15 @@ function Graph:find_nodes(criteria)
 	return result
 end
 
+---Find edges based on given criteria.
+---Example:
+---  {
+---    {"_type", "SimpleEdge"},
+---    {"_state", "active"},
+---    {"content", function(field) return field == "Hello" end}
+---  }
+---@param criteria table The criteria to match edges against.
+---@return table matched_edges The edges matching the criteria.
 function Graph:find_edges(criteria)
 	local result = {}
 
@@ -391,12 +386,10 @@ end
 -----
 
 ---Remove an edge from the graph using ID.
----If `edge.before_remove_from_graph ~= nil` and / or `edge.after_remove_from_graph ~= nil`,
----`remove_edge` will automatically call these methods before and after removing the edge.
----If `self.current_transaction ~= nil`,
----`remove_edge` will automatically record the its operation and inverse to the transaction.
+---If the edge has `before_remove_from_graph` or `after_remove_from_graph` methods, they will be called automatically.
+---If a transaction is active, the operation and its inverse will be recorded automatically.
 ---@param edge_id EdgeID ID of the edge to be removed.
----@return boolean _ Whether the edge is removed.
+---@return boolean is_removed Whether the edge is removed successfully.
 function Graph:remove_edge(edge_id)
 	local edge = self.edges[edge_id]
 	if not edge then
@@ -440,17 +433,15 @@ function Graph:remove_edge(edge_id)
 
 	-- Others --
 
-	self.logger:info("Edge", "Remove " .. edge._type .. " <" .. edge._id .. "> from graph.")
+	self.logger:info("Edge", "Remove `" .. edge._type .. "` `" .. edge._id .. "` from graph.")
 	return true
 end
 
 ---Remove a node from the graph and all edges related to it using ID.
----If `node.before_remove_from_graph ~= nil` and / or `node.after_remove_from_graph ~= nil`,
----`remove_node` will automatically call these methods before and after removing the node.
----If `self.current_transaction ~= nil`,
----`remove_node` will automatically record the its operation and inverse to the transaction.
+---If the node has `before_remove_from_graph` or `after_remove_from_graph` methods, they will be called automatically.
+---If a transaction is active, the operation and its inverse will be recorded automatically.
 ---@param node_id NodeID ID of the node to be removed.
----@return boolean _ Whether the node is removed.
+---@return boolean is_removed Whether the node is removed successfully.
 function Graph:remove_node(node_id)
 	local node = self.nodes[node_id]
 	if not node then
@@ -494,7 +485,7 @@ function Graph:remove_node(node_id)
 
 	-- Others --
 
-	self.logger:info("Node", "Remove " .. node._type .. " <" .. node._id .. "> from graph.")
+	self.logger:info("Node", "Remove `" .. node._type .. "` `" .. node._id .. "` from graph.")
 	return true
 end
 
@@ -503,8 +494,6 @@ end
 ----------
 
 ---Executes a transaction on the graph.
----This method acquires a lock, executes the provided closure within a transaction,
----and then either commits or rolls back the transaction based on the execution result.
 ---@param closure function The function to be executed within the transaction.
 ---@return boolean success Whether the transaction was successfully committed.
 function Graph:transact(closure)
@@ -530,7 +519,6 @@ function Graph:transact(closure)
 
 	if not success then
 		self.logger:error("Graph", "Transaction failed: " .. err_msg .. ".")
-
 		-- Just simply rollback the savepoint now.
 		self:rollback_savepoint(self.current_transaction.savepoint)
 		self.logger:info("Graph", "Transaction rollback completed.")
@@ -546,8 +534,8 @@ function Graph:transact(closure)
 	return success
 end
 
----Undo the lastest transaction.
----@return boolean _ Whether the undo operation is successful.
+---Undo the latest transaction.
+---@return boolean is_successful Whether the undo operation is successful.
 function Graph:undo()
 	local transaction = table.remove(self.undo_stack)
 	if not transaction then
@@ -566,8 +554,8 @@ function Graph:undo()
 	return true
 end
 
----Redo the lastest transaction.
----@return boolean _ Whether the redo operation is successful.
+---Redo the latest transaction.
+---@return boolean is_successful Whether the redo operation is successful.
 function Graph:redo()
 	local transaction = table.remove(self.redo_stack)
 	if not transaction then
@@ -588,9 +576,10 @@ end
 
 ----------
 -- Spaced Repetition Methods
+-- TODO:
 ----------
 
----Spaced repetition function: get spaced repetition information from the edge.
+---Get spaced repetition information from the edge.
 ---@param edge_id EdgeID ID of the edge.
 ---@return string[] front, string[] back, integer created_at, integer updated_at, integer due_at, integer ease, integer interval, integer answer_count, integer ease_count, integer again_count The spaced repetition information.
 function Graph:get_sp_info_from_edge(edge_id)
@@ -621,7 +610,7 @@ function Graph:get_sp_info_from_edge(edge_id)
 		edge.again_count
 end
 
----Show card.
+---Show card for spaced repetition.
 ---@param edge_id EdgeID ID of the edge.
 ---@return string status Status of spaced repetition. Can be "again", "good", "easy", "skip" or "quit".
 function Graph:show_card(edge_id)
@@ -733,10 +722,6 @@ function Graph:show_card(edge_id)
 	card_ui:unmount()
 	return status
 end
-
-----------
--- class Method
-----------
 
 --------------------
 

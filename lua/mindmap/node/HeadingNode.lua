@@ -6,8 +6,8 @@ local ts_utils = require("mindmap.ts_utils")
 --------------------
 
 ---@class HeadingNode : BaseNode
----@field _cache.ts_node userdata|nil See: `HeadingNode.get_ts_node`.
----@field _cache.ts_node_bufnr number|nil See: `HeadingNode.get_ts_node`.
+---@field _cache.ts_node userdata|nil See: `HeadingNode:get_ts_node`.
+---@field _cache.ts_node_bufnr number|nil See: `HeadingNode:get_ts_node`.
 local HeadingNode = {}
 
 ----------
@@ -27,7 +27,7 @@ function HeadingNode:get_ts_node(bufnr)
 	local heading_node = ts_utils.get_heading_nodes(self._id, bufnr)[self._id]
 	if not heading_node then
 		vim.notify(
-			"[HeadingNode] Can not find the treesitter node with id: `" .. self._id .. "`. Abort getting.",
+			"[HeadingNode] Cannot find the treesitter node with id: `" .. self._id .. "`. Aborting retrieval.",
 			vim.log.levels.ERROR
 		)
 		return
@@ -76,14 +76,14 @@ end
 -- Graph Method
 ----------
 
----Handle the node after adding into the graph.
----@return nil _ This function does not return anything.
+---Handle the node after adding it to the graph.
+---@return nil
 function HeadingNode:after_add_into_graph()
 	local _f = function(bufnr)
 		local ts_node = self:get_ts_node(bufnr)
 		if not ts_node then
 			vim.notify(
-				"[HeadingNode] Can not find the treesitter node. Failed to call `after_add_into_graph`.",
+				"[HeadingNode] Cannot find the treesitter node. Failed to call `after_add_into_graph`.",
 				vim.log.levels.ERROR
 			)
 			return
@@ -91,7 +91,7 @@ function HeadingNode:after_add_into_graph()
 		local ts_node_title, _, _ = ts_utils.parse_heading_node(ts_node)
 		if not ts_node_title then
 			vim.notify(
-				"[HeadingNode] Can not find the title node. Failed to call `after_add_into_graph`.",
+				"[HeadingNode] Cannot find the title node. Failed to call `after_add_into_graph`.",
 				vim.log.levels.ERROR
 			)
 			return
@@ -109,14 +109,14 @@ function HeadingNode:after_add_into_graph()
 	return utils.with_temp_bufnr(self:get_abs_path(), _f)
 end
 
----Handle the node before removing from the graph.
----@return nil _ This function does not return anything.
+---Handle the node before removing it from the graph.
+---@return nil
 function HeadingNode:before_remove_from_graph()
 	local _f = function(bufnr)
 		local ts_node = self:get_ts_node(bufnr)
 		if not ts_node then
 			vim.notify(
-				"[HeadingNode] Can not find the treesitter node. Failed to call `before_remove_from_graph`.",
+				"[HeadingNode] Cannot find the treesitter node. Failed to call `before_remove_from_graph`.",
 				vim.log.levels.ERROR
 			)
 			return
@@ -124,7 +124,7 @@ function HeadingNode:before_remove_from_graph()
 		local ts_node_title, _, _ = ts_utils.parse_heading_node(ts_node)
 		if not ts_node_title then
 			vim.notify(
-				"[HeadingNode] Can not find the title node. Failed to call `before_remove_from_graph`.",
+				"[HeadingNode] Cannot find the title node. Failed to call `before_remove_from_graph`.",
 				vim.log.levels.ERROR
 			)
 			return

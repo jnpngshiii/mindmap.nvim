@@ -11,7 +11,7 @@ setmetatable(NodeFactory, BaseFactory)
 
 ---Convert a node to a table.
 ---@param node BaseNode The node to be converted.
----@return table _ The converted table.
+---@return table node_table The converted table.
 function NodeFactory:to_table(node)
 	return {
 		_type = node._type,
@@ -30,12 +30,12 @@ end
 ---Convert a table to a node.
 ---@param registered_type string Which registered type the table should be converted to.
 ---@param tbl table The table to be converted.
----@return BaseNode? _ The converted node.
+---@return BaseNode? node The converted node or nil if conversion fails.
 function NodeFactory:from_table(registered_type, tbl)
 	local registered_cls = self:get_registered_class(registered_type)
 	if not registered_cls then
 		vim.notify(
-			"[EdgeFactory] Type `" .. registered_type .. "` is not registered. Aborte converting.",
+			"[NodeFactory] Type `" .. registered_type .. "` is not registered. Aborting conversion.",
 			vim.log.levels.ERROR
 		)
 		return
