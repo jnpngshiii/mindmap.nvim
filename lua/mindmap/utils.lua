@@ -1,9 +1,55 @@
 local utils = {}
 
 --------------------
--- Helper functions
+-- String Function
 --------------------
 
+---Split a string using the given separator.
+---@param str string The string to split.
+---@param sep string The separator to use.
+---@return table parts The table of split parts.
+function utils.split_string(str, sep)
+	local parts = {}
+	for part in string.gmatch(str, "([^" .. sep .. "]+)") do
+		table.insert(parts, part)
+	end
+	return parts
+end
+
+---Limit the length of a string or a list of strings.
+---@param str_or_list string|string[] String or list of strings to be limited.
+---@param limitation integer Maximum length of each string.
+---@return string[] limited_list The limited list of strings.
+function utils.limit_string_length(str_or_list, limitation)
+	local str
+	if type(str_or_list) == "table" then
+		str = table.concat(str_or_list, " ") -- TODO: chinese?
+	elseif type(str_or_list) == "string" then
+		str = str_or_list
+	else
+		return {}
+	end
+
+	local result = {}
+	local start_index = 1
+	local str_length = string.len(str)
+
+	while start_index <= str_length do
+		local end_index = start_index + limitation - 1
+		if end_index > str_length then
+			end_index = str_length
+		end
+
+		local substring = string.sub(str, start_index, end_index)
+		table.insert(result, substring)
+
+		start_index = end_index + 1
+	end
+
+	return result
+end
+
+---@deprecated
 ---Match all patterns in the content.
 ---@param content string|string[] The content to search in.
 ---@param pattern string The pattern to match.
@@ -27,18 +73,6 @@ function utils.match_pattern(content, pattern)
 	return match_list
 end
 
----Split a string using the given separator.
----@param str string The string to split.
----@param sep string The separator to use.
----@return table parts The table of split parts.
-function utils.split_string(str, sep)
-	local parts = {}
-	for part in string.gmatch(str, "([^" .. sep .. "]+)") do
-		table.insert(parts, part)
-	end
-	return parts
-end
-
 ---Get the indent of a line.
 ---@param bufnr integer Buffer number.
 ---@param line_num integer Line number.
@@ -49,44 +83,9 @@ function utils.get_indent(bufnr, line_num)
 	return indent or ""
 end
 
----Add virtual text in the given buffer in the given namespace.
----@param bufnr integer Buffer number.
----@param namespace number Namespace.
----@param line_num integer Line number.
----@param text string|string[] Text to be added as virtual text.
----@param text_type? string Type of the virtual text. Default: `"Comment"`.
----@return nil
-function utils.add_virtual_text(bufnr, namespace, line_num, text, text_type)
-	if type(text) == "string" then
-		text = { text }
-	end
-
-	local indent = utils.get_indent(bufnr, line_num)
-
-	local virt_text = {}
-	for _, t in ipairs(text) do
-		table.insert(virt_text, { indent .. t, text_type or "Comment" })
-	end
-
-	vim.api.nvim_buf_set_extmark(bufnr, namespace, line_num - 1, -1, {
-		-- TODO: use argument for virt_text_pos
-		virt_text_pos = "overlay",
-		virt_lines = {
-			virt_text,
-		},
-		hl_mode = "combine",
-	})
-end
-
----Clear virtual text in the given buffer in the given namespace.
----@param bufnr integer Buffer number.
----@param namespace number Namespace.
----@param start_row? integer Start of range of lines to clear. Default: `0`.
----@param end_row? integer End of range of lines to clear (exclusive) or -1 to clear to end of buffer. Default: `-1`.
----@return nil
-function utils.clear_virtual_text(bufnr, namespace, start_row, end_row)
-	vim.api.nvim_buf_clear_namespace(bufnr, namespace, start_row or 0, end_row or -1)
-end
+--------------------
+-- File Function
+--------------------
 
 ---Convert relative path (target_path) to absolute path according to reference path (reference_path).
 ---Example: get_abs_path("../a/b", "/c/d") -> "/c/a/b"
@@ -138,10 +137,9 @@ function utils.get_rel_path(target_path, reference_path)
 	return table.concat(rel_path, "/")
 end
 
----TODO:
 ---Get the information of a buffer or a file.
 ---@param bufnr_or_file_path? integer|string Buffer number or file path of the file to be parsed.
----@return string[] file_info { file_name, abs_file_path, rel_file_path, proj_path }
+---@return string file_name, string abs_file_path, string rel_file_path, string proj_path Information of the file.
 function utils.get_file_info(bufnr_or_file_path)
 	bufnr_or_file_path = bufnr_or_file_path or 0
 
@@ -160,7 +158,7 @@ function utils.get_file_info(bufnr_or_file_path)
 	local abs_file_path = vim.fs.dirname(file_path)
 	local rel_file_path = utils.get_rel_path(abs_file_path, proj_path)
 
-	return { file_name, abs_file_path, rel_file_path, proj_path }
+	return file_name, abs_file_path, rel_file_path, proj_path
 end
 
 ---Get the content of a buffer or a file.
@@ -210,6 +208,20 @@ function utils.get_file_content(bufnr_or_file_path, start_row, end_row, start_co
 	return range_content
 end
 
+--------------------
+-- Neovim Function
+--------------------
+
+---Get the latest visual selection.
+---@return number start_row, number start_col, number end_row, number end_col The positions of the latest visual selection.
+function utils.get_latest_visual_selection()
+	-- FIXME: The first call will return { 0, 0 } for both marks
+	local start_row, start_col = unpack(vim.api.nvim_buf_get_mark(0, "<"))
+	local end_row, end_col = unpack(vim.api.nvim_buf_get_mark(0, ">"))
+
+	return start_row, start_col, end_row, end_col
+end
+
 ---Execute a function with an existing or temporary buffer and automatically clean up if necessary.
 ---@param file_path string File path to check or read into a temporary buffer.
 ---@param callback function Function to execute with the buffer. Receives buffer number as the first argument.
@@ -242,6 +254,49 @@ function utils.with_temp_bufnr(file_path, callback, ...)
 	return unpack(result)
 end
 
+---Add virtual text in the given buffer in the given namespace.
+---@param bufnr integer Buffer number.
+---@param namespace number Namespace.
+---@param line_num integer Line number.
+---@param text string|string[] Text to be added as virtual text.
+---@param text_type? string Type of the virtual text. Default: `"Comment"`.
+---@return nil
+function utils.add_virtual_text(bufnr, namespace, line_num, text, text_type)
+	if type(text) == "string" then
+		text = { text }
+	end
+
+	local indent = utils.get_indent(bufnr, line_num)
+
+	local virt_text = {}
+	for _, t in ipairs(text) do
+		table.insert(virt_text, { indent .. t, text_type or "Comment" })
+	end
+
+	vim.api.nvim_buf_set_extmark(bufnr, namespace, line_num - 1, -1, {
+		-- TODO: use argument for virt_text_pos
+		virt_text_pos = "overlay",
+		virt_lines = {
+			virt_text,
+		},
+		hl_mode = "combine",
+	})
+end
+
+---Clear virtual text in the given buffer in the given namespace.
+---@param bufnr integer Buffer number.
+---@param namespace number Namespace.
+---@param start_row? integer Start of range of lines to clear. Default: `0`.
+---@param end_row? integer End of range of lines to clear (exclusive) or -1 to clear to end of buffer. Default: `-1`.
+---@return nil
+function utils.clear_virtual_text(bufnr, namespace, start_row, end_row)
+	vim.api.nvim_buf_clear_namespace(bufnr, namespace, start_row or 0, end_row or -1)
+end
+
+--------------------
+-- Other Function
+--------------------
+
 ---Remove fields that are not string, number, or boolean in a table.
 ---@param tbl table The table to process.
 ---@return table processed_tbl The processed table with removed fields.
@@ -257,57 +312,7 @@ function utils.remove_table_fields(tbl)
 	return processed_tbl
 end
 
----Limit the length of a string or a list of strings.
----@param str_or_list string|string[] String or list of strings to be limited.
----@param limitation integer Maximum length of each string.
----@return string[] limited_list The limited list of strings.
-function utils.limit_string_length(str_or_list, limitation)
-	local str
-	if type(str_or_list) == "table" then
-		str = table.concat(str_or_list, " ") -- TODO: chinese?
-	elseif type(str_or_list) == "string" then
-		str = str_or_list
-	else
-		return {}
-	end
-
-	local result = {}
-	local start_index = 1
-	local str_length = string.len(str)
-
-	while start_index <= str_length do
-		local end_index = start_index + limitation - 1
-		if end_index > str_length then
-			end_index = str_length
-		end
-
-		local substring = string.sub(str, start_index, end_index)
-		table.insert(result, substring)
-
-		start_index = end_index + 1
-	end
-
-	return result
-end
-
----TODO:
----Get the latest visual selection.
----@return table selection { start_row, start_col, end_row, end_col }
-function utils.get_latest_visual_selection()
-	-- FIXME: The first call will return { 0, 0 } for both marks
-	local start_row = vim.api.nvim_buf_get_mark(0, "<")[1]
-	local start_col = vim.api.nvim_buf_get_mark(0, "<")[2]
-	local end_row = vim.api.nvim_buf_get_mark(0, ">")[1]
-	local end_col = vim.api.nvim_buf_get_mark(0, ">")[2]
-
-	return {
-		start_row = start_row,
-		start_col = start_col,
-		end_row = end_row,
-		end_col = end_col,
-	}
-end
-
+---@deprecated
 ---Create a closure.
 ---@param func function Function to be wrapped.
 ---@param ... any Arguments to be passed to the function.
@@ -319,19 +324,27 @@ function utils.create_closure(func, ...)
 	end
 end
 
---------------------
--- Deprecated functions
---------------------
+---Process items in parallel using multiple coroutines.
+---@param iterator table The table or list to iterate over.
+---@param thread_num integer The number of coroutines to use for parallel processing. Default: `3`.
+---@param func function The function to apply to each item in the iterator.
+---It should accept two parameters:
+---  key: The key of the current item in the iterator.
+---  value: The value of the current item in the iterator.
+---It should return a value to be stored in the results table,
+---or nil if no result should be stored for this item.
+---@return table results A table containing the results of processing each item.
+---The keys in this table correspond to the keys in the input iterator.
+function utils.pfor(iterator, thread_num, func)
+	thread_num = thread_num or 3
 
-local function parallel_process(data, thread_count, process_func)
 	local results = {}
-
 	local function worker(start_index)
 		local index = 0
-		for key, value in pairs(data) do
+		for key, value in pairs(iterator) do
 			index = index + 1
-			if index % thread_count == start_index - 1 then
-				local result = process_func(key, value)
+			if index % thread_num == start_index - 1 then
+				local result = func(key, value)
 				if result ~= nil then
 					results[key] = result
 				end
@@ -340,7 +353,7 @@ local function parallel_process(data, thread_count, process_func)
 	end
 
 	local threads = {}
-	for i = 1, thread_count do
+	for i = 1, thread_num do
 		threads[i] = coroutine.create(function()
 			worker(i)
 		end)

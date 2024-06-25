@@ -90,7 +90,7 @@ function BaseNode:get_abs_path()
 		return self._cache.abs_file_path
 	end
 
-	local abs_file_path = utils.get_abs_path(self._rel_file_dir, utils.get_file_info()[4]) .. "/" .. self._file_name
+	local abs_file_path = utils.get_abs_path(self._rel_file_dir, {utils.get_file_info()}[4]) .. "/" .. self._file_name
 
 	self._cache.abs_file_path = abs_file_path
 	return abs_file_path

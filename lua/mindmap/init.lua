@@ -30,7 +30,7 @@ function user_func.MindmapAdd(location, node_type)
 
 		-- Add node --
 		if not id then
-			local file_name, _, rel_file_path, _ = unpack(utils.get_file_info())
+			local file_name, _, rel_file_path, _ = utils.get_file_info()
 			local created_heading_node =
 				-- TODO: how to use ...?
 				found_graph.node_factory:create(node_type, #found_graph.nodes + 1, file_name, rel_file_path)
@@ -79,15 +79,15 @@ function user_func.MindmapAddVisualSelectionAsExcerptNode()
 
 	-- Add node --
 
-	local visual_selection_range = unpack(utils.get_latest_visual_selection())
-	local file_name, _, rel_file_path, _ = unpack(utils.get_file_info())
-	local created_excerpt_node = found_graph.node_factory:create(
-		"ExcerptNode",
-		#found_graph.nodes + 1,
-		file_name,
-		rel_file_path,
-		visual_selection_range
-	)
+	local start_row, start_col, end_row, end_col = utils.get_visual_selection_range()
+	local file_name, _, rel_file_path, _ = utils.get_file_info()
+	local created_excerpt_node =
+		found_graph.node_factory:create("ExcerptNode", #found_graph.nodes + 1, file_name, rel_file_path, {
+			start_row = start_row,
+			start_col = start_col,
+			end_row = end_row,
+			end_col = end_col,
+		})
 	found_graph:add_node(created_excerpt_node)
 
 	-- Transaction --

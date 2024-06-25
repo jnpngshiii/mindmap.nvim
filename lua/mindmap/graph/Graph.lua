@@ -59,7 +59,7 @@ local graph_version = 6
 function Graph:new(save_dir, node_factory, edge_factory, alg, logger, undo_redo_limit, version)
 	local graph = {
 		-- Basic:
-		save_dir = save_dir or utils.get_file_info()[4],
+		save_dir = save_dir or {utils.get_file_info()}[4],
 		--   Node:
 		node_factory = node_factory,
 		nodes = {},
