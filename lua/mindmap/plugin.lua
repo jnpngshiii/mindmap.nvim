@@ -316,12 +316,13 @@ function plugin.find_heading_nodes(graph, location)
 	end
 
 	if location == "buffer" then
-		local found_ts_nodes = ts_utils.get_heading_node_in_buf()
-
 		local found_nodes = {}
-		for id, _ in pairs(found_ts_nodes or {}) do
-			if graph.nodes[id]._state == "active" then
-				found_nodes[id] = graph.nodes[id]
+
+		local found_ts_nodes = ts_utils.get_heading_nodes()
+		for id, ts_node in pairs(found_ts_nodes) do
+			local ok, node = pcall(plugin.find_heading_nodes, graph, ts_node)
+			if ok and node then
+				found_nodes[id] = node
 			end
 		end
 

@@ -22,7 +22,7 @@ function ts_utils.get_root_node(bufnr)
 end
 
 ---Get all heading nodes matched the given id in the given buffer.
----@param id integer The id of the heading node. Default: `%d%d%d%d%d%d%d%d`.
+---@param id? string The id of the heading node. Default: `%d%d%d%d%d%d%d%d`.
 ---@param bufnr? integer The buffer number. Default: `0`.
 ---@return table<NodeID, TSNode> heading_nodes The table of heading nodes indexed by their IDs.
 function ts_utils.get_heading_nodes(id, bufnr)
@@ -48,12 +48,22 @@ function ts_utils.get_heading_nodes(id, bufnr)
 
 	for _, heading_node in parsed_query:iter_captures(root_node, 0) do
 		local title_node, _, _ = ts_utils.parse_heading_node(heading_node)
+		if not title_node then
+			goto continue
+		end
+
 		local title_node_text = vim.treesitter.get_node_text(title_node, bufnr)
+		if not title_node_text then
+			goto continue
+		end
+
 		-- Just handle the first match.
 		local heading_node_id = tonumber(string.match(title_node_text, "%%" .. id .. "%%"))
 		if heading_node_id then
 			heading_nodes[heading_node_id] = heading_node
 		end
+
+		::continue::
 	end
 
 	return heading_nodes
