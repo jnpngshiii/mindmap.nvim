@@ -20,7 +20,7 @@ function EdgeFactory:to_table(edge)
 		_to = edge._to,
 		--
 		_data = edge._data,
-		_cache = edge._cache,
+		-- _cache = edge._cache,
 		_created_at = edge._created_at,
 		_updated_at = edge._updated_at,
 		_due_at = edge._due_at,
@@ -55,7 +55,7 @@ function EdgeFactory:from_table(registered_type, tbl)
 		tbl._to,
 		--
 		tbl._data,
-		tbl._cache,
+		{}, -- tbl._cache,
 		tbl._created_at,
 		tbl._updated_at,
 		tbl._due_at,
