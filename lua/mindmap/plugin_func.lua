@@ -145,15 +145,15 @@ function plugin_func.find_heading_nodes(graph, location, force_add, id_regex)
 		local latest_node = graph.nodes[#graph.nodes]
 		return (latest_node and latest_node._state == "active") and { [latest_node._id] = latest_node } or {}
 	elseif location == "nearest" then
-		local nearest_ts_node = nts_utils.get_node_at_cursor()
-		while nearest_ts_node and not nearest_ts_node:type():match("^heading%d$") do
-			nearest_ts_node = nearest_ts_node:parent()
+		local ts_node = nts_utils.get_node_at_cursor()
+		while ts_node and not ts_node:type():match("^heading%d$") do
+			ts_node = ts_node:parent()
 		end
-		if not nearest_ts_node then
-			graph.logger:error("[Func]", "Cannot find the nearest heading treesitter node.")
+		if not ts_node then
+			graph.logger:error("[Func]", "Cannot find the treesitter node of the nearest heading.")
 			return {}
 		end
-		local node = process_node(nearest_ts_node)
+		local node = process_node(ts_node)
 		return node and { [node._id] = node } or {}
 	elseif location == "telescope" then
 		-- TODO: Implement telescope functionality
