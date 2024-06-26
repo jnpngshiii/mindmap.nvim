@@ -201,13 +201,20 @@ function plugin.find_heading_nodes(graph, location)
 
 			id = #graph.nodes + 1
 			local file_name, _, rel_file_path, _ = utils.get_file_info()
-			graph:add_node("HeadingNode", id, file_name, rel_file_path, {}, { ts_node = location })
+			local ok, node = graph:add_node("HeadingNode", id, file_name, rel_file_path, {}, { ts_node = location })
+			if not ok then
+				vim.notify("[Func] Automatically adding node failed. Abort finding.", vim.log.levels.ERROR)
+				return {}
+			end
+		else
+			local node = graph.nodes[id]
 		end
-		if graph.nodes[id]._state ~= "active" then
+
+		if node._state ~= "active" then
 			return {}
 		end
 
-		return { [id] = graph.nodes[id] }
+		return { [node._id] = node }
 	end
 
 	if location == "latest" then

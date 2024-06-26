@@ -169,7 +169,7 @@ end
 ---If a transaction is active, the operation and its inverse will be recorded automatically.
 ---@param node_or_node_type string|BaseNode Node or type of the node to be added.
 ---@param ... any Additional information to create the node.
----@return boolean is_added Whether the node is added successfully.
+---@return boolean is_added, BaseNode? node Whether the node is added successfully, and the added node.
 function Graph:add_node(node_or_node_type, ...)
 	local node
 	if type(node_or_node_type) == "table" then
@@ -178,7 +178,7 @@ function Graph:add_node(node_or_node_type, ...)
 		node = self.node_factory:create(node_or_node_type, ...)
 		if not node then
 			self.logger:warn("Node", "Add node failed. Can not create `" .. node_or_node_type .. "`.")
-			return false
+			return false, nil
 		end
 	else
 		self.logger:error(
@@ -187,7 +187,7 @@ function Graph:add_node(node_or_node_type, ...)
 				.. type(node_or_node_type)
 				.. "`."
 		)
-		return false
+		return false, nil
 	end
 
 	-- Operation --
@@ -228,7 +228,7 @@ function Graph:add_node(node_or_node_type, ...)
 	-- Others --
 
 	self.logger:info("Node", "Add `" .. node._type .. "` `" .. node._id .. "` to graph.")
-	return true
+	return true, node
 end
 
 ---Add an edge to the graph.
@@ -236,7 +236,7 @@ end
 ---If a transaction is active, the operation and its inverse will be recorded automatically.
 ---@param edge_or_edge_type string|BaseEdge Edge or type of the edge to be added.
 ---@param ... any Additional information to create the edge.
----@return boolean is_added Whether the edge is added successfully.
+---@return boolean is_added, BaseEdge? edge Whether the edge is added successfully, and the added edge.
 function Graph:add_edge(edge_or_edge_type, ...)
 	local edge
 	if type(edge_or_edge_type) == "table" then
@@ -245,7 +245,7 @@ function Graph:add_edge(edge_or_edge_type, ...)
 		edge = self.edge_factory:create(edge_or_edge_type, ...)
 		if not edge then
 			self.logger:warn("Edge", "Add edge failed. Can not create `" .. edge_or_edge_type .. "`.")
-			return false
+			return false, nil
 		end
 	else
 		self.logger:error(
@@ -254,7 +254,7 @@ function Graph:add_edge(edge_or_edge_type, ...)
 				.. type(edge_or_edge_type)
 				.. "`."
 		)
-		return false
+		return false, nil
 	end
 
 	-- Operation --
@@ -295,7 +295,7 @@ function Graph:add_edge(edge_or_edge_type, ...)
 	-- Others --
 
 	self.logger:info("Edge", "Add `" .. edge._type .. "` `" .. edge._id .. "` to graph.")
-	return true
+	return true, edge
 end
 
 -----
