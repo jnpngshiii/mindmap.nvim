@@ -14,23 +14,23 @@ setmetatable(EdgeFactory, BaseFactory)
 ---@return table edge_table The converted table.
 function EdgeFactory:to_table(edge)
 	return {
-		id = edge.id,
-		from_node_id = edge.from_node_id,
-		to_node_id = edge.to_node_id,
+		_type = edge._type,
+		_id = edge._id,
+		_from = edge._from,
+		_to = edge._to,
 		--
-		data = edge.data,
-		type = edge.type,
-		tag = edge.tag,
-		state = edge.state,
-		version = edge.version,
-		created_at = edge.created_at,
-		updated_at = edge.updated_at,
-		due_at = edge.due_at,
-		ease = edge.ease,
-		interval = edge.interval,
-		answer_count = edge.answer_count,
-		ease_count = edge.ease_count,
-		again_count = edge.again_count,
+		_data = edge._data,
+		_cache = edge._cache,
+		_created_at = edge._created_at,
+		_updated_at = edge._updated_at,
+		_due_at = edge._due_at,
+		_ease = edge._ease,
+		_interval = edge._interval,
+		_answer_count = edge._answer_count,
+		_ease_count = edge._ease_count,
+		_again_count = edge._again_count,
+		_state = edge._state,
+		_version = edge._version,
 	}
 end
 
@@ -49,23 +49,23 @@ function EdgeFactory:from_table(registered_type, tbl)
 	end
 
 	return registered_cls:new(
-		tbl.id,
-		tbl.from_node_id,
-		tbl.to_node_id,
+		tbl._type,
+		tbl._id,
+		tbl._from,
+		tbl._to,
 		--
-		tbl.data,
-		tbl.type,
-		tbl.tag,
-		tbl.state,
-		tbl.version,
-		tbl.created_at,
-		tbl.updated_at,
-		tbl.due_at,
-		tbl.ease,
-		tbl.interval,
-		tbl.answer_count,
-		tbl.ease_count,
-		tbl.again_count
+		tbl._data,
+		tbl._cache,
+		tbl._created_at,
+		tbl._updated_at,
+		tbl._due_at,
+		tbl._ease,
+		tbl._interval,
+		tbl._answer_count,
+		tbl._ease_count,
+		tbl._again_count,
+		tbl._state,
+		tbl._version
 	)
 end
 

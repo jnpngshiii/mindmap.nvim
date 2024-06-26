@@ -1,29 +1,9 @@
--- Factory:
 local NodeFactory = require("mindmap.factory.NodeFactory")
 local EdgeFactory = require("mindmap.factory.EdgeFactory")
 local AlgFactory = require("mindmap.factory.AlgFactory")
--- Node:
 local BaseNode = require("mindmap.node.BaseNode")
--- local SimpleNode = require("mindmap.node.SimpleNode")
--- local HeadingNode = require("mindmap.node.HeadingNode")
--- local ExcerptNode = require("mindmap.node.ExcerptNode")
--- Edge:
 local BaseEdge = require("mindmap.edge.BaseEdge")
--- local SimpleEdge = require("mindmap.edge.SimpleEdge")
--- local SelfLoopContentEdge = require("mindmap.edge.SelfLoopContentEdge")
--- local SelfLoopSubheadingEdge = require("mindmap.edge.SelfLoopSubheadingEdge")
--- Alg:
 local BaseAlg = require("mindmap.alg.BaseAlg")
--- local AnkiAlg = require("mindmap.alg.AnkiAlg")
--- local SimpleAlg = require("mindmap.alg.SimpleAlg")
--- local SM2Alg = require("mindmap.alg.SM2Alg")
--- Logger:
--- local Logger = require("mindmap.graph.Logger")
--- Graph:
--- local Graph = require("mindmap.graph.Graph")
--- Utils:
--- local utils = require("mindmap.utils")
--- local ts_utils = require("mindmap.ts_utils")
 
 local plugin_data = {}
 

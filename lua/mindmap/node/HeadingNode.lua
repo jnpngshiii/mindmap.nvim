@@ -24,7 +24,7 @@ function HeadingNode:get_ts_node(bufnr)
 		return self._cache.ts_node
 	end
 
-	local heading_node = ts_utils.get_heading_nodes(self._id, bufnr)[self._id]
+	local heading_node = ts_utils.get_heading_nodes(string.format("%08d", self._id), bufnr)[self._id]
 	if not heading_node then
 		vim.notify(
 			"[HeadingNode] Cannot find the treesitter node with id: `" .. self._id .. "`. Aborting retrieval.",
