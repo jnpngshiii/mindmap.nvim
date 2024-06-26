@@ -68,7 +68,7 @@ function HeadingNode:get_content(edge_type)
 		return front, back
 	end
 
-	---@diagnostic disable-next-line: return-type-mismatch
+	---@diagnostic disable-next-line: return-type-mismatch, missing-return-value
 	return utils.with_temp_bufnr(self:get_abs_path(), _f)
 end
 

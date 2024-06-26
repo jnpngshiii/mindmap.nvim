@@ -193,6 +193,7 @@ function plugin.find_heading_nodes(graph, location)
 
 		local title_ts_node_text = vim.treesitter.get_node_text(title_ts_node, 0)
 		local id = tonumber(string.match(title_ts_node_text, "%d%d%d%d%d%d%d%d"))
+		local node
 		if not id then
 			vim.notify(
 				"[Func] Cannot find the ID of the given node. Automatically add it to the graph.",
@@ -201,13 +202,14 @@ function plugin.find_heading_nodes(graph, location)
 
 			id = #graph.nodes + 1
 			local file_name, _, rel_file_path, _ = utils.get_file_info()
-			local ok, node = graph:add_node("HeadingNode", id, file_name, rel_file_path, {}, { ts_node = location })
-			if not ok then
+			local ok
+			ok, node = graph:add_node("HeadingNode", id, file_name, rel_file_path, {}, { ts_node = location })
+			if not ok or not node then
 				vim.notify("[Func] Automatically adding node failed. Abort finding.", vim.log.levels.ERROR)
 				return {}
 			end
 		else
-			local node = graph.nodes[id]
+			node = graph.nodes[id]
 		end
 
 		if node._state ~= "active" then
@@ -231,38 +233,57 @@ function plugin.find_heading_nodes(graph, location)
 		while nearest_ts_node and not nearest_ts_node:type():match("^heading%d$") do
 			nearest_ts_node = nearest_ts_node:parent()
 		end
-
 		if not nearest_ts_node then
-			return {}, {}
+			vim.notify("[Func] Cannot find the nearest heading treesitter node. Abort finding.", vim.log.levels.ERROR)
+			return {}
 		end
 
 		local title_ts_node, _, _ = ts_utils.parse_heading_node(nearest_ts_node)
+		if not title_ts_node then
+			vim.notify(
+				"[Func] Cannot find the title treesitter node of the given treesitter node. Abort finding.",
+				vim.log.levels.ERROR
+			)
+			return {}
+		end
+
 		local title_ts_node_text = vim.treesitter.get_node_text(title_ts_node, 0)
-		local nearest_node_id = tonumber(string.match(title_ts_node_text, "%d%d%d%d%d%d%d%d"))
+		local id = tonumber(string.match(title_ts_node_text, "%d%d%d%d%d%d%d%d"))
+		local node
+		if not id then
+			vim.notify(
+				"[Func] Cannot find the ID of the given node. Automatically add it to the graph.",
+				vim.log.levels.WARN
+			)
 
-		local nearest_node
-		if nearest_node_id then
-			nearest_node = graph.nodes[nearest_node_id]
+			id = #graph.nodes + 1
+			local file_name, _, rel_file_path, _ = utils.get_file_info()
+			local ok
+			ok, node = graph:add_node("HeadingNode", id, file_name, rel_file_path, {}, { ts_node = location })
+			if not ok or not node then
+				vim.notify("[Func] Automatically adding node failed. Abort finding.", vim.log.levels.ERROR)
+				return {}
+			end
 		else
-			-- TODO: auto add node if not exist
+			node = graph.nodes[id]
 		end
 
-		if nearest_node and nearest_node.state == "active" then
-			return { [nearest_node.id] = nearest_node }, { [nearest_node.id] = nearest_ts_node }
-		else
-			return {}, {}
+		if node._state ~= "active" then
+			return {}
 		end
+
+		return { [node._id] = node }
 	end
 
 	if location == "telescope" then
 		local nodes = {}
 		for _, node in pairs(graph.nodes) do
-			if node.state == "active" then
+			if node._state == "active" then
 				table.insert(nodes, {
-					node.id,
-					node.type,
+					node._id,
+					node._type,
 					node:get_abs_path(),
-					node:get_content()[1],
+					unpack({ node:get_content() })[1],
 				})
 			end
 		end
@@ -299,15 +320,15 @@ function plugin.find_heading_nodes(graph, location)
 
 		local found_nodes = {}
 		for id, _ in pairs(found_ts_nodes or {}) do
-			if graph.nodes[id].state == "active" then
+			if graph.nodes[id]._state == "active" then
 				found_nodes[id] = graph.nodes[id]
 			end
 		end
 
-		return found_nodes, found_ts_nodes
+		return found_nodes
 	end
 
-	return {}, {}
+	return {}
 end
 
 --------------------

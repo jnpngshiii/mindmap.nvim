@@ -100,7 +100,7 @@ end
 
 ---@abstract
 ---Get the content of the node.
----@param edge_type EdgeType Type of the edge.
+---@param edge_type? EdgeType Type of the edge.
 ---@return string[] front, string[] back Content of the node.
 ---@diagnostic disable-next-line: unused-local
 function BaseNode:get_content(edge_type)
