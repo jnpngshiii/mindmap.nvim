@@ -162,166 +162,83 @@ end
 ---Find `HeadingNode`s in the given location.
 ---@param graph Graph The graph to search in.
 ---@param location string|TSNode Location to find nodes. Location must be TSNode, "latest", "nearest", "telescope" or "buffer".
+---@param force_add? boolean Whether to force add the node if the ID is not found. Default: `false`.
+---@param id_regex? string Regex pattern to match the ID of the node. Default: `"%d%d%d%d%d%d%d%d"`.
 ---@return table<NodeID, BaseNode> found_nodes The found nodes.
-function plugin.find_heading_nodes(graph, location)
-	if
-		type(location) ~= "userdata"
-		and location ~= "latest"
-		and location ~= "nearest"
-		and location ~= "telescope"
-		and location ~= "buffer"
-	then
-		vim.notify(
+function plugin.find_heading_nodes(graph, location, force_add, id_regex)
+	local valid_locations = { latest = true, nearest = true, telescope = true, buffer = true }
+	if type(location) ~= "userdata" and not valid_locations[location] then
+		graph.logger:error(
+			"[Func]",
 			string.format(
-				"[Func] Invalid location `%s`. Location must be TSNode, `latest`, `nearest`, `telescope` or `buffer`",
+				"Invalid location `%s`. Must be TSNode, `latest`, `nearest`, `telescope` or `buffer`",
 				location
-			),
-			vim.log.levels.ERROR
+			)
 		)
 		return {}
 	end
+	id_regex = id_regex or "%d%d%d%d%d%d%d%d"
+	force_add = force_add and (id_regex == "%d%d%d%d%d%d%d%d")
 
-	if type(location) == "userdata" then
-		local title_ts_node, _, _ = ts_utils.parse_heading_node(location)
+	-- Helper function to process a single node
+	local function process_node(ts_node)
+		local title_ts_node, _, _ = ts_utils.parse_heading_node(ts_node)
 		if not title_ts_node then
-			vim.notify(
-				"[Func] Cannot find the title treesitter node of the given treesitter node. Abort finding.",
-				vim.log.levels.ERROR
-			)
-			return {}
+			graph.logger:debug("[Func]", "Cannot find the title treesitter node. Skipping.")
+			return nil
 		end
 
-		local title_ts_node_text = vim.treesitter.get_node_text(title_ts_node, 0)
-		local id = tonumber(string.match(title_ts_node_text, "%d%d%d%d%d%d%d%d"))
-		local node
+		local title_text = vim.treesitter.get_node_text(title_ts_node, 0)
+		local id = tonumber(string.match(title_text, id_regex))
+
 		if not id then
-			vim.notify(
-				"[Func] Cannot find the ID of the given node. Automatically add it to the graph.",
-				vim.log.levels.WARN
-			)
+			if not force_add then
+				graph.logger:debug("[Func]", "Cannot find the node ID. Skipping.")
+				return nil
+			end
 
 			id = #graph.nodes + 1
-			local file_name, _, rel_file_path, _ = utils.get_file_info()
-			local ok
-			ok, node = graph:add_node("HeadingNode", id, file_name, rel_file_path, {}, { ts_node = location })
+			local file_name, _, rel_file_path = utils.get_file_info()
+			local ok, node = graph:add_node("HeadingNode", id, file_name, rel_file_path, {}, { ts_node = ts_node })
 			if not ok or not node then
-				vim.notify("[Func] Automatically adding node failed. Abort finding.", vim.log.levels.ERROR)
-				return {}
+				graph.logger:error("[Func]", "Cannot force add a new node. Skipping.")
+				return nil
 			end
-		else
-			node = graph.nodes[id]
+
+			return node
 		end
 
-		if node._state ~= "active" then
-			return {}
-		end
-
-		return { [node._id] = node }
+		local node = graph.nodes[id]
+		return (node and node._state == "active") and node or nil
 	end
 
-	if location == "latest" then
+	-- Handle different location types
+	if type(location) == "userdata" then
+		local node = process_node(location)
+		return node and { [node._id] = node } or {}
+	elseif location == "latest" then
 		local latest_node = graph.nodes[#graph.nodes]
-		if not latest_node._state ~= "active" then
-			return {}
-		end
-
-		return latest_node
-	end
-
-	if location == "nearest" then
+		return (latest_node and latest_node._state == "active") and { [latest_node._id] = latest_node } or {}
+	elseif location == "nearest" then
 		local nearest_ts_node = nts_utils.get_node_at_cursor()
 		while nearest_ts_node and not nearest_ts_node:type():match("^heading%d$") do
 			nearest_ts_node = nearest_ts_node:parent()
 		end
 		if not nearest_ts_node then
-			vim.notify("[Func] Cannot find the nearest heading treesitter node. Abort finding.", vim.log.levels.ERROR)
+			graph.logger:error("[Func]", "Cannot find the nearest heading treesitter node.")
 			return {}
 		end
-
-		local title_ts_node, _, _ = ts_utils.parse_heading_node(nearest_ts_node)
-		if not title_ts_node then
-			vim.notify(
-				"[Func] Cannot find the title treesitter node of the given treesitter node. Abort finding.",
-				vim.log.levels.ERROR
-			)
-			return {}
-		end
-
-		local title_ts_node_text = vim.treesitter.get_node_text(title_ts_node, 0)
-		local id = tonumber(string.match(title_ts_node_text, "%d%d%d%d%d%d%d%d"))
-		local node
-		if not id then
-			vim.notify(
-				"[Func] Cannot find the ID of the given node. Automatically add it to the graph.",
-				vim.log.levels.WARN
-			)
-
-			id = #graph.nodes + 1
-			local file_name, _, rel_file_path, _ = utils.get_file_info()
-			local ok
-			ok, node = graph:add_node("HeadingNode", id, file_name, rel_file_path, {}, { ts_node = location })
-			if not ok or not node then
-				vim.notify("[Func] Automatically adding node failed. Abort finding.", vim.log.levels.ERROR)
-				return {}
-			end
-		else
-			node = graph.nodes[id]
-		end
-
-		if node._state ~= "active" then
-			return {}
-		end
-
-		return { [node._id] = node }
-	end
-
-	if location == "telescope" then
-		local nodes = {}
-		for _, node in pairs(graph.nodes) do
-			if node._state == "active" then
-				table.insert(nodes, {
-					node._id,
-					node._type,
-					node:get_abs_path(),
-					unpack({ node:get_content() })[1],
-				})
-			end
-		end
-
-		pickers
-			.new({}, {
-				prompt_title = "Select a node",
-				finder = finders.new_table({
-					results = nodes,
-					entry_maker = function(entry)
-						return {
-							value = entry,
-							display = string.format(
-								"ID: %s | Type: %s | Path: %s | Content: %s",
-								entry[1],
-								entry[2],
-								entry[3],
-								entry[4]
-							),
-							ordinal = entry[1],
-							path = entry[3],
-							lnum = entry[1],
-						}
-					end,
-				}),
-			})
-			:find()
-
+		local node = process_node(nearest_ts_node)
+		return node and { [node._id] = node } or {}
+	elseif location == "telescope" then
 		-- TODO: Implement telescope functionality
-	end
-
-	if location == "buffer" then
+		graph.logger:warn("[Func]", "Telescope functionality not yet implemented.")
+		return {}
+	elseif location == "buffer" then
 		local found_nodes = {}
-
-		local found_ts_nodes = ts_utils.get_heading_nodes()
-		for id, ts_node in pairs(found_ts_nodes) do
-			local ok, node = pcall(plugin.find_heading_nodes, graph, ts_node)
-			if ok and node then
+		for id, ts_node in pairs(ts_utils.get_heading_nodes()) do
+			local node = process_node(ts_node)
+			if node then
 				found_nodes[id] = node
 			end
 		end
