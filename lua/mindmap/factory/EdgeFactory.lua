@@ -9,6 +9,20 @@ local EdgeFactory = {}
 EdgeFactory.__index = EdgeFactory
 setmetatable(EdgeFactory, BaseFactory)
 
+---Create a new factory.
+---@param base_cls table Base class of the factory. Registered classes should inherit from this class.
+---@return EdgeFactory factory The created factory.
+function EdgeFactory:new(base_cls)
+	local factory = {
+		base_cls = base_cls,
+		registered_cls = {},
+	}
+	factory.__index = factory
+	setmetatable(factory, EdgeFactory)
+
+	return factory
+end
+
 ---Convert an edge to a table.
 ---@param edge BaseEdge The edge to be converted.
 ---@return table edge_table The converted table.

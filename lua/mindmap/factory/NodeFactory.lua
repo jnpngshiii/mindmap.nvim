@@ -9,6 +9,20 @@ local NodeFactory = {}
 NodeFactory.__index = NodeFactory
 setmetatable(NodeFactory, BaseFactory)
 
+---Create a new factory.
+---@param base_cls table Base class of the factory. Registered classes should inherit from this class.
+---@return NodeFactory factory The created factory.
+function NodeFactory:new(base_cls)
+	local factory = {
+		base_cls = base_cls,
+		registered_cls = {},
+	}
+	factory.__index = factory
+	setmetatable(factory, NodeFactory)
+
+	return factory
+end
+
 ---Convert a node to a table.
 ---@param node BaseNode The node to be converted.
 ---@return table node_table The converted table.
