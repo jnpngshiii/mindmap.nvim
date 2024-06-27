@@ -86,7 +86,7 @@ function BaseNode:new(
 		local issues = base_node:check_health()
 		if #issues > 0 then
 			vim.notify(
-				"[BaseNode] Health check failed:\n" .. table.concat(issues, "\n") .. "\nReturn nil.",
+				"[Node] Health check failed:\n" .. table.concat(issues, "\n") .. "\nReturn nil.",
 				vim.log.levels.WARN
 			)
 			return nil
@@ -160,7 +160,7 @@ end
 ---@return string[] front, string[] back Content of the node.
 ---@diagnostic disable-next-line: unused-local
 function BaseNode:get_content(edge_type)
-	vim.notify("[BaseNode] Method `get_content` is not implemented.")
+	vim.notify("[Node] Method `get_content` is not implemented.")
 	return {}, {}
 end
 
@@ -175,7 +175,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:before_add_into_graph(...)
-	-- vim.notify("[BaseNode] Method `before_add_into_graph` is not implemented.")
+	-- vim.notify("[Node] Method `before_add_into_graph` is not implemented.")
 end
 
 ---@abstract
@@ -184,7 +184,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:after_add_into_graph(...)
-	-- vim.notify("[BaseNode] Method `after_add_into_graph` is not implemented.")
+	-- vim.notify("[Node] Method `after_add_into_graph` is not implemented.")
 end
 
 ---@abstract
@@ -193,7 +193,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:before_remove_from_graph(...)
-	-- vim.notify("[BaseNode] Method `before_remove_from_graph` is not implemented.")
+	-- vim.notify("[Node] Method `before_remove_from_graph` is not implemented.")
 end
 
 ---@abstract
@@ -202,7 +202,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:after_remove_from_graph(...)
-	-- vim.notify("[BaseNode] Method `after_remove_from_graph` is not implemented.")
+	-- vim.notify("[Node] Method `after_remove_from_graph` is not implemented.")
 end
 
 --------------------
