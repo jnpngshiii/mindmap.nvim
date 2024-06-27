@@ -27,7 +27,7 @@
 local BaseEdge = {}
 BaseEdge.__index = BaseEdge
 
-local base_edge_version = 12
+local base_edge_version = 13
 -- v0: Initial version.
 -- v1: Add `tag` field.
 -- v2: Remove `id` field.
@@ -41,12 +41,14 @@ local base_edge_version = 12
 -- v10: Rename to `BaseEdge`.
 -- v11: Remove `tag` field.
 -- v12: Rename `field` to `_field`.
+-- v13: Add `check_health` method.
 
 ----------
 -- Basic Method
 ----------
 
 ---Create a new edge.
+---If the edge has `check_health` method, it will be called automatically.
 ---@param _type EdgeType Type of the edge.
 ---@param _id EdgeID ID of the edge.
 ---@param _from NodeID ID of the node where the edge starts.
@@ -64,7 +66,7 @@ local base_edge_version = 12
 ---@param _again_count integer Number of "again" answers for the edge.
 ---@param _state string State of the edge ("active", "removed", or "archived"). Default: `"active"`.
 ---@param _version integer Version of the edge.
----@return BaseEdge base_edge The created edge.
+---@return BaseEdge? base_edge The created edge, or nil if check health failed.
 function BaseEdge:new(
 	_type,
 	_id,
@@ -106,7 +108,94 @@ function BaseEdge:new(
 	base_edge.__index = base_edge
 	setmetatable(base_edge, BaseEdge)
 
+	if base_edge.check_health then
+		local issues = base_edge:check_health()
+		if #issues > 0 then
+			vim.notify(
+				"[BaseEdge] Health check failed:\n" .. table.concat(issues, "\n") .. "\nReturn nil.",
+				vim.log.levels.WARN
+			)
+			return nil
+		end
+	end
+
 	return base_edge
+end
+
+---Basic health check for edge.
+---Subclasses should override this method.
+---@return string[] issues List of issues. Empty if the edge is healthy.
+function BaseEdge:check_health()
+	local issues = {}
+
+	-- Check mandatory fields
+	if type(self._type) ~= "string" then
+		table.insert(issues, "Invalid `_type`: expected `string`, got `" .. type(self._type) .. "`;")
+	end
+	if type(self._id) ~= "number" then
+		table.insert(issues, "Invalid `_id`: expected `number`, got `" .. type(self._id) .. "`;")
+	end
+	if type(self._from) ~= "number" then
+		table.insert(issues, "Invalid `_from`: expected `number`, got `" .. type(self._from) .. "`;")
+	end
+	if type(self._to) ~= "number" then
+		table.insert(issues, "Invalid `_to`: expected `number`, got `" .. type(self._to) .. "`;")
+	end
+
+	-- Check optional fields
+	if type(self._data) ~= "table" then
+		table.insert(issues, "Invalid `_data`: expected `table` or `nil`, got `" .. type(self._data) .. "`;")
+	end
+	if type(self._cache) ~= "table" then
+		table.insert(issues, "Invalid `_cache`: expected `table` or `nil`, got `" .. type(self._cache) .. "`;")
+	end
+	if type(self._created_at) ~= "number" then
+		table.insert(
+			issues,
+			"Invalid `_created_at`: expected `number` or `nil`, got `" .. type(self._created_at) .. "`;"
+		)
+	end
+	if type(self._updated_at) ~= "number" then
+		table.insert(
+			issues,
+			"Invalid `_updated_at`: expected `number` or `nil`, got `" .. type(self._updated_at) .. "`;"
+		)
+	end
+	if type(self._due_at) ~= "number" then
+		table.insert(issues, "Invalid `_due_at`: expected `number` or `nil`, got `" .. type(self._due_at) .. "`;")
+	end
+	if type(self._ease) ~= "number" then
+		table.insert(issues, "Invalid `_ease`: expected `number` or `nil`, got `" .. type(self._ease) .. "`;")
+	end
+	if type(self._interval) ~= "number" then
+		table.insert(issues, "Invalid `_interval`: expected `number` or `nil`, got `" .. type(self._interval) .. "`;")
+	end
+	if type(self._answer_count) ~= "number" then
+		table.insert(
+			issues,
+			"Invalid `_answer_count`: expected `number` or `nil`, got `" .. type(self._answer_count) .. "`;"
+		)
+	end
+	if type(self._ease_count) ~= "number" then
+		table.insert(
+			issues,
+			"Invalid `_ease_count`: expected `number` or `nil`, got `" .. type(self._ease_count) .. "`;"
+		)
+	end
+	if type(self._again_count) ~= "number" then
+		table.insert(
+			issues,
+			"Invalid `_again_count`: expected `number` or `nil`, got `" .. type(self._again_count) .. "`;"
+		)
+	end
+	if type(self._state) ~= "string" then
+		table.insert(issues, "Invalid `_state`: expected `string` or `nil`, got `" .. type(self._state) .. "`;")
+	end
+	if type(self._version) ~= "number" then
+		table.insert(issues, "Invalid `_version`: expected `number` or `nil`, got `" .. type(self._version) .. "`;")
+	end
+
+	return issues
 end
 
 ----------
