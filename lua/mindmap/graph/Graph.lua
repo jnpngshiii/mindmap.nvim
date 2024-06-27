@@ -95,7 +95,7 @@ end
 ---@return nil
 function Graph:load()
 	local json_path = self.save_dir .. "/" .. ".mindmap.json"
-	local json, _ = io.open(json_path, "w")
+	local json, _ = io.open(json_path, "r")
 	if not json then
 		self.logger:error("Graph", "Load graph failed. Can not open file `" .. json_path .. "`.")
 		return
