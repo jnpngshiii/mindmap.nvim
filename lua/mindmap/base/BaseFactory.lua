@@ -32,21 +32,21 @@ function BaseFactory:register(type_to_be_registered, cls_to_be_registered, type_
 
 	if self.registered_cls[type_to_be_registered] then
 		vim.notify(
-			"[Factory] Type `" .. type_to_be_registered .. "` already registered. Aborting registration.",
+			"[Base] Type `" .. type_to_be_registered .. "` already registered. Aborting registration.",
 			vim.log.levels.WARN
 		)
 		return false
 	end
 	if not cls_to_be_inherited.new or type(cls_to_be_inherited.new) ~= "function" then
 		vim.notify(
-			"[Factory] Class to be inherited does not have a `new` method. Aborting registration.",
+			"[Base] Class to be inherited does not have a `new` method. Aborting registration.",
 			vim.log.levels.ERROR
 		)
 		return false
 	end
 	if not cls_to_be_registered.new or type(cls_to_be_registered.new) ~= "function" then
 		vim.notify(
-			"[Factory] Class to be registered `"
+			"[Base] Class to be registered `"
 				.. type_to_be_registered
 				.. "` does not have a `new` method. Binding default `new` method.",
 			vim.log.levels.WARN
@@ -77,7 +77,7 @@ function BaseFactory:get_registered_class(registered_type)
 	local registered_cls = self.registered_cls[registered_type]
 	if not registered_cls then
 		-- vim.notify(
-		-- "[Factory] Type `" .. registered_type .. "` is not registered. Aborting retrieval.",
+		-- "[Base] Type `" .. registered_type .. "` is not registered. Aborting retrieval.",
 		-- vim.log.levels.WARN
 		-- )
 		return
@@ -105,7 +105,7 @@ function BaseFactory:create(registered_type, ...)
 	local registered_cls = self:get_registered_class(registered_type)
 	if not registered_cls then
 		vim.notify(
-			"[Factory] Type `" .. registered_type .. "` is not registered. Aborting creation.",
+			"[Base] Type `" .. registered_type .. "` is not registered. Aborting creation.",
 			vim.log.levels.ERROR
 		)
 		return

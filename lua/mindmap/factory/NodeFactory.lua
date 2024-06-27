@@ -49,7 +49,7 @@ function NodeFactory:from_table(registered_type, tbl)
 	local registered_cls = self:get_registered_class(registered_type)
 	if not registered_cls then
 		vim.notify(
-			"[NodeFactory] Type `" .. registered_type .. "` is not registered. Aborting conversion.",
+			"[Factory] Type `" .. registered_type .. "` is not registered. Aborting conversion.",
 			vim.log.levels.ERROR
 		)
 		return

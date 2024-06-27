@@ -46,7 +46,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-local, unused-vararg
 function BaseAlg:answer_easy(edge, ...)
-	vim.notify("[Alg] Method `answer_easy` is not implemented.", vim.log.levels.ERROR)
+	vim.notify("[Base] Method `answer_easy` is not implemented.", vim.log.levels.ERROR)
 end
 
 ---@abstract
@@ -56,7 +56,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-local, unused-vararg
 function BaseAlg:answer_good(edge, ...)
-	vim.notify("[Alg] Method `answer_good` is not implemented.", vim.log.levels.ERROR)
+	vim.notify("[Base] Method `answer_good` is not implemented.", vim.log.levels.ERROR)
 end
 
 ---@abstract
@@ -66,7 +66,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-local, unused-vararg
 function BaseAlg:answer_again(edge, ...)
-	vim.notify("[Alg] Method `answer_again` is not implemented.", vim.log.levels.ERROR)
+	vim.notify("[Base] Method `answer_again` is not implemented.", vim.log.levels.ERROR)
 end
 
 ----------

@@ -183,12 +183,12 @@ function Graph:add_node(node_or_node_type, ...)
 	elseif type(node_or_node_type) == "string" then
 		node = self.node_factory:create(node_or_node_type, ...)
 		if not node then
-			self.logger:warn("Node", "Add node failed. Can not create `" .. node_or_node_type .. "`.")
+			self.logger:warn("Graph", "Add node failed. Can not create `" .. node_or_node_type .. "`.")
 			return false, nil
 		end
 	else
 		self.logger:error(
-			"Node",
+			"Graph",
 			"Add node failed. The type of node_or_node_type must be `string` or `table`, but got `"
 				.. type(node_or_node_type)
 				.. "`."
@@ -233,7 +233,7 @@ function Graph:add_node(node_or_node_type, ...)
 
 	-- Others --
 
-	self.logger:info("Node", "Add `" .. node._type .. "` `" .. node._id .. "` to graph.")
+	self.logger:info("Graph", "Add `" .. node._type .. "` `" .. node._id .. "` to graph.")
 	return true, node
 end
 
@@ -250,12 +250,12 @@ function Graph:add_edge(edge_or_edge_type, ...)
 	elseif type(edge_or_edge_type) == "string" then
 		edge = self.edge_factory:create(edge_or_edge_type, ...)
 		if not edge then
-			self.logger:warn("Edge", "Add edge failed. Can not create `" .. edge_or_edge_type .. "`.")
+			self.logger:warn("Graph", "Add edge failed. Can not create `" .. edge_or_edge_type .. "`.")
 			return false, nil
 		end
 	else
 		self.logger:error(
-			"Edge",
+			"Graph",
 			"Add edge failed. The type of edge_or_edge_type must be `string` or `table`, but got `"
 				.. type(edge_or_edge_type)
 				.. "`."
@@ -300,7 +300,7 @@ function Graph:add_edge(edge_or_edge_type, ...)
 
 	-- Others --
 
-	self.logger:info("Edge", "Add `" .. edge._type .. "` `" .. edge._id .. "` to graph.")
+	self.logger:info("Graph", "Add `" .. edge._type .. "` `" .. edge._id .. "` to graph.")
 	return true, edge
 end
 
@@ -391,7 +391,7 @@ end
 function Graph:remove_edge(edge_id)
 	local edge = self.edges[edge_id]
 	if not edge then
-		self.logger:warn("Edge", "Remove edge failed. Can not find edge `" .. edge_id .. "`.")
+		self.logger:warn("Graph", "Remove edge failed. Can not find edge `" .. edge_id .. "`.")
 		return false
 	end
 
@@ -431,7 +431,7 @@ function Graph:remove_edge(edge_id)
 
 	-- Others --
 
-	self.logger:info("Edge", "Remove `" .. edge._type .. "` `" .. edge._id .. "` from graph.")
+	self.logger:info("Graph", "Remove `" .. edge._type .. "` `" .. edge._id .. "` from graph.")
 	return true
 end
 
@@ -443,7 +443,7 @@ end
 function Graph:remove_node(node_id)
 	local node = self.nodes[node_id]
 	if not node then
-		self.logger:warn("Node", "Remove node failed. Can not find node `" .. node_id .. "`.")
+		self.logger:warn("Graph", "Remove node failed. Can not find node `" .. node_id .. "`.")
 		return false
 	end
 
@@ -483,7 +483,7 @@ function Graph:remove_node(node_id)
 
 	-- Others --
 
-	self.logger:info("Node", "Remove `" .. node._type .. "` `" .. node._id .. "` from graph.")
+	self.logger:info("Graph", "Remove `" .. node._type .. "` `" .. node._id .. "` from graph.")
 	return true
 end
 
@@ -667,12 +667,12 @@ function Graph:show_card(edge_id)
 	until choice == string.byte(" ") or choice == string.byte("s") or choice == string.byte("q")
 
 	if choice == string.byte("s") then
-		self.logger:info("SP", "Skip spaced repetition of the current card.")
+		self.logger:info("Graph", "Skip spaced repetition of the current card.")
 		status = "skip"
 		card_ui:unmount()
 		return status
 	elseif choice == string.byte("q") then
-		self.logger:info("SP", "Quit spaced repetition of the current deck.")
+		self.logger:info("Graph", "Quit spaced repetition of the current deck.")
 		status = "quit"
 		card_ui:unmount()
 		return status
@@ -698,22 +698,22 @@ function Graph:show_card(edge_id)
 		or choice == string.byte("q")
 
 	if choice == string.byte("1") or choice == string.byte("a") then
-		self.logger:debug("SP", "Answer again to edge `" .. edge_id .. "`.")
+		self.logger:debug("Graph", "Answer again to edge `" .. edge_id .. "`.")
 		self.alg:answer_again(edge)
 		status = "again"
 	elseif choice == string.byte(" ") or choice == string.byte("2") or choice == string.byte("g") then
-		self.logger:debug("SP", "Answer good to edge `" .. edge_id .. "`.")
+		self.logger:debug("Graph", "Answer good to edge `" .. edge_id .. "`.")
 		self.alg:answer_good(edge)
 		status = "good"
 	elseif choice == string.byte("3") or choice == string.byte("e") then
-		self.logger:debug("SP", "Answer easy to edge `" .. edge_id .. "`.")
+		self.logger:debug("Graph", "Answer easy to edge `" .. edge_id .. "`.")
 		self.alg:answer_easy(edge)
 		status = "easy"
 	elseif choice == string.byte("s") then
-		self.logger:info("SP", "Skip spaced repetition of the current card.")
+		self.logger:info("Graph", "Skip spaced repetition of the current card.")
 		status = "skip"
 	elseif choice == string.byte("q") then
-		self.logger:info("SP", "Quit spaced repetition of the current deck.")
+		self.logger:info("Graph", "Quit spaced repetition of the current deck.")
 		status = "quit"
 	end
 
