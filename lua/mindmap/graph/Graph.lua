@@ -101,8 +101,14 @@ function Graph:load()
 		return
 	end
 
-	local json_content = vim.fn.json_decode(json:read("*all"))
+	local json_content = json:read("*all")
 	json:close()
+
+	if json_content == "" then
+		self.logger:warn("Graph", "Load graph skipped. File `" .. json_path .. "` is empty.")
+		return
+	end
+	json_content = vim.fn.json_decode(json_content)
 
 	for node_id, node in pairs(json_content.nodes) do
 		self.nodes[node_id] = self.node_factory:from_table(node._type, node)
