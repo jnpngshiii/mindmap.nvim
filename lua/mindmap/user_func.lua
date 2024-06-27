@@ -1,5 +1,6 @@
 local nts_utils = require("nvim-treesitter.ts_utils")
 
+local plugin_data = require("mindmap.plugin_data")
 local plugin_func = require("mindmap.plugin_func")
 local utils = require("mindmap.utils")
 local ts_utils = require("mindmap.ts_utils")
@@ -493,7 +494,7 @@ function user_func.MindmapSave(save_type)
 		graph:save()
 		vim.notify("Saved graph for current buffer.", vim.log.levels.INFO)
 	elseif save_type == "all" then
-		for _, graph in pairs(plugin_func.cache.graphs) do
+		for _, graph in pairs(plugin_data.cache.graphs) do
 			graph:save()
 		end
 		vim.notify("Saved all graphs.", vim.log.levels.INFO)
