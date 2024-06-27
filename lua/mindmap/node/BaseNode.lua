@@ -23,7 +23,7 @@ local utils = require("mindmap.utils")
 local BaseNode = {}
 BaseNode.__index = BaseNode
 
-local base_node_version = 10
+local base_node_version = 11
 -- v0: Initial version.
 -- v1: Add `tag` field.
 -- v2: Remove `id` field.
@@ -35,12 +35,14 @@ local base_node_version = 10
 -- v8: Rename to `BaseNode`.
 -- v9: Remove `tag`, `incoming_edge_ids`, `outcoming_edge_ids` fields, and rename `rel_file_path` to `rel_file_dir`.
 -- v10: Rename `field` to `_field`.
+-- v11: Add `check_health` method.
 
 ----------
 -- Basic Method
 ----------
 
 ---Create a new node.
+---If the node has `check_health` method, it will be called automatically.
 ---Mandatory fields:
 ---@param _type NodeType Type of the node.
 ---@param _id NodeID ID of the node.
@@ -52,7 +54,7 @@ local base_node_version = 10
 ---@param _created_at? integer Creation time of the node in UNIX timestamp format.
 ---@param _state? string State of the node. Default is "active". Can be "active", "removed", or "archived".
 ---@param _version? integer Version of the node.
----@return BaseNode base_node The created node.
+---@return BaseNode? base_node The created node, or nil if check health failed.
 function BaseNode:new(
 	_type,
 	_id,
@@ -66,7 +68,7 @@ function BaseNode:new(
 	_version
 )
 	local base_node = {
-		_type = type,
+		_type = _type,
 		_id = _id,
 		_file_name = _file_name,
 		_rel_file_dir = _rel_file_dir,
@@ -80,7 +82,56 @@ function BaseNode:new(
 	base_node.__index = base_node
 	setmetatable(base_node, BaseNode)
 
+	local issues = base_node:check_health()
+	if #issues > 0 then
+		vim.notify(
+			"[BaseNode] Health check failed:\n" .. table.concat(issues, "\n") .. "\nReturn nil.",
+			vim.log.levels.ERROR
+		)
+		return nil
+	end
+
 	return base_node
+end
+
+---Basic health check for node.
+---Subclasses should override this method.
+---@return string[] issues List of issues. Empty if the node is healthy.
+function BaseNode:check_health()
+	local issues = {}
+
+	-- Check mandatory fields
+	if type(self._type) ~= "string" then
+		table.insert(issues, "Invalid `_type`: expected string, got " .. type(self._type) .. ";")
+	end
+	if type(self._id) ~= "number" then
+		table.insert(issues, "Invalid `_id`: expected number, got " .. type(self._id) .. ";")
+	end
+	if type(self._file_name) ~= "string" then
+		table.insert(issues, "Invalid `_file_name`: expected string, got " .. type(self._file_name) .. ";")
+	end
+	if type(self._rel_file_dir) ~= "string" then
+		table.insert(issues, "Invalid `_rel_file_dir`: expected string, got " .. type(self._rel_file_dir) .. ";")
+	end
+
+	-- Check optional fields
+	if type(self._data) ~= "table" then
+		table.insert(issues, "Invalid `_data`: expected table or nil, got " .. type(self._data) .. ";")
+	end
+	if type(self._cache) ~= "table" then
+		table.insert(issues, "Invalid `_cache`: expected table or nil, got " .. type(self._cache) .. ";")
+	end
+	if type(self._created_at) ~= "number" then
+		table.insert(issues, "Invalid `_created_at`: expected number or nil, got " .. type(self._created_at) .. ";")
+	end
+	if type(self._state) ~= "string" then
+		table.insert(issues, "Invalid `_state`: expected string or nil, got " .. type(self._state) .. ";")
+	end
+	if type(self._version) ~= "number" then
+		table.insert(issues, "Invalid `_version`: expected number or nil, got " .. type(self._version) .. ";")
+	end
+
+	return issues
 end
 
 ---Get the absolute path of the file where the node is from.
@@ -150,5 +201,7 @@ function BaseNode:after_remove_from_graph(...)
 end
 
 --------------------
+
+local a = BaseNode:new(type, type, "a", "a")
 
 return BaseNode
