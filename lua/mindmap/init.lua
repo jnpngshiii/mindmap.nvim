@@ -28,6 +28,7 @@ function M.setup(user_config)
 end
 
 function M.setup_default_keymaps()
+  vim.notify("[Mindmap] Default keymaps enabled.", vim.log.levels.INFO)
 	local keymap_prefix = plugin_data.config.keymap_prefix
 
 	-- MindmapAdd (Node)
@@ -144,6 +145,7 @@ function M.setup_default_keymaps()
 end
 
 function M.setup_shorten_keymaps()
+	vim.notify("[Mindmap] Shorten keymaps enabled.", vim.log.levels.INFO)
 	local shorten_prefix = plugin_data.config.shorten_keymap_prefix
 
 	-- Remap 'm' to 'M' for marks if 'm' is used as prefix
@@ -197,6 +199,8 @@ function M.setup_shorten_keymaps()
 end
 
 function M.setup_default_autocommands()
+	vim.notify("[Mindmap] Default autocommands enabled.", vim.log.levels.INFO)
+
 	vim.api.nvim_create_autocmd("VimLeave", {
 		callback = function()
 			user_func.MindmapSave("all")

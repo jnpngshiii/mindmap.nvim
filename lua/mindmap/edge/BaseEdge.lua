@@ -209,7 +209,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseEdge:before_add_into_graph(...)
-	vim.notify("[BaseEdge] Method `before_add_into_graph` is not implemented.")
+	-- vim.notify("[BaseEdge] Method `before_add_into_graph` is not implemented.")
 end
 
 ---@abstract
@@ -218,7 +218,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseEdge:after_add_into_graph(...)
-	vim.notify("[BaseEdge] Method `after_add_into_graph` is not implemented.")
+	-- vim.notify("[BaseEdge] Method `after_add_into_graph` is not implemented.")
 end
 
 ---@abstract
@@ -227,7 +227,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseEdge:before_remove_from_graph(...)
-	vim.notify("[BaseEdge] Method `before_remove_from_graph` is not implemented.")
+	-- vim.notify("[BaseEdge] Method `before_remove_from_graph` is not implemented.")
 end
 
 ---@abstract
@@ -236,7 +236,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseEdge:after_remove_from_graph(...)
-	vim.notify("[BaseEdge] Method `after_remove_from_graph` is not implemented.")
+	-- vim.notify("[BaseEdge] Method `after_remove_from_graph` is not implemented.")
 end
 
 --------------------
