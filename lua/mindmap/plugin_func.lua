@@ -49,7 +49,7 @@ end
 ---@param save_dir? string Dir to load and save the graph. The graph will be saved in `{self.save_dir}/.mindmap.json`. Default: `{current_project_path}`.
 ---@return Graph found_graph Found or created graph.
 function plugin_func.find_graph(save_dir)
-	save_dir = save_dir or unpack({ utils.get_file_info() })[4]
+	save_dir = save_dir or ({ utils.get_file_info() })[4]
 
 	if not plugin_data.cache.graphs[save_dir] then
 		local node_factory = plugin_data.config.node_factory:new(plugin_data.config.base_node)
