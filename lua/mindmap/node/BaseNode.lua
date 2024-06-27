@@ -82,13 +82,15 @@ function BaseNode:new(
 	base_node.__index = base_node
 	setmetatable(base_node, BaseNode)
 
-	local issues = base_node:check_health()
-	if #issues > 0 then
-		vim.notify(
-			"[BaseNode] Health check failed:\n" .. table.concat(issues, "\n") .. "\nReturn nil.",
-			vim.log.levels.ERROR
-		)
-		return nil
+	if base_node.check_health then
+		local issues = base_node:check_health()
+		if #issues > 0 then
+			vim.notify(
+				"[BaseNode] Health check failed:\n" .. table.concat(issues, "\n") .. "\nReturn nil.",
+				vim.log.levels.WARN
+			)
+			return nil
+		end
 	end
 
 	return base_node
@@ -102,33 +104,36 @@ function BaseNode:check_health()
 
 	-- Check mandatory fields
 	if type(self._type) ~= "string" then
-		table.insert(issues, "Invalid `_type`: expected string, got " .. type(self._type) .. ";")
+		table.insert(issues, "Invalid `_type`: expected `string`, got `" .. type(self._type) .. "`;")
 	end
 	if type(self._id) ~= "number" then
-		table.insert(issues, "Invalid `_id`: expected number, got " .. type(self._id) .. ";")
+		table.insert(issues, "Invalid `_id`: expected `number`, got `" .. type(self._id) .. "`;")
 	end
 	if type(self._file_name) ~= "string" then
-		table.insert(issues, "Invalid `_file_name`: expected string, got " .. type(self._file_name) .. ";")
+		table.insert(issues, "Invalid `_file_name`: expected `string`, got `" .. type(self._file_name) .. "`;")
 	end
 	if type(self._rel_file_dir) ~= "string" then
-		table.insert(issues, "Invalid `_rel_file_dir`: expected string, got " .. type(self._rel_file_dir) .. ";")
+		table.insert(issues, "Invalid `_rel_file_dir`: expected `string`, got `" .. type(self._rel_file_dir) .. "`;")
 	end
 
 	-- Check optional fields
 	if type(self._data) ~= "table" then
-		table.insert(issues, "Invalid `_data`: expected table or nil, got " .. type(self._data) .. ";")
+		table.insert(issues, "Invalid `_data`: expected `table` or `nil`, got `" .. type(self._data) .. "`;")
 	end
 	if type(self._cache) ~= "table" then
-		table.insert(issues, "Invalid `_cache`: expected table or nil, got " .. type(self._cache) .. ";")
+		table.insert(issues, "Invalid `_cache`: expected `table` or `nil`, got `" .. type(self._cache) .. "`;")
 	end
 	if type(self._created_at) ~= "number" then
-		table.insert(issues, "Invalid `_created_at`: expected number or nil, got " .. type(self._created_at) .. ";")
+		table.insert(
+			issues,
+			"Invalid `_created_at`: expected `number` or `nil`, got `" .. type(self._created_at) .. "`;"
+		)
 	end
 	if type(self._state) ~= "string" then
-		table.insert(issues, "Invalid `_state`: expected string or nil, got " .. type(self._state) .. ";")
+		table.insert(issues, "Invalid `_state`: expected `string` or `nil`, got `" .. type(self._state) .. "`;")
 	end
 	if type(self._version) ~= "number" then
-		table.insert(issues, "Invalid `_version`: expected number or nil, got " .. type(self._version) .. ";")
+		table.insert(issues, "Invalid `_version`: expected `number` or `nil`, got `" .. type(self._version) .. "`;")
 	end
 
 	return issues
@@ -201,7 +206,5 @@ function BaseNode:after_remove_from_graph(...)
 end
 
 --------------------
-
-local a = BaseNode:new(type, type, "a", "a")
 
 return BaseNode
