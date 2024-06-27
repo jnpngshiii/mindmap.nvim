@@ -7,17 +7,17 @@ local pickers = require("telescope.pickers")
 local sorters = require("telescope.sorters")
 
 -- Node:
-local SimpleNode = require("mindmap.node.SimpleNode")
-local HeadingNode = require("mindmap.node.HeadingNode")
-local ExcerptNode = require("mindmap.node.ExcerptNode")
+local SimpleNode = require("mindmap.graph.node.SimpleNode")
+local HeadingNode = require("mindmap.graph.node.HeadingNode")
+local ExcerptNode = require("mindmap.graph.node.ExcerptNode")
 -- Edge:
-local SimpleEdge = require("mindmap.edge.SimpleEdge")
-local SelfLoopContentEdge = require("mindmap.edge.SelfLoopContentEdge")
-local SelfLoopSubheadingEdge = require("mindmap.edge.SelfLoopSubheadingEdge")
+local SimpleEdge = require("mindmap.graph.edge.SimpleEdge")
+local SelfLoopContentEdge = require("mindmap.graph.edge.SelfLoopContentEdge")
+local SelfLoopSubheadingEdge = require("mindmap.graph.edge.SelfLoopSubheadingEdge")
 -- Alg:
-local AnkiAlg = require("mindmap.alg.AnkiAlg")
-local SimpleAlg = require("mindmap.alg.SimpleAlg")
-local SM2Alg = require("mindmap.alg.SM2Alg")
+local AnkiAlg = require("mindmap.graph.alg.AnkiAlg")
+local SimpleAlg = require("mindmap.graph.alg.SimpleAlg")
+local SM2Alg = require("mindmap.graph.alg.SM2Alg")
 -- Logger:
 local Logger = require("mindmap.graph.Logger")
 -- Graph:

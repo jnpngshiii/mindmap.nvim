@@ -1,4 +1,4 @@
-local BaseFactory = require("mindmap.factory.BaseFactory")
+local BaseFactory = require("mindmap.base.BaseFactory")
 
 --------------------
 -- Class NodeFactory

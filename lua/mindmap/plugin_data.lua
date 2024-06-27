@@ -1,9 +1,11 @@
+-- Base:
+local BaseNode = require("mindmap.base.BaseNode")
+local BaseEdge = require("mindmap.base.BaseEdge")
+local BaseAlg = require("mindmap.base.BaseAlg")
+-- Factory:
 local NodeFactory = require("mindmap.factory.NodeFactory")
 local EdgeFactory = require("mindmap.factory.EdgeFactory")
 local AlgFactory = require("mindmap.factory.AlgFactory")
-local BaseNode = require("mindmap.node.BaseNode")
-local BaseEdge = require("mindmap.edge.BaseEdge")
-local BaseAlg = require("mindmap.alg.BaseAlg")
 
 local plugin_data = {}
 
