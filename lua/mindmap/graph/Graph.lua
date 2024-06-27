@@ -119,10 +119,10 @@ function Graph:save()
 		nodes = {},
 		edges = {},
 	}
-	for node_id, node in ipairs(self.nodes) do
+	for node_id, node in pairs(self.nodes) do
 		graph_tbl.nodes[node_id] = self.node_factory:to_table(node)
 	end
-	for edge_id, edge in ipairs(self.edges) do
+	for edge_id, edge in pairs(self.edges) do
 		graph_tbl.edges[edge_id] = self.edge_factory:to_table(edge)
 	end
 
@@ -510,10 +510,10 @@ function Graph:transact(closure)
 	end
 
 	if not success then
-		self.logger:error("Graph", "Transaction failed: " .. err_msg .. ".")
+		self.logger:warn("Graph", "Transaction failed: " .. err_msg .. ".")
 		-- Just simply rollback the savepoint now.
 		self:rollback_savepoint(self.current_transaction.savepoint)
-		self.logger:info("Graph", "Transaction rollback completed.")
+		self.logger:warn("Graph", "Transaction rollback completed.")
 		-- if self.current_transaction:rollback() then
 		--   self.logger:info("Graph", "Transaction rollback completed.")
 		-- else

@@ -76,10 +76,10 @@ end
 function BaseFactory:get_registered_class(registered_type)
 	local registered_cls = self.registered_cls[registered_type]
 	if not registered_cls then
-		vim.notify(
-			"[BaseFactory] Type `" .. registered_type .. "` is not registered. Aborting retrieval.",
-			vim.log.levels.WARN
-		)
+		-- vim.notify(
+		-- "[BaseFactory] Type `" .. registered_type .. "` is not registered. Aborting retrieval.",
+		-- vim.log.levels.WARN
+		-- )
 		return
 	end
 
