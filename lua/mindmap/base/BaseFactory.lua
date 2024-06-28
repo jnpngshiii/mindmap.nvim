@@ -53,8 +53,7 @@ function BaseFactory:register(type_to_be_registered, cls_to_be_registered, type_
 		)
 
 		function cls_to_be_registered:new(...)
-			-- NOTE: The first parameter of the `new` method in the base class should be the type of the class.
-			local ins = cls_to_be_inherited:new(type_to_be_registered, ...)
+			local ins = cls_to_be_inherited:new(...)
 			ins.__index = ins
 			setmetatable(ins, cls_to_be_registered)
 
