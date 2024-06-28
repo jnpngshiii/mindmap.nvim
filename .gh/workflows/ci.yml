@@ -1,51 +1,24 @@
-name: CI
+name: Simple Test
+
 on:
   push:
+    branches: [main]
   pull_request:
+    branches: [main]
+
 jobs:
-  # build_docs:
-  #   name: Build docs
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-  #     - name: Setup Lua
-  #       uses: leafo/gh-actions-lua@v8
-  #       with:
-  #         luaVersion: 5.4
-  #     - name: Setup Lua Rocks
-  #       uses: leafo/gh-actions-luarocks@v4
-  #     - name: Setup dependencies
-  #       run: luarocks install --only-deps ldoc-dev-1.rockspec
-  #     - name: Build docs
-  #       run: make doc-site
-  #     - name: Deploy
-  #       if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
-  #       uses: peaceiris/actions-gh-pages@v3
-  #       with:
-  #         github_token: ${{ secrets.GITHUB_TOKEN }}
-  release:
-    name: release
-    if: ${{ github.ref == 'refs/heads/master' }}
-    # needs:
-    #   - build_docs
+  test:
     runs-on: ubuntu-latest
     steps:
-      - uses: google-github-actions/release-please-action@v4
-        id: release
+      - uses: actions/checkout@v2
+      - name: Set up Lua
+        uses: leafo/gh-actions-lua@v8
         with:
-          release-type: simple
-          package-name: LazyVim
-          extra-files: |
-            lua/lazyvim/config/init.lua
-      - uses: actions/checkout@v4
-      - name: tag stable versions
-        if: ${{ steps.release.outputs.release_created }}
+          luaVersion: "5.4"
+      - name: Set up LuaRocks
+        uses: leafo/gh-actions-luarocks@v4
+      - name: Install dependencies
         run: |
-          git config user.name github-actions[bot]
-          git config user.email github-actions[bot]@users.noreply.github.com
-          git remote add gh-token "https://${{ secrets.GITHUB_TOKEN }}@github.com/google-github-actions/release-please-action.git"
-          git tag -d stable || true
-          git push origin :stable || true
-          git tag -a stable -m "Last Stable Release"
-          git push origin stable
+          luarocks install busted
+      - name: Run tests
+        run: busted tests/utils_spec.lua
