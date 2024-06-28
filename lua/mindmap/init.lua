@@ -77,15 +77,15 @@ function M.setup_default_keymaps()
 	)
 	vim.api.nvim_set_keymap(
 		"n",
-		keymap_prefix .. "ls",
-		"<cmd>MindmapLink nearest SelfLoopSubheadingEdge nearest<CR>",
-		{ noremap = true, silent = true, desc = "Add SelfLoopSubheadingEdge to nearest node" }
+		keymap_prefix .. "lc",
+		"<cmd>MindmapLink nearest ChildrenEdge nearest<CR>",
+		{ noremap = true, silent = true, desc = "Add ChildrenEdge to nearest node" }
 	)
 	vim.api.nvim_set_keymap(
 		"n",
-		keymap_prefix .. "lc",
-		"<cmd>MindmapLink nearest SelfLoopContentEdge nearest<CR>",
-		{ noremap = true, silent = true, desc = "Add SelfLoopContentEdge to nearest node" }
+		keymap_prefix .. "ls",
+		"<cmd>MindmapLink nearest SelfLoopEdge nearest<CR>",
+		{ noremap = true, silent = true, desc = "Add SelfLoopEdge to nearest node" }
 	)
 
 	-- MindmapUnlink (Edge)
@@ -173,15 +173,15 @@ function M.setup_shorten_keymaps()
 	)
 	vim.api.nvim_set_keymap(
 		"n",
-		shorten_prefix .. "s",
-		"<cmd>MindmapLink nearest SelfLoopSubheadingEdge nearest<CR>",
-		{ noremap = true, silent = true, desc = "Self-link subheading" }
+		shorten_prefix .. "c",
+		"<cmd>MindmapLink nearest ChildrenEdge nearest<CR>",
+		{ noremap = true, silent = true, desc = "Add ChildrenEdge to nearest" }
 	)
 	vim.api.nvim_set_keymap(
 		"n",
-		shorten_prefix .. "c",
-		"<cmd>MindmapLink nearest SelfLoopContentEdge nearest<CR>",
-		{ noremap = true, silent = true, desc = "Self-link content" }
+		shorten_prefix .. "s",
+		"<cmd>MindmapLink nearest SelfLoopEdge nearest<CR>",
+		{ noremap = true, silent = true, desc = "Add SelfLoopEdge to nearest" }
 	)
 
 	-- MindmapDisplay
