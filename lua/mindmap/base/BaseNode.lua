@@ -86,11 +86,17 @@ function BaseNode:new(
 		local issues = base_node:check_health()
 		if #issues > 0 then
 			vim.notify(
-				"[Base.Node] Health check failed:\n" .. table.concat(issues, "\n") .. "\nReturn nil.",
+				"[Base.Node] Health check failed: \n" .. table.concat(issues, "\n") .. "\nReturn `nil`.",
 				vim.log.levels.WARN
 			)
 			return nil
 		end
+	end
+
+	local success = base_node:upgrade()
+	if not success then
+		vim.notify("[Base.Node] Failed to upgrade node. Return `nil`", vim.log.levels.WARN)
+		return nil
 	end
 
 	return base_node
@@ -139,6 +145,47 @@ function BaseNode:check_health()
 	return issues
 end
 
+---Upgrade the node to the latest version.
+---To support version upgrades, implement functions named `upgrade_to_vX`
+---where `X` is the version to upgrade to. Each function should only upgrade
+---the node by one version.
+---Example:
+---  ```lua
+---  function BaseNode:upgrade_to_v11(self)
+---    self._new_field = "default_value"
+---    return true
+---  end
+---  ```
+---For multi-version upgrades (e.g., v8 to v11), this function will
+---sequentially call the appropriate upgrade functions (v8 to v9,
+---v9 to v10, v10 to v11) in order. If an intermediate upgrade
+---function is missing, the version number will be forcibly updated
+---without any changes to the node's data.
+---@return boolean success Whether the upgrade was successful.
+function BaseNode:upgrade()
+	local current_version = self._version
+	local latest_version = base_node_version
+
+	while current_version < latest_version do
+		local next_version = current_version + 1
+		local upgrade_func = self["upgrade_to_v" .. next_version]
+		if upgrade_func then
+			local success = upgrade_func(self)
+			if not success then
+				vim.notify("[Base.Node] Failed to upgrade to `v" .. next_version .. ".`")
+				return false
+			end
+		else
+			vim.notify("[Base.Node] Forced upgrade to `v" .. next_version .. ".`")
+		end
+
+		current_version = next_version
+		self._version = current_version
+	end
+
+	return true
+end
+
 ---Get the absolute path of the file where the node is from.
 ---@return string abs_file_path The absolute path of the file.
 function BaseNode:get_abs_path()
@@ -160,7 +207,7 @@ end
 ---@return string[] front, string[] back Content of the node.
 ---@diagnostic disable-next-line: unused-local
 function BaseNode:get_content(edge_type)
-	vim.notify("[Base] Method `get_content` is not implemented.")
+	vim.notify("[Base.Node] Method `get_content` is not implemented.")
 	return {}, {}
 end
 
@@ -175,7 +222,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:before_add_into_graph(...)
-	-- vim.notify("[Base] Method `before_add_into_graph` is not implemented.")
+	-- vim.notify("[Base.Node] Method `before_add_into_graph` is not implemented.")
 end
 
 ---@abstract
@@ -184,7 +231,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:after_add_into_graph(...)
-	-- vim.notify("[Base] Method `after_add_into_graph` is not implemented.")
+	-- vim.notify("[Base.Node] Method `after_add_into_graph` is not implemented.")
 end
 
 ---@abstract
@@ -193,7 +240,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:before_remove_from_graph(...)
-	-- vim.notify("[Base] Method `before_remove_from_graph` is not implemented.")
+	-- vim.notify("[Base.Node] Method `before_remove_from_graph` is not implemented.")
 end
 
 ---@abstract
@@ -202,7 +249,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:after_remove_from_graph(...)
-	-- vim.notify("[Base] Method `after_remove_from_graph` is not implemented.")
+	-- vim.notify("[Base.Node] Method `after_remove_from_graph` is not implemented.")
 end
 
 --------------------
