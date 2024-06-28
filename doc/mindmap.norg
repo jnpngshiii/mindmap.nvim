@@ -13,11 +13,11 @@ version: 1.1.1
   When reviewing `SelfLoopContentEdge` using spaced repetition, the content here will be shown as the back of the card.
 * 2nd Heading
 ** 1st Sub Heading. When reviewing `SelfLoopSubheadingEdge` using spaced repetition, the content here will be shown as the back of the card (the same as below).
-** 2nd Sub Heading
+** 2nd Sub Heading %00000003%
    There is an `ExcerptNode` pointing to this `HeadingNode` to give it additional information.
    Try displaying it using `<localleader>mde` (display excerpt).
-** 3th Sub Heading
-*** 1st Subsub Heading
+** 3th Sub Heading %00000004%
+*** 1st Subsub Heading %00000002%
     This is the content of the "1st Subsub Heading".
 *** 2nd Subsub Heading
     There are multiple `ExcerptNode` s pointing to this `HeadingNode`.

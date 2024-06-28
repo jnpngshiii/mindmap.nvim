@@ -7,8 +7,38 @@
       "_rel_file_dir": "doc",
       "_id": 1,
       "_type": "HeadingNode",
-      "_created_at": 1719500797,
-      "_file_name": "mindmap.norg"
+      "_file_name": "mindmap.norg",
+      "_created_at": 1719500797
+    },
+    {
+      "_data": [],
+      "_state": "active",
+      "_version": 11,
+      "_rel_file_dir": "doc",
+      "_id": 2,
+      "_type": "HeadingNode",
+      "_file_name": "mindmap.norg",
+      "_created_at": 1719542333
+    },
+    {
+      "_data": [],
+      "_state": "active",
+      "_version": 11,
+      "_rel_file_dir": "doc",
+      "_id": 3,
+      "_type": "HeadingNode",
+      "_file_name": "mindmap.norg",
+      "_created_at": 1719542337
+    },
+    {
+      "_data": [],
+      "_state": "active",
+      "_version": 11,
+      "_rel_file_dir": "doc",
+      "_id": 4,
+      "_type": "HeadingNode",
+      "_file_name": "mindmap.norg",
+      "_created_at": 1719542340
     }
   ],
   "edges": []
