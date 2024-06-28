@@ -578,8 +578,8 @@ function Graph:redo()
 end
 
 ----------
--- Spaced Repetition Methods
 -- TODO:
+-- Spaced Repetition Methods
 ----------
 
 ---Get spaced repetition information from the edge.

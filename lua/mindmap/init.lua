@@ -48,7 +48,7 @@ function M.setup_default_keymaps()
 		{ noremap = true, silent = true, desc = "Add visual selection as excerpt node" }
 	)
 	vim.api.nvim_set_keymap(
-		"v",
+		"v", -- Visual mode
 		"E",
 		"<cmd>MindmapAddVisualSelectionAsExcerptNode<CR>",
 		{ noremap = true, silent = true, desc = "Add visual selection as excerpt node" }
@@ -58,13 +58,13 @@ function M.setup_default_keymaps()
 	vim.api.nvim_set_keymap(
 		"n",
 		keymap_prefix .. "rn",
-		"<cmd>MindmapRemove nearest node<CR>",
+		"<cmd>MindmapRemove nearest<CR>",
 		{ noremap = true, silent = true, desc = "Remove nearest node" }
 	)
 	vim.api.nvim_set_keymap(
 		"n",
 		keymap_prefix .. "rN",
-		"<cmd>MindmapRemove buffer node<CR>",
+		"<cmd>MindmapRemove buffer<CR>",
 		{ noremap = true, silent = true, desc = "Remove buffer node" }
 	)
 
@@ -79,39 +79,33 @@ function M.setup_default_keymaps()
 		"n",
 		keymap_prefix .. "lc",
 		"<cmd>MindmapLink nearest ChildrenEdge nearest<CR>",
-		{ noremap = true, silent = true, desc = "Add ChildrenEdge to nearest node" }
+		{ noremap = true, silent = true, desc = "Add ChildrenEdge form nearest node to nearest node" }
 	)
 	vim.api.nvim_set_keymap(
 		"n",
 		keymap_prefix .. "ls",
 		"<cmd>MindmapLink nearest SelfLoopEdge nearest<CR>",
-		{ noremap = true, silent = true, desc = "Add SelfLoopEdge to nearest node" }
+		{ noremap = true, silent = true, desc = "Add SelfLoopEdge form nearest node to nearest node" }
 	)
 
 	-- MindmapUnlink (Edge)
-	vim.api.nvim_set_keymap(
-		"n",
-		keymap_prefix .. "u",
-		"<cmd>MindmapUnlink nearest<CR>",
-		{ noremap = true, silent = true, desc = "Unlink nearest edge" }
-	)
 
 	-- MindmapDisplay
 	vim.api.nvim_set_keymap(
 		"n",
-		keymap_prefix .. "dc",
+		keymap_prefix .. "cc",
 		"<cmd>MindmapDisplay nearest card_back<CR>",
 		{ noremap = true, silent = true, desc = "Display nearest card back" }
 	)
 	vim.api.nvim_set_keymap(
 		"n",
-		keymap_prefix .. "de",
+		keymap_prefix .. "ce",
 		"<cmd>MindmapDisplay nearest excerpt<CR>",
 		{ noremap = true, silent = true, desc = "Display nearest excerpt" }
 	)
 	vim.api.nvim_set_keymap(
 		"n",
-		keymap_prefix .. "ds",
+		keymap_prefix .. "cs",
 		"<cmd>MindmapDisplay nearest sp_info<CR>",
 		{ noremap = true, silent = true, desc = "Display nearest spaced repetition info" }
 	)
@@ -119,9 +113,21 @@ function M.setup_default_keymaps()
 	-- MindmapClean
 	vim.api.nvim_set_keymap(
 		"n",
-		keymap_prefix .. "c",
-		"<cmd>MindmapClean nearest all<CR>",
-		{ noremap = true, silent = true, desc = "Clean all virtual text for nearest node" }
+		keymap_prefix .. "dc",
+		"<cmd>MindmapClean nearest card_back<CR>",
+		{ noremap = true, silent = true, desc = "Clean nearest card back" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		keymap_prefix .. "de",
+		"<cmd>MindmapClean nearest excerpt<CR>",
+		{ noremap = true, silent = true, desc = "Clean nearest excerpt" }
+	)
+	vim.api.nvim_set_keymap(
+		"n",
+		keymap_prefix .. "ds",
+		"<cmd>MindmapClean nearest sp_info<CR>",
+		{ noremap = true, silent = true, desc = "Clean nearest spaced repetition info" }
 	)
 
 	-- MindmapReview
@@ -169,27 +175,27 @@ function M.setup_shorten_keymaps()
 		"n",
 		shorten_prefix .. "l",
 		"<cmd>MindmapLink latest SimpleEdge nearest<CR>",
-		{ noremap = true, silent = true, desc = "Link latest to nearest" }
+		{ noremap = true, silent = true, desc = "Link latest node to nearest node" }
 	)
 	vim.api.nvim_set_keymap(
 		"n",
 		shorten_prefix .. "c",
 		"<cmd>MindmapLink nearest ChildrenEdge nearest<CR>",
-		{ noremap = true, silent = true, desc = "Add ChildrenEdge to nearest" }
+		{ noremap = true, silent = true, desc = "Add ChildrenEdge to nearest node" }
 	)
 	vim.api.nvim_set_keymap(
 		"n",
 		shorten_prefix .. "s",
 		"<cmd>MindmapLink nearest SelfLoopEdge nearest<CR>",
-		{ noremap = true, silent = true, desc = "Add SelfLoopEdge to nearest" }
+		{ noremap = true, silent = true, desc = "Add SelfLoopEdge to nearest node" }
 	)
 
 	-- MindmapDisplay
 	vim.api.nvim_set_keymap(
 		"n",
 		shorten_prefix .. "d",
-		"<cmd>MindmapDisplay nearest all<CR>",
-		{ noremap = true, silent = true, desc = "Display all for nearest" }
+		"<cmd>MindmapDisplay buffer sp_info<CR>",
+		{ noremap = true, silent = true, desc = "Display all spaced repetition info in current buffer" }
 	)
 
 	-- MindmapReview
@@ -197,7 +203,7 @@ function M.setup_shorten_keymaps()
 		"n",
 		shorten_prefix .. "r",
 		"<cmd>MindmapReview buffer<CR>",
-		{ noremap = true, silent = true, desc = "Review buffer" }
+		{ noremap = true, silent = true, desc = "Review add cards in current buffer" }
 	)
 end
 
