@@ -1,3 +1,3 @@
-# mindmap.nvim
+# graph.nvim
 
 In progress.
