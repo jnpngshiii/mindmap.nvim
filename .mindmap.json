@@ -7,8 +7,8 @@
       "_rel_file_dir": "doc",
       "_id": 1,
       "_type": "HeadingNode",
-      "_file_name": "mindmap.norg",
-      "_created_at": 1719500797
+      "_created_at": 1719500797,
+      "_file_name": "mindmap.norg"
     },
     {
       "_data": [],
@@ -17,8 +17,8 @@
       "_rel_file_dir": "doc",
       "_id": 2,
       "_type": "HeadingNode",
-      "_file_name": "mindmap.norg",
-      "_created_at": 1719542333
+      "_created_at": 1719542333,
+      "_file_name": "mindmap.norg"
     },
     {
       "_data": [],
@@ -27,8 +27,8 @@
       "_rel_file_dir": "doc",
       "_id": 3,
       "_type": "HeadingNode",
-      "_file_name": "mindmap.norg",
-      "_created_at": 1719542337
+      "_created_at": 1719542337,
+      "_file_name": "mindmap.norg"
     },
     {
       "_data": [],
@@ -37,9 +37,44 @@
       "_rel_file_dir": "doc",
       "_id": 4,
       "_type": "HeadingNode",
-      "_file_name": "mindmap.norg",
-      "_created_at": 1719542340
+      "_created_at": 1719542340,
+      "_file_name": "mindmap.norg"
     }
   ],
-  "edges": []
+  "edges": [
+    {
+      "_due_at": 0,
+      "_updated_at": 1719545251,
+      "_again_count": 0,
+      "_state": "active",
+      "_version": 13,
+      "_from": 4,
+      "_id": 1,
+      "_ease": 250,
+      "_data": [],
+      "_interval": 1,
+      "_ease_count": 0,
+      "_type": "ChildrenEdge",
+      "_to": 4,
+      "_answer_count": 0,
+      "_created_at": 1719545251
+    },
+    {
+      "_due_at": 0,
+      "_updated_at": 1719545261,
+      "_again_count": 0,
+      "_state": "active",
+      "_version": 13,
+      "_from": 3,
+      "_id": 2,
+      "_ease": 250,
+      "_data": [],
+      "_interval": 1,
+      "_ease_count": 0,
+      "_type": "SelfLoopEdge",
+      "_to": 3,
+      "_answer_count": 0,
+      "_created_at": 1719545261
+    }
+  ]
 }
