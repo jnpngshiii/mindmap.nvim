@@ -148,8 +148,8 @@ end
 ---@return table savepoint The created savepoint.
 function Graph:create_savepoint()
 	local savepoint = {
-		nodes = vim.deepcopy(self.nodes),
-		edges = vim.deepcopy(self.edges),
+		nodes = self.nodes,
+		edges = self.edges,
 	}
 	return savepoint
 end
