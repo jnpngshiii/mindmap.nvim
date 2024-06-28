@@ -187,7 +187,8 @@ function Logger:save()
 	local json_path = self.save_path .. "/" .. "log_" .. self.timestamp .. ".json"
 	local json, err_msg = io.open(json_path, "w")
 	if not json then
-		vim.notify("[Logger] Failed to open file: " .. err_msg .. ". Abort saving.", vim.log.levels.ERROR)
+		vim.notify("[Logger] Failed to open file: " .. err_msg .. ". Abortine save.", vim.log.levels.ERROR)
+
 		return
 	end
 

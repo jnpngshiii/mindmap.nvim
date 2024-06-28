@@ -78,7 +78,7 @@ function ts_utils.parse_heading_node(heading_node)
 	local sub_heading_level = tonumber(string.match(heading_node:type(), "%d")) + 1
 	if not sub_heading_level then
 		vim.notify(
-			string.format("[TSUtils] Node `%s` is not a heading node. Abort parsing.", heading_node:type()),
+			string.format("[TSUtils] Node `%s` is not a heading node. Aborting parsing.", heading_node:type()),
 			vim.log.levels.ERROR
 		)
 		return title_node, content_node, sub_heading_nodes
