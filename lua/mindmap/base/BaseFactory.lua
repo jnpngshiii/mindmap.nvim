@@ -110,7 +110,9 @@ function BaseFactory:create(registered_type, ...)
 		return
 	end
 
-	return registered_cls:new(...)
+	-- The first argument of `new` method is the class type.
+	-- In this way, we can use `create` method just like `new` method.
+	return registered_cls:new(registered_type, ...)
 end
 
 --------------------
