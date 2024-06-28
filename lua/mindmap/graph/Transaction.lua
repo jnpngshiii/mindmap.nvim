@@ -4,6 +4,7 @@
 
 ---@class Transaction
 ---@field savepoint any Savepoint of the transaction.
+---@field description string Description of the transaction. Default: `""`.
 ---@field operations function[] Operations in the transaction.
 ---@field inverses function[] Inverses of the operations in the transaction.
 local Transaction = {}
@@ -12,11 +13,13 @@ Transaction.__index = Transaction
 ---Begin a new transaction.
 ---This method is often called automatically at the start of a "transaction" method.
 ---See: `Graph:transact`.
----@param savepoint? any Savepoint of the transaction.
+---@param savepoint any Savepoint of the transaction.
+---@param description? string Description of the transaction.
 ---@return Transaction transaction The new transaction.
-function Transaction:begin(savepoint)
+function Transaction:begin(savepoint, description)
 	local transaction = {
 		savepoint = savepoint,
+		description = description or "",
 		operations = {},
 		inverses = {},
 	}

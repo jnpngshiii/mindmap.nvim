@@ -493,10 +493,12 @@ end
 
 ---Executes a transaction on the graph.
 ---@param closure function The function to be executed within the transaction.
+---@param description? string Description of the transaction.
 ---@return boolean success Whether the transaction was successfully committed.
-function Graph:transact(closure)
+function Graph:transact(closure, description)
 	self.lock:acquire()
-	self.current_transaction = Transaction:begin(self:create_savepoint())
+	self.current_transaction = Transaction:begin(self:create_savepoint(), description)
+	self.logger:info("Graph", "Transaction `" .. self.current_transaction.description .. "` begin.")
 
 	local success, err_msg = pcall(closure)
 	if success then
@@ -508,18 +510,21 @@ function Graph:transact(closure)
 			table.insert(self.undo_stack, self.current_transaction)
 			self.redo_stack = {}
 
-			self.logger:info("Graph", "Transaction commit completed.")
+			self.logger:info("Graph", "Transaction `" .. self.current_transaction.description .. "` commit completed.")
 		else
 			success = false
-			self.logger:error("Graph", "Transaction commit failed.")
+			self.logger:error("Graph", "Transaction `" .. self.current_transaction.description .. "` commit failed.")
 		end
 	end
 
 	if not success then
-		self.logger:warn("Graph", "Transaction failed: " .. err_msg .. ".")
+		self.logger:warn(
+			"Graph",
+			"Transaction `" .. self.current_transaction.description .. "` failed: " .. err_msg .. "."
+		)
 		-- Just simply rollback the savepoint now.
 		self:rollback_savepoint(self.current_transaction.savepoint)
-		self.logger:warn("Graph", "Transaction rollback completed.")
+		self.logger:warn("Graph", "Transaction `" .. self.current_transaction.description .. "` rollback completed.")
 		-- if self.current_transaction:rollback() then
 		--   self.logger:info("Graph", "Transaction rollback completed.")
 		-- else

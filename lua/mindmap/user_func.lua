@@ -36,7 +36,7 @@ function user_func.MindmapAddNearestHeadingAsHeadingNode()
 		})
 
 		graph:add_node(new_node)
-	end)
+	end, "Add Nearest Heading As Heading Node")
 end
 
 vim.api.nvim_create_user_command("MindmapAddNearestHeadingAsHeadingNode", function()
@@ -63,7 +63,7 @@ function user_func.MindmapAddVisualSelectionAsExcerptNode()
 		})
 
 		graph:add_node(new_node)
-	end)
+	end, "Add Visual Selection As Excerpt Node")
 end
 
 vim.api.nvim_create_user_command("MindmapAddVisualSelectionAsExcerptNode", function()
@@ -94,7 +94,7 @@ function user_func.MindmapRemove(criteria)
 		for id, _ in pairs(items) do
 			graph:remove_node(id)
 		end
-	end)
+	end, "Remove Nodes")
 end
 
 vim.api.nvim_create_user_command("MindmapRemove", function(opts)
@@ -182,7 +182,7 @@ function user_func.MindmapLink(from_node_location, edge_type, to_node_location)
 				graph:add_edge(new_edge)
 			end
 		end
-	end)
+	end, "Link Nodes")
 end
 
 vim.api.nvim_create_user_command("MindmapLink", function(opts)
@@ -220,7 +220,7 @@ function user_func.MindmapUnlink(criteria)
 		for id, _ in pairs(items) do
 			graph:remove_edge(id)
 		end
-	end)
+	end, "Unlink Nodes")
 end
 
 vim.api.nvim_create_user_command("MindmapUnlink", function(opts)
