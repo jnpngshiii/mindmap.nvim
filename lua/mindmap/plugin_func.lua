@@ -6,31 +6,50 @@ local finders = require("telescope.finders")
 local pickers = require("telescope.pickers")
 local sorters = require("telescope.sorters")
 
--- Node:
+-- Graph:
+local Graph = require("mindmap.graph.Graph")
+--   Node:
 local SimpleNode = require("mindmap.graph.node.SimpleNode")
 local HeadingNode = require("mindmap.graph.node.HeadingNode")
 local ExcerptNode = require("mindmap.graph.node.ExcerptNode")
--- Edge:
+--   Edge:
 local SimpleEdge = require("mindmap.graph.edge.SimpleEdge")
 local SelfLoopContentEdge = require("mindmap.graph.edge.SelfLoopContentEdge")
 local SelfLoopSubheadingEdge = require("mindmap.graph.edge.SelfLoopSubheadingEdge")
--- Alg:
+--   Alg:
 local AnkiAlg = require("mindmap.graph.alg.AnkiAlg")
 local SimpleAlg = require("mindmap.graph.alg.SimpleAlg")
 local SM2Alg = require("mindmap.graph.alg.SM2Alg")
--- Logger:
+--   Logger:
 local Logger = require("mindmap.graph.Logger")
--- Graph:
-local Graph = require("mindmap.graph.Graph")
 -- Utils:
 local utils = require("mindmap.utils")
 local ts_utils = require("mindmap.ts_utils")
 -- Plugin data:
 local plugin_data = require("mindmap.plugin_data")
 
+--------------------
+
 local plugin_func = {}
 
---------------------
+---Get the plugin configuration.
+---@return table plugin_data.config Plugin configuration.
+function plugin_func.get_config()
+	return plugin_data.config
+end
+
+---Set the plugin configuration.
+---@param user_config table User configuration. Used to override the default configuration.
+---@return nil
+function plugin_func.set_config(user_config)
+	plugin_data.config = vim.tbl_deep_extend("force", plugin_data.config, user_config)
+end
+
+---Get the plugin cache.
+---@return table plugin_data.cache Plugin cache.
+function plugin_func.get_cache()
+	return plugin_data.cache
+end
 
 ---Find the registered namespace and return it.
 ---If the namespace does not exist, register it first.

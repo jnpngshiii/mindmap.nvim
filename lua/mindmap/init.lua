@@ -1,35 +1,38 @@
-local plugin_data = require("mindmap.plugin_data")
+local plugin_func = require("mindmap.plugin_func")
 local user_func = require("mindmap.user_func")
+
+--------------------
 
 local M = {}
 
----Setup function for the Mindmap plugin
----@param user_config table User configuration table
+---Set up the plugin.
+---@param user_config table User configuration. Used to override the default configuration.
+---@return nil
 function M.setup(user_config)
 	user_config = user_config or {}
 
 	-- Merge user config with default config
-	plugin_data.config = vim.tbl_deep_extend("force", plugin_data.config, user_config)
+	local config = plugin_func.get_config(plugin_func.set_config(user_config))
 
 	-- Set up default keymaps if enabled
-	if plugin_data.config.enable_default_keymap then
+	if config.enable_default_keymap then
 		M.setup_default_keymaps()
 	end
 
 	-- Set up shorten keymaps if enabled
-	if plugin_data.config.enable_shorten_keymap then
+	if config.enable_shorten_keymap then
 		M.setup_shorten_keymaps()
 	end
 
 	-- Set up default autocommands if enabled
-	if plugin_data.config.enable_default_autocmd then
+	if config.enable_default_autocmd then
 		M.setup_default_autocommands()
 	end
 end
 
 function M.setup_default_keymaps()
-  vim.notify("[Mindmap] Default keymaps enabled.", vim.log.levels.INFO)
-	local keymap_prefix = plugin_data.config.keymap_prefix
+	vim.notify("[Mindmap] Default keymaps enabled.", vim.log.levels.INFO)
+	local keymap_prefix = plugin_func.get_config().keymap_prefix
 
 	-- MindmapAdd (Node)
 	vim.api.nvim_set_keymap(
@@ -146,7 +149,7 @@ end
 
 function M.setup_shorten_keymaps()
 	vim.notify("[Mindmap] Shorten keymaps enabled.", vim.log.levels.INFO)
-	local shorten_prefix = plugin_data.config.shorten_keymap_prefix
+	local shorten_prefix = plugin_func.get_config().shorten_keymap_prefix
 
 	-- Remap 'm' to 'M' for marks if 'm' is used as prefix
 	if shorten_prefix == "m" then
@@ -208,7 +211,8 @@ function M.setup_default_autocommands()
 		desc = "Save all mindmap graphs on exit",
 	})
 
-	if plugin_data.config.show_excerpt_after_add then
+	local config = plugin_func.get_config()
+	if config.show_excerpt_after_add then
 		vim.api.nvim_create_autocmd("User", {
 			pattern = "MindmapNodeAdded",
 			callback = function()
@@ -218,7 +222,7 @@ function M.setup_default_autocommands()
 		})
 	end
 
-	if plugin_data.config.show_excerpt_after_bfread then
+	if config.show_excerpt_after_bfread then
 		vim.api.nvim_create_autocmd("BufRead", {
 			pattern = "*.norg",
 			callback = function()
@@ -228,5 +232,7 @@ function M.setup_default_autocommands()
 		})
 	end
 end
+
+--------------------
 
 return M

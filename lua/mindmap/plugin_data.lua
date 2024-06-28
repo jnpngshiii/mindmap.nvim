@@ -7,11 +7,13 @@ local NodeFactory = require("mindmap.factory.NodeFactory")
 local EdgeFactory = require("mindmap.factory.EdgeFactory")
 local AlgFactory = require("mindmap.factory.AlgFactory")
 
+--------------------
+
 local plugin_data = {}
 
---------------------
+----------
 -- Class plugin_data.config
---------------------
+----------
 
 ---@class plugin_data.config
 ---Node:
@@ -65,9 +67,9 @@ plugin_data.config = {
 	show_excerpt_after_bfread = true,
 }
 
---------------------
+----------
 -- Class plugin_data.cache
---------------------
+----------
 
 ---@class plugin_data.cache
 ---@field graphs table<string, Graph> Graphs of different repos.
