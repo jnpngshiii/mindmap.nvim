@@ -1,3 +1,5 @@
+local logger = require("mindmap.Logger"):register_source("Base.Edge")
+
 --------------------
 -- Class BaseEdge
 --------------------
@@ -110,17 +112,14 @@ function BaseEdge:new(
 
 	local success = base_edge:upgrade()
 	if not success then
-		vim.notify("[Base.edge] Failed to upgrade edge. Return `nil`", vim.log.levels.WARN)
+		logger.warn("Failed to upgrade edge. Return `nil`")
 		return nil
 	end
 
 	if base_edge.check_health then
 		local issues = base_edge:check_health()
 		if #issues > 0 then
-			vim.notify(
-				"[Base.Edge] Health check failed:\n" .. table.concat(issues, "\n") .. "\nReturn `nil`.",
-				vim.log.levels.WARN
-			)
+			logger.warn("Health check failed:\n" .. table.concat(issues, "\n") .. "\nReturn `nil`.")
 			return nil
 		end
 	end
@@ -155,11 +154,11 @@ function BaseEdge:upgrade()
 		if upgrade_func then
 			local success = upgrade_func(self)
 			if not success then
-				vim.notify("[Base.Edge] Failed to upgrade to `v" .. next_version .. ".`")
+				logger.info("Failed to upgrade to `v" .. next_version .. ".`")
 				return false
 			end
 		else
-			vim.notify("[Base.Edge] Forced upgrade to `v" .. next_version .. ".`")
+			logger.info("Forced upgrade to `v" .. next_version .. ".`")
 		end
 
 		current_version = next_version
@@ -256,7 +255,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseEdge:before_add_into_graph(...)
-	-- vim.notify("[Base] Method `before_add_into_graph` is not implemented.")
+	-- logger.info("Method `before_add_into_graph` is not implemented.")
 end
 
 ---@abstract
@@ -265,7 +264,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseEdge:after_add_into_graph(...)
-	-- vim.notify("[Base] Method `after_add_into_graph` is not implemented.")
+	-- logger.info("Method `after_add_into_graph` is not implemented.")
 end
 
 ---@abstract
@@ -274,7 +273,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseEdge:before_remove_from_graph(...)
-	-- vim.notify("[Base] Method `before_remove_from_graph` is not implemented.")
+	-- logger.info("Method `before_remove_from_graph` is not implemented.")
 end
 
 ---@abstract
@@ -283,7 +282,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseEdge:after_remove_from_graph(...)
-	-- vim.notify("[Base] Method `after_remove_from_graph` is not implemented.")
+	-- logger.info("Method `after_remove_from_graph` is not implemented.")
 end
 
 --------------------

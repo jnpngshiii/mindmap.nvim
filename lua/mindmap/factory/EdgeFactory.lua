@@ -1,3 +1,5 @@
+local logger = require("mindmap.Logger"):register_source("Factory.Edge")
+
 local BaseFactory = require("mindmap.base.BaseFactory")
 
 --------------------
@@ -55,10 +57,7 @@ end
 function EdgeFactory:from_table(registered_type, tbl)
 	local registered_cls = self:get_registered_class(registered_type)
 	if not registered_cls then
-		vim.notify(
-			"[Factory] Type `" .. registered_type .. "` is not registered. Aborting conversion.",
-			vim.log.levels.ERROR
-		)
+		logger.error("Type `" .. registered_type .. "` is not registered. Aborting conversion.")
 		return
 	end
 

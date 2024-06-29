@@ -1,3 +1,5 @@
+local logger = require("mindmap.Logger"):register_source("Node.Heading")
+
 local utils = require("mindmap.utils")
 local ts_utils = require("mindmap.ts_utils")
 
@@ -26,10 +28,7 @@ function HeadingNode:get_ts_node(bufnr)
 
 	local heading_node = ts_utils.get_heading_nodes(string.format("%08d", self._id), bufnr)[self._id]
 	if not heading_node then
-		vim.notify(
-			"[Node] Cannot find the treesitter node with id: `" .. self._id .. "`. Aborting retrieval.",
-			vim.log.levels.ERROR
-		)
+		logger.error("Cannot find the treesitter node with id: `" .. self._id .. "`. Aborting retrieval.")
 		return
 	end
 
@@ -82,18 +81,12 @@ function HeadingNode:after_add_into_graph()
 	local _f = function(bufnr)
 		local ts_node = self:get_ts_node(bufnr)
 		if not ts_node then
-			vim.notify(
-				"[Node] Cannot find the treesitter node. Failed to call `after_add_into_graph`.",
-				vim.log.levels.ERROR
-			)
+			logger.error("Cannot find the treesitter node. Failed to call `after_add_into_graph`.")
 			return
 		end
 		local ts_node_title, _, _ = ts_utils.parse_heading_node(ts_node)
 		if not ts_node_title then
-			vim.notify(
-				"[Node] Cannot find the title node. Failed to call `after_add_into_graph`.",
-				vim.log.levels.ERROR
-			)
+			logger.error("Cannot find the title node. Failed to call `after_add_into_graph`.")
 			return
 		end
 
@@ -115,18 +108,12 @@ function HeadingNode:before_remove_from_graph()
 	local _f = function(bufnr)
 		local ts_node = self:get_ts_node(bufnr)
 		if not ts_node then
-			vim.notify(
-				"[Node] Cannot find the treesitter node. Failed to call `before_remove_from_graph`.",
-				vim.log.levels.ERROR
-			)
+			logger.error("Cannot find the treesitter node. Failed to call `before_remove_from_graph`.")
 			return
 		end
 		local ts_node_title, _, _ = ts_utils.parse_heading_node(ts_node)
 		if not ts_node_title then
-			vim.notify(
-				"[Node] Cannot find the title node. Failed to call `before_remove_from_graph`.",
-				vim.log.levels.ERROR
-			)
+			logger.error("Cannot find the title node. Failed to call `before_remove_from_graph`.")
 			return
 		end
 

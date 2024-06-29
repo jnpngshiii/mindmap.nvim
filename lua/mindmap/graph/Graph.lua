@@ -1,3 +1,5 @@
+local logger = require("mindmap.Logger"):register_source("Graph")
+
 local Popup = require("nui.popup")
 local Layout = require("nui.layout")
 
@@ -20,8 +22,6 @@ local utils = require("mindmap.utils")
 ---@field edges table<EdgeID, BaseEdge> Edges in the graph.
 ---  Alg:
 ---@field alg BaseAlg Algorithm for the graph.
----  Logger:
----@field logger Logger Logger for the graph.
 ---Transaction:
 ---@field current_transaction Transaction? Current active transaction.
 ---@field undo_redo_limit integer Maximum number of undo and redo operations. Default: `3`.
@@ -43,6 +43,7 @@ local graph_version = 6
 -- v4: Use `Transaction` class to manage transactions.
 -- v5: Update `load` and `save` methods.
 -- v6: Add `lock` and `transact` related methods.
+-- v7: Remove `logger` field. Use global logger instead.
 
 ----------
 -- Basic Method
@@ -53,12 +54,11 @@ local graph_version = 6
 ---@param node_factory NodeFactory Factory for creating nodes.
 ---@param edge_factory EdgeFactory Factory for creating edges.
 ---@param alg BaseAlg Algorithm for the graph.
----@param logger Logger Logger for the graph.
 ---@param undo_redo_limit? integer Limit of undo and redo operations. Default: `3`.
 ---@param thread_num? integer Number of threads to use. Default: `3`.
 ---@param version? integer Version of the graph.
 ---@return Graph graph The new graph.
-function Graph:new(save_dir, node_factory, edge_factory, alg, logger, undo_redo_limit, thread_num, version)
+function Graph:new(save_dir, node_factory, edge_factory, alg, undo_redo_limit, thread_num, version)
 	local graph = {
 		-- Basic:
 		save_dir = save_dir,
@@ -70,8 +70,6 @@ function Graph:new(save_dir, node_factory, edge_factory, alg, logger, undo_redo_
 		edges = {},
 		--   Alg:
 		alg = alg,
-		--   Logger:
-		logger = logger,
 		-- Transaction:
 		current_transaction = nil,
 		undo_redo_limit = undo_redo_limit or 3,
@@ -97,7 +95,7 @@ function Graph:load()
 	local json_path = self.save_dir .. "/" .. ".mindmap.json"
 	local json, _ = io.open(json_path, "r")
 	if not json then
-		self.logger:warn("Graph", "Load graph failed. Can not open file `" .. json_path .. "`.")
+		logger:warn("Graph", "Load graph failed. Can not open file `" .. json_path .. "`.")
 		return
 	end
 
@@ -105,7 +103,7 @@ function Graph:load()
 	json:close()
 
 	if json_content == "" then
-		self.logger:warn("Graph", "Load graph skipped. File `" .. json_path .. "` is empty.")
+		logger:warn("Graph", "Load graph skipped. File `" .. json_path .. "` is empty.")
 		return
 	end
 	json_content = vim.fn.json_decode(json_content)
@@ -135,7 +133,7 @@ function Graph:save()
 	local json_path = self.save_dir .. "/" .. ".mindmap.json"
 	local json, _ = io.open(json_path, "w")
 	if not json then
-		self.logger:error("Graph", "Save graph failed. Can not open file `" .. json_path .. "`.")
+		logger:error("Graph", "Save graph failed. Can not open file `" .. json_path .. "`.")
 		return
 	end
 
@@ -183,11 +181,11 @@ function Graph:add_node(node_or_node_type, ...)
 	elseif type(node_or_node_type) == "string" then
 		node = self.node_factory:create(node_or_node_type, ...)
 		if not node then
-			self.logger:warn("Graph", "Add node failed. Can not create `" .. node_or_node_type .. "`.")
+			logger:warn("Graph", "Add node failed. Can not create `" .. node_or_node_type .. "`.")
 			return false, nil
 		end
 	else
-		self.logger:error(
+		logger:error(
 			"Graph",
 			"Add node failed. The type of node_or_node_type must be `string` or `table`, but got `"
 				.. type(node_or_node_type)
@@ -233,7 +231,7 @@ function Graph:add_node(node_or_node_type, ...)
 
 	-- Others --
 
-	self.logger:info("Graph", "Add `" .. node._type .. "` `" .. node._id .. "` to graph.")
+	logger:info("Graph", "Add `" .. node._type .. "` `" .. node._id .. "` to graph.")
 	return true, node
 end
 
@@ -250,11 +248,11 @@ function Graph:add_edge(edge_or_edge_type, ...)
 	elseif type(edge_or_edge_type) == "string" then
 		edge = self.edge_factory:create(edge_or_edge_type, ...)
 		if not edge then
-			self.logger:warn("Graph", "Add edge failed. Can not create `" .. edge_or_edge_type .. "`.")
+			logger:warn("Graph", "Add edge failed. Can not create `" .. edge_or_edge_type .. "`.")
 			return false, nil
 		end
 	else
-		self.logger:error(
+		logger:error(
 			"Graph",
 			"Add edge failed. The type of edge_or_edge_type must be `string` or `table`, but got `"
 				.. type(edge_or_edge_type)
@@ -300,7 +298,7 @@ function Graph:add_edge(edge_or_edge_type, ...)
 
 	-- Others --
 
-	self.logger:info("Graph", "Add `" .. edge._type .. "` `" .. edge._id .. "` to graph.")
+	logger:info("Graph", "Add `" .. edge._type .. "` `" .. edge._id .. "` to graph.")
 	return true, edge
 end
 
@@ -391,7 +389,7 @@ end
 function Graph:remove_edge(edge_id)
 	local edge = self.edges[edge_id]
 	if not edge then
-		self.logger:warn("Graph", "Remove edge failed. Can not find edge `" .. edge_id .. "`.")
+		logger:warn("Graph", "Remove edge failed. Can not find edge `" .. edge_id .. "`.")
 		return false
 	end
 
@@ -431,7 +429,7 @@ function Graph:remove_edge(edge_id)
 
 	-- Others --
 
-	self.logger:info("Graph", "Remove `" .. edge._type .. "` `" .. edge._id .. "` from graph.")
+	logger:info("Graph", "Remove `" .. edge._type .. "` `" .. edge._id .. "` from graph.")
 	return true
 end
 
@@ -443,7 +441,7 @@ end
 function Graph:remove_node(node_id)
 	local node = self.nodes[node_id]
 	if not node then
-		self.logger:warn("Graph", "Remove node failed. Can not find node `" .. node_id .. "`.")
+		logger:warn("Graph", "Remove node failed. Can not find node `" .. node_id .. "`.")
 		return false
 	end
 
@@ -483,7 +481,7 @@ function Graph:remove_node(node_id)
 
 	-- Others --
 
-	self.logger:info("Graph", "Remove `" .. node._type .. "` `" .. node._id .. "` from graph.")
+	logger:info("Graph", "Remove `" .. node._type .. "` `" .. node._id .. "` from graph.")
 	return true
 end
 
@@ -498,7 +496,7 @@ end
 function Graph:transact(closure, description)
 	self.lock:acquire()
 	self.current_transaction = Transaction:begin(self:create_savepoint(), description)
-	self.logger:info("Graph", "Transaction `" .. self.current_transaction.description .. "` begin.")
+	logger:info("Graph", "Transaction `" .. self.current_transaction.description .. "` begin.")
 
 	local success, err_msg = pcall(closure)
 	if success then
@@ -510,25 +508,22 @@ function Graph:transact(closure, description)
 			table.insert(self.undo_stack, self.current_transaction)
 			self.redo_stack = {}
 
-			self.logger:info("Graph", "Transaction `" .. self.current_transaction.description .. "` commit completed.")
+			logger:info("Graph", "Transaction `" .. self.current_transaction.description .. "` commit completed.")
 		else
 			success = false
-			self.logger:error("Graph", "Transaction `" .. self.current_transaction.description .. "` commit failed.")
+			logger:error("Graph", "Transaction `" .. self.current_transaction.description .. "` commit failed.")
 		end
 	end
 
 	if not success then
-		self.logger:warn(
-			"Graph",
-			"Transaction `" .. self.current_transaction.description .. "` failed: " .. err_msg .. "."
-		)
+		logger:warn("Graph", "Transaction `" .. self.current_transaction.description .. "` failed: " .. err_msg .. ".")
 		-- Just simply rollback the savepoint now.
 		self:rollback_savepoint(self.current_transaction.savepoint)
-		self.logger:warn("Graph", "Transaction `" .. self.current_transaction.description .. "` rollback completed.")
+		logger:warn("Graph", "Transaction `" .. self.current_transaction.description .. "` rollback completed.")
 		-- if self.current_transaction:rollback() then
-		--   self.logger:info("Graph", "Transaction rollback completed.")
+		--   logger:info("Graph", "Transaction rollback completed.")
 		-- else
-		--   self.logger:error("Graph", "Transaction rollback failed.")
+		--   logger:error("Graph", "Transaction rollback failed.")
 		-- end
 	end
 
@@ -542,7 +537,7 @@ end
 function Graph:undo()
 	local transaction = table.remove(self.undo_stack)
 	if not transaction then
-		self.logger:info("Graph", "No transaction to undo.")
+		logger:info("Graph", "No transaction to undo.")
 		return false
 	end
 
@@ -562,7 +557,7 @@ end
 function Graph:redo()
 	local transaction = table.remove(self.redo_stack)
 	if not transaction then
-		self.logger:info("Graph", "No operation to redo.")
+		logger:info("Graph", "No operation to redo.")
 		return false
 	end
 
@@ -672,12 +667,12 @@ function Graph:show_card(edge_id)
 	until choice == string.byte(" ") or choice == string.byte("s") or choice == string.byte("q")
 
 	if choice == string.byte("s") then
-		self.logger:info("Graph", "Skip spaced repetition of the current card.")
+		logger:info("Graph", "Skip spaced repetition of the current card.")
 		status = "skip"
 		card_ui:unmount()
 		return status
 	elseif choice == string.byte("q") then
-		self.logger:info("Graph", "Quit spaced repetition of the current deck.")
+		logger:info("Graph", "Quit spaced repetition of the current deck.")
 		status = "quit"
 		card_ui:unmount()
 		return status
@@ -703,22 +698,22 @@ function Graph:show_card(edge_id)
 		or choice == string.byte("q")
 
 	if choice == string.byte("1") or choice == string.byte("a") then
-		self.logger:debug("Graph", "Answer again to edge `" .. edge_id .. "`.")
+		logger:debug("Graph", "Answer again to edge `" .. edge_id .. "`.")
 		self.alg:answer_again(edge)
 		status = "again"
 	elseif choice == string.byte(" ") or choice == string.byte("2") or choice == string.byte("g") then
-		self.logger:debug("Graph", "Answer good to edge `" .. edge_id .. "`.")
+		logger:debug("Graph", "Answer good to edge `" .. edge_id .. "`.")
 		self.alg:answer_good(edge)
 		status = "good"
 	elseif choice == string.byte("3") or choice == string.byte("e") then
-		self.logger:debug("Graph", "Answer easy to edge `" .. edge_id .. "`.")
+		logger:debug("Graph", "Answer easy to edge `" .. edge_id .. "`.")
 		self.alg:answer_easy(edge)
 		status = "easy"
 	elseif choice == string.byte("s") then
-		self.logger:info("Graph", "Skip spaced repetition of the current card.")
+		logger:info("Graph", "Skip spaced repetition of the current card.")
 		status = "skip"
 	elseif choice == string.byte("q") then
-		self.logger:info("Graph", "Quit spaced repetition of the current deck.")
+		logger:info("Graph", "Quit spaced repetition of the current deck.")
 		status = "quit"
 	end
 

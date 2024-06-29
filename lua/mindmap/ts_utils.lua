@@ -1,3 +1,5 @@
+local logger = require("mindmap.Logger"):register_source("Plugin.TSUtils")
+
 local ts_utils = {}
 
 ---Get the root node in the given buffer.
@@ -8,13 +10,13 @@ function ts_utils.get_root_node(bufnr)
 
 	local lang_tree = vim.treesitter.get_parser(bufnr, "norg")
 	if not lang_tree then
-		vim.notify("[TSUtils] Cannot get norg tree in the given buffer", vim.log.levels.ERROR)
+		logger.error("Cannot get norg tree in the given buffer")
 		return
 	end
 
 	local neorg_doc_tree = lang_tree:parse()[1]
 	if not neorg_doc_tree then
-		vim.notify("[TSUtils] Cannot parse norg tree in the given buffer", vim.log.levels.ERROR)
+		logger.error("Cannot parse norg tree in the given buffer")
 		return
 	end
 
@@ -77,10 +79,7 @@ function ts_utils.parse_heading_node(heading_node)
 
 	local sub_heading_level = tonumber(string.match(heading_node:type(), "%d")) + 1
 	if not sub_heading_level then
-		vim.notify(
-			string.format("[TSUtils] Node `%s` is not a heading node. Aborting parsing.", heading_node:type()),
-			vim.log.levels.ERROR
-		)
+		logger.error("Node `%s` is not a heading node. Aborting parsing.")
 		return title_node, content_node, sub_heading_nodes
 	end
 

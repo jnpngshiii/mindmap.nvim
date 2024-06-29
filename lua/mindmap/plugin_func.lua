@@ -1,3 +1,5 @@
+local logger = require("mindmap.Logger"):register_source("Plugin.Func")
+
 -- nvim-treesitter:
 local nts_utils = require("nvim-treesitter.ts_utils")
 -- telescope:
@@ -21,7 +23,7 @@ local AnkiAlg = require("mindmap.graph.alg.AnkiAlg")
 local SimpleAlg = require("mindmap.graph.alg.SimpleAlg")
 local SM2Alg = require("mindmap.graph.alg.SM2Alg")
 --   Logger:
-local Logger = require("mindmap.graph.Logger")
+local Logger = require("mindmap.logger")
 -- Utils:
 local utils = require("mindmap.utils")
 local ts_utils = require("mindmap.ts_utils")
@@ -112,7 +114,7 @@ end
 function plugin_func.find_heading_nodes(graph, location, force_add, id_regex)
 	local valid_locations = { latest = true, nearest = true, telescope = true, buffer = true }
 	if type(location) ~= "userdata" and not valid_locations[location] then
-		graph.logger:error(
+		logger:error(
 			"[Func]",
 			string.format(
 				"Invalid location `%s`. Must be TSNode, `latest`, `nearest`, `telescope` or `buffer`",
@@ -128,7 +130,7 @@ function plugin_func.find_heading_nodes(graph, location, force_add, id_regex)
 	local function process_node(ts_node)
 		local title_ts_node, _, _ = ts_utils.parse_heading_node(ts_node)
 		if not title_ts_node then
-			graph.logger:debug("[Func]", "Cannot find the title treesitter node. Skipping.")
+			logger:debug("[Func]", "Cannot find the title treesitter node. Skipping.")
 			return nil
 		end
 
@@ -137,7 +139,7 @@ function plugin_func.find_heading_nodes(graph, location, force_add, id_regex)
 
 		if not id then
 			if not force_add then
-				graph.logger:debug("[Func]", "Cannot find the node ID. Skipping.")
+				logger:debug("[Func]", "Cannot find the node ID. Skipping.")
 				return nil
 			end
 
@@ -145,7 +147,7 @@ function plugin_func.find_heading_nodes(graph, location, force_add, id_regex)
 			local file_name, _, rel_file_path = utils.get_file_info()
 			local ok, node = graph:add_node("HeadingNode", id, file_name, rel_file_path, {}, { ts_node = ts_node })
 			if not ok or not node then
-				graph.logger:error("[Func]", "Cannot force add a new node. Skipping.")
+				logger:error("[Func]", "Cannot force add a new node. Skipping.")
 				return nil
 			end
 
@@ -169,14 +171,14 @@ function plugin_func.find_heading_nodes(graph, location, force_add, id_regex)
 			ts_node = ts_node:parent()
 		end
 		if not ts_node then
-			graph.logger:error("[Func]", "Cannot find the treesitter node of the nearest heading.")
+			logger:error("[Func]", "Cannot find the treesitter node of the nearest heading.")
 			return {}
 		end
 		local node = process_node(ts_node)
 		return node and { [node._id] = node } or {}
 	elseif location == "telescope" then
 		-- TODO: Implement telescope functionality
-		graph.logger:warn("[Func]", "Telescope functionality not yet implemented.")
+		logger:warn("[Func]", "Telescope functionality not yet implemented.")
 		return {}
 	elseif location == "buffer" then
 		local found_nodes = {}

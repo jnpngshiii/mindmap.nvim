@@ -1,3 +1,5 @@
+local logger = require("mindmap.Logger"):register_source("Node.Excerpt")
+
 local utils = require("mindmap.utils")
 
 --------------------

@@ -1,3 +1,5 @@
+local logger = require("mindmap.Logger"):register_source("Graph.Trans")
+
 --------------------
 -- Class Transaction
 --------------------

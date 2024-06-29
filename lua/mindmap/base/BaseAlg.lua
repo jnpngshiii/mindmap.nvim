@@ -1,3 +1,5 @@
+local logger = require("mindmap.Logger"):register_source("Base.Alg")
+
 --------------------
 -- Class BaseAlg
 --------------------
@@ -39,17 +41,14 @@ function BaseAlg:new(version)
 
 	local success = base_alg:upgrade()
 	if not success then
-		vim.notify("[Base.Alg] Failed to upgrade alg. Return `nil`", vim.log.levels.WARN)
+		logger.warn("Failed to upgrade alg. Return `nil`")
 		return nil
 	end
 
 	if base_alg.check_health then
 		local issues = base_alg:check_health()
 		if #issues > 0 then
-			vim.notify(
-				"[Base.Alg] Health check failed: \n" .. table.concat(issues, "\n") .. "\nReturn `nil`.",
-				vim.log.levels.WARN
-			)
+			logger.warn("Health check failed: \n" .. table.concat(issues, "\n") .. "\nReturn `nil`.")
 			return nil
 		end
 	end
@@ -84,11 +83,11 @@ function BaseAlg:upgrade()
 		if upgrade_func then
 			local success = upgrade_func(self)
 			if not success then
-				vim.notify("[Base.Alg] Failed to upgrade to `v" .. next_version .. ".`")
+				logger.info("Failed to upgrade to `v" .. next_version .. ".`")
 				return false
 			end
 		else
-			vim.notify("[Base.Alg] Forced upgrade to `v" .. next_version .. ".`")
+			logger.info("Forced upgrade to `v" .. next_version .. ".`")
 		end
 
 		current_version = next_version
@@ -121,7 +120,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-local, unused-vararg
 function BaseAlg:answer_easy(edge, ...)
-	vim.notify("[Base] Method `answer_easy` is not implemented.", vim.log.levels.ERROR)
+	logger.error("Method `answer_easy` is not implemented.")
 end
 
 ---@abstract
@@ -131,7 +130,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-local, unused-vararg
 function BaseAlg:answer_good(edge, ...)
-	vim.notify("[Base] Method `answer_good` is not implemented.", vim.log.levels.ERROR)
+	logger.error("Method `answer_good` is not implemented.")
 end
 
 ---@abstract
@@ -141,7 +140,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-local, unused-vararg
 function BaseAlg:answer_again(edge, ...)
-	vim.notify("[Base] Method `answer_again` is not implemented.", vim.log.levels.ERROR)
+	logger.error("Method `answer_again` is not implemented.")
 end
 
 ----------

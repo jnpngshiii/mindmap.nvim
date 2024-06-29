@@ -1,3 +1,5 @@
+local logger = require("mindmap.Logger"):register_source("Base.Node")
+
 local utils = require("mindmap.utils")
 
 --------------------
@@ -84,17 +86,14 @@ function BaseNode:new(
 
 	local success = base_node:upgrade()
 	if not success then
-		vim.notify("[Base.Node] Failed to upgrade node. Return `nil`", vim.log.levels.WARN)
+		logger.warn("Failed to upgrade node. Return `nil`")
 		return nil
 	end
 
 	if base_node.check_health then
 		local issues = base_node:check_health()
 		if #issues > 0 then
-			vim.notify(
-				"[Base.Node] Health check failed: \n" .. table.concat(issues, "\n") .. "\nReturn `nil`.",
-				vim.log.levels.WARN
-			)
+			logger.warn("Health check failed: \n" .. table.concat(issues, "\n") .. "\nReturn `nil`.")
 			return nil
 		end
 	end
@@ -129,11 +128,11 @@ function BaseNode:upgrade()
 		if upgrade_func then
 			local success = upgrade_func(self)
 			if not success then
-				vim.notify("[Base.Node] Failed to upgrade to `v" .. next_version .. ".`")
+				logger.info("Failed to upgrade to `v" .. next_version .. ".`")
 				return false
 			end
 		else
-			vim.notify("[Base.Node] Forced upgrade to `v" .. next_version .. ".`")
+			logger.info("Forced upgrade to `v" .. next_version .. ".`")
 		end
 
 		current_version = next_version
@@ -207,7 +206,7 @@ end
 ---@return string[] front, string[] back Content of the node.
 ---@diagnostic disable-next-line: unused-local
 function BaseNode:get_content(edge_type)
-	vim.notify("[Base.Node] Method `get_content` is not implemented.")
+	logger.info("Method `get_content` is not implemented.")
 	return {}, {}
 end
 
@@ -222,7 +221,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:before_add_into_graph(...)
-	-- vim.notify("[Base.Node] Method `before_add_into_graph` is not implemented.")
+	-- logger.info("Method `before_add_into_graph` is not implemented.")
 end
 
 ---@abstract
@@ -231,7 +230,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:after_add_into_graph(...)
-	-- vim.notify("[Base.Node] Method `after_add_into_graph` is not implemented.")
+	-- logger.info("Method `after_add_into_graph` is not implemented.")
 end
 
 ---@abstract
@@ -240,7 +239,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:before_remove_from_graph(...)
-	-- vim.notify("[Base.Node] Method `before_remove_from_graph` is not implemented.")
+	-- logger.info("Method `before_remove_from_graph` is not implemented.")
 end
 
 ---@abstract
@@ -249,7 +248,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:after_remove_from_graph(...)
-	-- vim.notify("[Base.Node] Method `after_remove_from_graph` is not implemented.")
+	-- logger.info("Method `after_remove_from_graph` is not implemented.")
 end
 
 --------------------

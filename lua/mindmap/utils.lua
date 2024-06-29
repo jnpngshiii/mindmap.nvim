@@ -1,3 +1,5 @@
+local logger = require("mindmap.Logger"):register_source("Plugin.Utils")
+
 local utils = {}
 
 --------------------
@@ -255,7 +257,7 @@ function utils.with_temp_bufnr(file_path, callback, ...)
 
 		local ok, content = pcall(vim.fn.readfile, file_path)
 		if not ok then
-			vim.notify("[Utils] Failed to read file: `" .. file_path .. "`.", vim.log.levels.ERROR)
+			logger.error("Failed to read file: `" .. file_path .. "`.")
 			vim.api.nvim_buf_delete(bufnr, { force = true })
 			return
 		end

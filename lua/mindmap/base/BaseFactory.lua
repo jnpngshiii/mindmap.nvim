@@ -1,3 +1,5 @@
+local logger = require("mindmap.Logger"):register_source("Base.Factory")
+
 --------------------
 -- Class BaseFactory
 --------------------
@@ -31,25 +33,18 @@ function BaseFactory:register(type_to_be_registered, cls_to_be_registered, type_
 	local cls_to_be_inherited = self:get_registered_class(type_to_be_inherited or "N/A") or self.base_cls
 
 	if self.registered_cls[type_to_be_registered] then
-		vim.notify(
-			"[Base] Type `" .. type_to_be_registered .. "` already registered. Aborting registration.",
-			vim.log.levels.WARN
-		)
+		logger.warn("Type `" .. type_to_be_registered .. "` already registered. Aborting registration.")
 		return false
 	end
 	if not cls_to_be_inherited.new or type(cls_to_be_inherited.new) ~= "function" then
-		vim.notify(
-			"[Base] Class to be inherited does not have a `new` method. Aborting registration.",
-			vim.log.levels.ERROR
-		)
+		logger.error("Class to be inherited does not have a `new` method. Aborting registration.")
 		return false
 	end
 	if not cls_to_be_registered.new or type(cls_to_be_registered.new) ~= "function" then
-		vim.notify(
-			"[Base] Class to be registered `"
+		logger.warn(
+			"Class to be registered `"
 				.. type_to_be_registered
-				.. "` does not have a `new` method. Binding default `new` method.",
-			vim.log.levels.WARN
+				.. "` does not have a `new` method. Binding default `new` method."
 		)
 
 		function cls_to_be_registered:new(...)
@@ -75,10 +70,7 @@ end
 function BaseFactory:get_registered_class(registered_type)
 	local registered_cls = self.registered_cls[registered_type]
 	if not registered_cls then
-		-- vim.notify(
-		-- "[Base] Type `" .. registered_type .. "` is not registered. Aborting retrieval.",
-		-- vim.log.levels.WARN
-		-- )
+		logger.warn("Type `" .. registered_type .. "` is not registered. Aborting retrieval.")
 		return
 	end
 
@@ -103,10 +95,7 @@ end
 function BaseFactory:create(registered_type, ...)
 	local registered_cls = self:get_registered_class(registered_type)
 	if not registered_cls then
-		vim.notify(
-			"[Base] Type `" .. registered_type .. "` is not registered. Aborting creation.",
-			vim.log.levels.ERROR
-		)
+		logger.error("Type `" .. registered_type .. "` is not registered. Aborting creation.")
 		return
 	end
 
