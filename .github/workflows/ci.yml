@@ -2,9 +2,11 @@ name: Simple Test
 
 on:
   push:
-    branches: [master]
+    branches:
+      - _master
   pull_request:
-    branches: [master]
+    branches:
+      - _master
 
 jobs:
   test:

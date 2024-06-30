@@ -1,10 +1,12 @@
 {
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "release-type": "simple",
   "packages": {
     ".": {
-      "release-type": "simple",
+      "package-name": "mindmap.nvim",
       "changelog-path": "CHANGELOG.md",
-      "bump-minor-pre-major": true,
-      "bump-patch-for-minor-pre-major": true
+      "release-type": "simple"
     }
   }
 }
