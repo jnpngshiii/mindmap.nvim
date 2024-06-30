@@ -1,11 +1,8 @@
 {
-  "bump-minor-pre-major": true,
-  "bump-patch-for-minor-pre-major": true,
-  "release-type": "simple",
+  "initial-version": "0.1.0",
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "packages": {
     ".": {
-      "package-name": "mindmap.nvim",
-      "changelog-path": "CHANGELOG.md",
       "release-type": "simple"
     }
   }
