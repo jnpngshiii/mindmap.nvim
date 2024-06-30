@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.2.0...v1.0.0) (2024-06-30)
+
+
+### Features
+
+* update ([1757f6d](https://github.com/jnpngshiii/mindmap.nvim/commit/1757f6de0745210274c53d9d1902375a9127da40))
+
 ## [0.2.0](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.1.1...v0.2.0) (2024-06-30)
 
 
