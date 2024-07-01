@@ -4,41 +4,56 @@ on:
   push:
     branches:
       - master
+      - dev
   pull_request:
     branches:
       - master
+      - dev
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Lua
-        uses: leafo/gh-actions-lua@v8
-        with:
-          luaVersion: "5.4"
-      - name: Set up LuaRocks
-        uses: leafo/gh-actions-luarocks@v4
-      - name: Install dependencies
-        run: |
-          luarocks install busted
-      - name: Run tests
-        run: |
-          busted tests/test_spec.lua
+  ####################
+  # test
+  ####################
 
-  release:
-    needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+  test:
+    name: test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        neovim_version: ["nightly", "stable"]
+
     steps:
-      - uses: googleapis/release-please-action@v4
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: run tests
+        uses: nvim-neorocks/nvim-busted-action@v1
+        with:
+          nvim_version: ${{ matrix.neovim_version }}
+
+  ####################
+  # github-release
+  ####################
+
+  github-release:
+    name: github-release
+    runs-on: ubuntu-latest
+    needs: test
+    if: (github.event_name == 'push' || github.event_name == 'pull_request') && github.ref == 'refs/heads/master'
+
+    steps:
+      - name: init release-please
+        uses: googleapis/release-please-action@v4
         id: release
         with:
           config-file: .github/release-please-config.json
           manifest-file: .github/.release-please-manifest.json
-      - uses: actions/checkout@v4
+
+      - name: checkout
+        uses: actions/checkout@v4
         if: ${{ steps.release.outputs.release_created }}
-      - name: Tag stable version
+
+      - name: release
         if: ${{ steps.release.outputs.release_created }}
         run: |
           git config user.name github-actions[bot]
@@ -48,3 +63,25 @@ jobs:
           git push origin :stable || true
           git tag -a stable -m "Last Stable Release"
           git push origin stable
+
+  ####################
+  # luarocks-release
+  ####################
+
+  luarocks-release:
+    name: luarocks-release
+    runs-on: ubuntu-latest
+    needs: test
+    if: (github.event_name == 'push' || github.event_name == 'pull_request') && github.ref == 'refs/heads/master' && startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: release
+        uses: nvim-neorocks/luarocks-tag-release@v7
+        env:
+          LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}
+        with:
+          dependencies: |
+            nui.nvim
