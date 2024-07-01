@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.1.1...v0.1.2) (2024-07-01)
+
+
+### Bug Fixes
+
+* **ci:** fix wrong condition of `luarocks-release` ([b543b33](https://github.com/jnpngshiii/mindmap.nvim/commit/b543b33fb5020388ae4fed400501f62255f1b120))
+
 ## [0.1.1](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.1.0...v0.1.1) (2024-07-01)
 
 
