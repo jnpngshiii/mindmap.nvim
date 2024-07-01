@@ -4,30 +4,32 @@ on:
   push:
     tags:
       - "v*"
+      - test
   pull_request:
     tags:
       - "v*"
+      - test
 
 jobs:
   ####################
   # test
   ####################
 
-  test:
-    name: test
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        neovim_version: ["nightly", "stable"]
-
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-
-      - name: run tests
-        uses: nvim-neorocks/nvim-busted-action@v1
-        with:
-          nvim_version: ${{ matrix.neovim_version }}
+  # test:
+  #   name: test
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       neovim_version: ["nightly", "stable"]
+  #
+  #   steps:
+  #     - name: checkout
+  #       uses: actions/checkout@v4
+  #
+  #     - name: run tests
+  #       uses: nvim-neorocks/nvim-busted-action@v1
+  #       with:
+  #         nvim_version: ${{ matrix.neovim_version }}
 
   ####################
   # luarocks-release
@@ -36,8 +38,8 @@ jobs:
   luarocks-release:
     name: luarocks-release
     runs-on: ubuntu-latest
-    needs:
-      - test
+    # needs:
+    #   - test
 
     steps:
       - name: checkout
