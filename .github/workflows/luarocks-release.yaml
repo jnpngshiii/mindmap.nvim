@@ -5,8 +5,7 @@ on:
     tags:
       - "*"
   pull_request:
-    tags:
-      - "*"
+  workflow_dispatch:
 
 jobs:
   ####################
