@@ -16,28 +16,28 @@ Lock.__index = Lock
 ---Create a new lock.
 ---@return Lock lock The created lock.
 function Lock:new()
-	local lock = {
-		is_locked = false,
-	}
-	lock.__index = lock
-	setmetatable(lock, Lock)
+  local lock = {
+    is_locked = false,
+  }
+  lock.__index = lock
+  setmetatable(lock, Lock)
 
-	return lock
+  return lock
 end
 
 ---Acquire the lock.
 ---@return nil
 function Lock:acquire()
-	while self.is_locked do
-		coroutine.yield()
-	end
-	self.is_locked = true
+  while self.is_locked do
+    coroutine.yield()
+  end
+  self.is_locked = true
 end
 
 ---Release the lock.
 ---@return nil
 function Lock:release()
-	self.is_locked = false
+  self.is_locked = false
 end
 
 --------------------

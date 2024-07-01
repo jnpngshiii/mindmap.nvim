@@ -58,47 +58,47 @@ local base_node_version = 11
 ---@param _version? integer Version of the node.
 ---@return BaseNode? base_node The created node, or nil if check health failed.
 function BaseNode:new(
-	_type,
-	_id,
-	_file_name,
-	_rel_file_dir,
-	--
-	_data,
-	_cache,
-	_created_at,
-	_state,
-	_version
+  _type,
+  _id,
+  _file_name,
+  _rel_file_dir,
+  --
+  _data,
+  _cache,
+  _created_at,
+  _state,
+  _version
 )
-	local base_node = {
-		_type = _type,
-		_id = _id,
-		_file_name = _file_name,
-		_rel_file_dir = _rel_file_dir,
-		--
-		_data = _data or {},
-		_cache = _cache or {},
-		_created_at = _created_at or tonumber(os.time()),
-		_state = _state or "active",
-		_version = _version or base_node_version,
-	}
-	base_node.__index = base_node
-	setmetatable(base_node, BaseNode)
+  local base_node = {
+    _type = _type,
+    _id = _id,
+    _file_name = _file_name,
+    _rel_file_dir = _rel_file_dir,
+    --
+    _data = _data or {},
+    _cache = _cache or {},
+    _created_at = _created_at or tonumber(os.time()),
+    _state = _state or "active",
+    _version = _version or base_node_version,
+  }
+  base_node.__index = base_node
+  setmetatable(base_node, BaseNode)
 
-	local success = base_node:upgrade()
-	if not success then
-		logger.warn("Failed to upgrade node. Return `nil`")
-		return nil
-	end
+  local success = base_node:upgrade()
+  if not success then
+    logger.warn("Failed to upgrade node. Return `nil`")
+    return nil
+  end
 
-	if base_node.check_health then
-		local issues = base_node:check_health()
-		if #issues > 0 then
-			logger.warn("Health check failed: \n" .. table.concat(issues, "\n") .. "\nReturn `nil`.")
-			return nil
-		end
-	end
+  if base_node.check_health then
+    local issues = base_node:check_health()
+    if #issues > 0 then
+      logger.warn("Health check failed: \n" .. table.concat(issues, "\n") .. "\nReturn `nil`.")
+      return nil
+    end
+  end
 
-	return base_node
+  return base_node
 end
 
 ---Upgrade the node to the latest version.
@@ -119,85 +119,80 @@ end
 ---without any changes to the node's data.
 ---@return boolean success Whether the upgrade was successful.
 function BaseNode:upgrade()
-	local current_version = self._version
-	local latest_version = base_node_version
+  local current_version = self._version
+  local latest_version = base_node_version
 
-	while current_version < latest_version do
-		local next_version = current_version + 1
-		local upgrade_func = self["upgrade_to_v" .. next_version]
-		if upgrade_func then
-			local success = upgrade_func(self)
-			if not success then
-				logger.info("Failed to upgrade to `v" .. next_version .. ".`")
-				return false
-			end
-		else
-			logger.info("Forced upgrade to `v" .. next_version .. ".`")
-		end
+  while current_version < latest_version do
+    local next_version = current_version + 1
+    local upgrade_func = self["upgrade_to_v" .. next_version]
+    if upgrade_func then
+      local success = upgrade_func(self)
+      if not success then
+        logger.info("Failed to upgrade to `v" .. next_version .. ".`")
+        return false
+      end
+    else
+      logger.info("Forced upgrade to `v" .. next_version .. ".`")
+    end
 
-		current_version = next_version
-		self._version = current_version
-	end
+    current_version = next_version
+    self._version = current_version
+  end
 
-	return true
+  return true
 end
 
 ---Basic health check for node.
 ---Subclasses should override this method.
 ---@return string[] issues List of issues. Empty if the node is healthy.
 function BaseNode:check_health()
-	local issues = {}
+  local issues = {}
 
-	-- Check mandatory fields
-	if type(self._type) ~= "string" then
-		table.insert(issues, "Invalid `_type`: expected `string`, got `" .. type(self._type) .. "`;")
-	end
-	if type(self._id) ~= "number" then
-		table.insert(issues, "Invalid `_id`: expected `number`, got `" .. type(self._id) .. "`;")
-	end
-	if type(self._file_name) ~= "string" then
-		table.insert(issues, "Invalid `_file_name`: expected `string`, got `" .. type(self._file_name) .. "`;")
-	end
-	if type(self._rel_file_dir) ~= "string" then
-		table.insert(issues, "Invalid `_rel_file_dir`: expected `string`, got `" .. type(self._rel_file_dir) .. "`;")
-	end
+  -- Check mandatory fields
+  if type(self._type) ~= "string" then
+    table.insert(issues, "Invalid `_type`: expected `string`, got `" .. type(self._type) .. "`;")
+  end
+  if type(self._id) ~= "number" then
+    table.insert(issues, "Invalid `_id`: expected `number`, got `" .. type(self._id) .. "`;")
+  end
+  if type(self._file_name) ~= "string" then
+    table.insert(issues, "Invalid `_file_name`: expected `string`, got `" .. type(self._file_name) .. "`;")
+  end
+  if type(self._rel_file_dir) ~= "string" then
+    table.insert(issues, "Invalid `_rel_file_dir`: expected `string`, got `" .. type(self._rel_file_dir) .. "`;")
+  end
 
-	-- Check optional fields
-	if type(self._data) ~= "table" then
-		table.insert(issues, "Invalid `_data`: expected `table` or `nil`, got `" .. type(self._data) .. "`;")
-	end
-	if type(self._cache) ~= "table" then
-		table.insert(issues, "Invalid `_cache`: expected `table` or `nil`, got `" .. type(self._cache) .. "`;")
-	end
-	if type(self._created_at) ~= "number" then
-		table.insert(
-			issues,
-			"Invalid `_created_at`: expected `number` or `nil`, got `" .. type(self._created_at) .. "`;"
-		)
-	end
-	if type(self._state) ~= "string" then
-		table.insert(issues, "Invalid `_state`: expected `string` or `nil`, got `" .. type(self._state) .. "`;")
-	end
-	if type(self._version) ~= "number" then
-		table.insert(issues, "Invalid `_version`: expected `number` or `nil`, got `" .. type(self._version) .. "`;")
-	end
+  -- Check optional fields
+  if type(self._data) ~= "table" then
+    table.insert(issues, "Invalid `_data`: expected `table` or `nil`, got `" .. type(self._data) .. "`;")
+  end
+  if type(self._cache) ~= "table" then
+    table.insert(issues, "Invalid `_cache`: expected `table` or `nil`, got `" .. type(self._cache) .. "`;")
+  end
+  if type(self._created_at) ~= "number" then
+    table.insert(issues, "Invalid `_created_at`: expected `number` or `nil`, got `" .. type(self._created_at) .. "`;")
+  end
+  if type(self._state) ~= "string" then
+    table.insert(issues, "Invalid `_state`: expected `string` or `nil`, got `" .. type(self._state) .. "`;")
+  end
+  if type(self._version) ~= "number" then
+    table.insert(issues, "Invalid `_version`: expected `number` or `nil`, got `" .. type(self._version) .. "`;")
+  end
 
-	return issues
+  return issues
 end
 
 ---Get the absolute path of the file where the node is from.
 ---@return string abs_file_path The absolute path of the file.
 function BaseNode:get_abs_path()
-	if self._cache.abs_file_path then
-		return self._cache.abs_file_path
-	end
+  if self._cache.abs_file_path then
+    return self._cache.abs_file_path
+  end
 
-	local abs_file_path = utils.get_abs_path(self._rel_file_dir, ({ utils.get_file_info() })[4])
-		.. "/"
-		.. self._file_name
+  local abs_file_path = utils.get_abs_path(self._rel_file_dir, ({ utils.get_file_info() })[4]) .. "/" .. self._file_name
 
-	self._cache.abs_file_path = abs_file_path
-	return abs_file_path
+  self._cache.abs_file_path = abs_file_path
+  return abs_file_path
 end
 
 ---@abstract
@@ -206,8 +201,8 @@ end
 ---@return string[] front, string[] back Content of the node.
 ---@diagnostic disable-next-line: unused-local
 function BaseNode:get_content(edge_type)
-	logger.info("Method `get_content` is not implemented.")
-	return {}, {}
+  logger.info("Method `get_content` is not implemented.")
+  return {}, {}
 end
 
 ----------
@@ -221,7 +216,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:before_add_into_graph(...)
-	-- logger.info("Method `before_add_into_graph` is not implemented.")
+  -- logger.info("Method `before_add_into_graph` is not implemented.")
 end
 
 ---@abstract
@@ -230,7 +225,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:after_add_into_graph(...)
-	-- logger.info("Method `after_add_into_graph` is not implemented.")
+  -- logger.info("Method `after_add_into_graph` is not implemented.")
 end
 
 ---@abstract
@@ -239,7 +234,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:before_remove_from_graph(...)
-	-- logger.info("Method `before_remove_from_graph` is not implemented.")
+  -- logger.info("Method `before_remove_from_graph` is not implemented.")
 end
 
 ---@abstract
@@ -248,7 +243,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:after_remove_from_graph(...)
-	-- logger.info("Method `after_remove_from_graph` is not implemented.")
+  -- logger.info("Method `after_remove_from_graph` is not implemented.")
 end
 
 --------------------

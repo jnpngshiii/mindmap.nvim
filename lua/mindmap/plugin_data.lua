@@ -44,29 +44,29 @@ local plugin_data = {}
 ---@field show_excerpt_after_add boolean Show excerpt after adding a node.
 ---@field show_excerpt_after_bfread boolean Show excerpt after reading a buffer.
 plugin_data.config = {
-	-- Node:
-	base_node = BaseNode,
-	node_factory = NodeFactory,
-	-- Edge:
-	base_edge = BaseEdge,
-	edge_factory = EdgeFactory,
-	-- Alg:
-	base_alg = BaseAlg,
-	alg_factory = AlgFactory,
-	alg_type = "SimpleAlg",
-	-- Logger:
-	log_level = "INFO",
-	show_log_in_nvim = true,
-	-- Behavior configuration:
-	--   Default behavior:
-	enable_default_keymap = true,
-	keymap_prefix = "<localleader>m",
-	enable_shorten_keymap = false,
-	shorten_keymap_prefix = "m",
-	enable_default_autocmd = true,
-	--   Automatic behavior:
-	show_excerpt_after_add = true,
-	show_excerpt_after_bfread = true,
+  -- Node:
+  base_node = BaseNode,
+  node_factory = NodeFactory,
+  -- Edge:
+  base_edge = BaseEdge,
+  edge_factory = EdgeFactory,
+  -- Alg:
+  base_alg = BaseAlg,
+  alg_factory = AlgFactory,
+  alg_type = "SimpleAlg",
+  -- Logger:
+  log_level = "INFO",
+  show_log_in_nvim = true,
+  -- Behavior configuration:
+  --   Default behavior:
+  enable_default_keymap = true,
+  keymap_prefix = "<localleader>m",
+  enable_shorten_keymap = false,
+  shorten_keymap_prefix = "m",
+  enable_default_autocmd = true,
+  --   Automatic behavior:
+  show_excerpt_after_add = true,
+  show_excerpt_after_bfread = true,
 }
 
 ----------
@@ -77,8 +77,8 @@ plugin_data.config = {
 ---@field graphs table<string, Graph> Graphs of different repos.
 ---@field namespaces table<string, integer> Namespaces of different virtual texts.
 plugin_data.cache = {
-	graphs = {},
-	namespaces = {},
+  graphs = {},
+  namespaces = {},
 }
 
 --------------------

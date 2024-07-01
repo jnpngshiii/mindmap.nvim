@@ -19,16 +19,16 @@ Transaction.__index = Transaction
 ---@param description? string Description of the transaction.
 ---@return Transaction transaction The new transaction.
 function Transaction:begin(savepoint, description)
-	local transaction = {
-		savepoint = savepoint,
-		description = description or "",
-		operations = {},
-		inverses = {},
-	}
-	transaction.__index = transaction
-	setmetatable(transaction, Transaction)
+  local transaction = {
+    savepoint = savepoint,
+    description = description or "",
+    operations = {},
+    inverses = {},
+  }
+  transaction.__index = transaction
+  setmetatable(transaction, Transaction)
 
-	return transaction
+  return transaction
 end
 
 ---Commit the transaction.
@@ -36,17 +36,17 @@ end
 ---See: `Graph:transact`.
 ---@return boolean is_committed Whether the transaction is successfully committed.
 function Transaction:commit()
-	local success = true
+  local success = true
 
-	for i = 1, #self.operations do
-		local ok, _ = pcall(self.operations[i])
-		if not ok then
-			success = false
-			break
-		end
-	end
+  for i = 1, #self.operations do
+    local ok, _ = pcall(self.operations[i])
+    if not ok then
+      success = false
+      break
+    end
+  end
 
-	return success
+  return success
 end
 
 ---@deprecated Needs update.
@@ -55,17 +55,17 @@ end
 ---See: `Graph:transact`.
 ---@return boolean is_rolled_back Whether the transaction is successfully rolled back.
 function Transaction:rollback()
-	local success = true
+  local success = true
 
-	for i = #self.operations, 1, -1 do
-		local ok, _ = pcall(self.inverses[i])
-		if not ok then
-			success = false
-			break
-		end
-	end
+  for i = #self.operations, 1, -1 do
+    local ok, _ = pcall(self.inverses[i])
+    if not ok then
+      success = false
+      break
+    end
+  end
 
-	return success
+  return success
 end
 
 ---Record an operation and its inverse.
@@ -77,8 +77,8 @@ end
 ---@param inverse function The inverse of the operation.
 ---@return nil
 function Transaction:record(operation, inverse)
-	table.insert(self.operations, operation)
-	table.insert(self.inverses, inverse)
+  table.insert(self.operations, operation)
+  table.insert(self.inverses, inverse)
 end
 
 --------------------

@@ -22,18 +22,18 @@ local ExcerptNode = {}
 ---@return string[] front, string[] back Content of the node.
 ---@diagnostic disable-next-line: unused-local
 function ExcerptNode:get_content(edge_type)
-	local front, back = {}, {}
+  local front, back = {}, {}
 
-	local excerpt = utils.get_file_content(
-		self:get_abs_path(),
-		self._data.start_row,
-		self._data.end_row,
-		self._data.start_col,
-		self._data.end_col
-	)
-	front, back = excerpt, excerpt
+  local excerpt = utils.get_file_content(
+    self:get_abs_path(),
+    self._data.start_row,
+    self._data.end_row,
+    self._data.start_col,
+    self._data.end_col
+  )
+  front, back = excerpt, excerpt
 
-	return front, back
+  return front, back
 end
 
 --------------------

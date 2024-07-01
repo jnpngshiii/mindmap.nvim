@@ -31,29 +31,29 @@ local base_alg_version = 3
 ---@param version? integer Version of the algorithm.
 ---@return BaseAlg? base_alg The created algorithm, or nil if check health failed.
 function BaseAlg:new(version)
-	local base_alg = {
-		initial_ease = 250,
-		initial_interval = 1,
-		version = version or base_alg_version,
-	}
-	base_alg.__index = base_alg
-	setmetatable(base_alg, BaseAlg)
+  local base_alg = {
+    initial_ease = 250,
+    initial_interval = 1,
+    version = version or base_alg_version,
+  }
+  base_alg.__index = base_alg
+  setmetatable(base_alg, BaseAlg)
 
-	local success = base_alg:upgrade()
-	if not success then
-		logger.warn("Failed to upgrade alg. Return `nil`")
-		return nil
-	end
+  local success = base_alg:upgrade()
+  if not success then
+    logger.warn("Failed to upgrade alg. Return `nil`")
+    return nil
+  end
 
-	if base_alg.check_health then
-		local issues = base_alg:check_health()
-		if #issues > 0 then
-			logger.warn("Health check failed: \n" .. table.concat(issues, "\n") .. "\nReturn `nil`.")
-			return nil
-		end
-	end
+  if base_alg.check_health then
+    local issues = base_alg:check_health()
+    if #issues > 0 then
+      logger.warn("Health check failed: \n" .. table.concat(issues, "\n") .. "\nReturn `nil`.")
+      return nil
+    end
+  end
 
-	return base_alg
+  return base_alg
 end
 
 ---Upgrade the alg to the latest version.
@@ -74,43 +74,43 @@ end
 ---without any changes to the alg's data.
 ---@return boolean success Whether the upgrade was successful.
 function BaseAlg:upgrade()
-	local current_version = self._version
-	local latest_version = base_alg_version
+  local current_version = self._version
+  local latest_version = base_alg_version
 
-	while current_version < latest_version do
-		local next_version = current_version + 1
-		local upgrade_func = self["upgrade_to_v" .. next_version]
-		if upgrade_func then
-			local success = upgrade_func(self)
-			if not success then
-				logger.info("Failed to upgrade to `v" .. next_version .. ".`")
-				return false
-			end
-		else
-			logger.info("Forced upgrade to `v" .. next_version .. ".`")
-		end
+  while current_version < latest_version do
+    local next_version = current_version + 1
+    local upgrade_func = self["upgrade_to_v" .. next_version]
+    if upgrade_func then
+      local success = upgrade_func(self)
+      if not success then
+        logger.info("Failed to upgrade to `v" .. next_version .. ".`")
+        return false
+      end
+    else
+      logger.info("Forced upgrade to `v" .. next_version .. ".`")
+    end
 
-		current_version = next_version
-		self._version = current_version
-	end
+    current_version = next_version
+    self._version = current_version
+  end
 
-	return true
+  return true
 end
 
 ---Basic health check for alg.
 ---Subclasses should override this method.
 ---@return string[] issues List of issues. Empty if the alg is healthy.
 function BaseAlg:check_health()
-	local issues = {}
+  local issues = {}
 
-	if type(self.initial_ease) ~= "number" then
-		table.insert(issues, "Invalid `initial_ease`: expected `number`, got `" .. type(self.initial_ease) .. "`;")
-	end
-	if type(self.initial_interval) ~= "number" then
-		table.insert(issues, "Invalid `initial_ease`: expected `number`, got `" .. type(self.initial_interval) .. "`;")
-	end
+  if type(self.initial_ease) ~= "number" then
+    table.insert(issues, "Invalid `initial_ease`: expected `number`, got `" .. type(self.initial_ease) .. "`;")
+  end
+  if type(self.initial_interval) ~= "number" then
+    table.insert(issues, "Invalid `initial_ease`: expected `number`, got `" .. type(self.initial_interval) .. "`;")
+  end
 
-	return issues
+  return issues
 end
 
 ---@abstract
@@ -120,7 +120,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-local, unused-vararg
 function BaseAlg:answer_easy(edge, ...)
-	logger.error("Method `answer_easy` is not implemented.")
+  logger.error("Method `answer_easy` is not implemented.")
 end
 
 ---@abstract
@@ -130,7 +130,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-local, unused-vararg
 function BaseAlg:answer_good(edge, ...)
-	logger.error("Method `answer_good` is not implemented.")
+  logger.error("Method `answer_good` is not implemented.")
 end
 
 ---@abstract
@@ -140,7 +140,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-local, unused-vararg
 function BaseAlg:answer_again(edge, ...)
-	logger.error("Method `answer_again` is not implemented.")
+  logger.error("Method `answer_again` is not implemented.")
 end
 
 ----------
@@ -155,15 +155,15 @@ end
 ---@param fuzz? integer The fuzz factor. Default is 3.
 ---@return integer new_interval The new adjusted interval.
 function BaseAlg:random_adjust_interval(interval, fuzz)
-	fuzz = fuzz or 3
+  fuzz = fuzz or 3
 
-	if interval >= 8 then
-		local choices = { -fuzz, 0, fuzz }
-		local random_index = math.random(#choices)
-		interval = interval + choices[random_index]
-	end
+  if interval >= 8 then
+    local choices = { -fuzz, 0, fuzz }
+    local random_index = math.random(#choices)
+    interval = interval + choices[random_index]
+  end
 
-	return interval
+  return interval
 end
 
 --------------------
