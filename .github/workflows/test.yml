@@ -1,0 +1,43 @@
+name: CI / CD
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Lua
+        uses: leafo/gh-actions-lua@v8
+        with:
+          luaVersion: "5.4"
+
+      - name: Set up LuaRocks
+        uses: leafo/gh-actions-luarocks@v4
+
+      - name: Clone third-party libraries
+        run: |
+          mkdir -p third_party
+          # git clone https://github.com/MunifTanjim/nui.nvim.git third_party/nui
+          luarocks install nui.nvim
+          git clone https://github.com/nvim-treesitter/nvim-treesitter.git third_party/nvim-treesitter
+
+      - name: Set up Lua path
+        run: |
+          echo "LUA_PATH='./lua/?.lua;'$LUA_PATH" >> $GITHUB_ENV
+          echo "LUA_PATH='./lua/?/init.lua;'$LUA_PATH" >> $GITHUB_ENV
+          echo "LUA_PATH='./third_party/?/lua/?.lua;'$LUA_PATH" >> $GITHUB_ENV
+          echo "LUA_PATH='./third_party/?/lua/?/init.lua;'$LUA_PATH" >> $GITHUB_ENV
+          echo "LUA_PATH='./third_party/?/lua/?/*/init.lua;'$LUA_PATH" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: |
+          luarocks install busted
+
+      - name: Run tests
+        run: |
+          busted tests/test_spec.lua
