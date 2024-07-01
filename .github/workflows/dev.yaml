@@ -1,0 +1,30 @@
+name: dev
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  ####################
+  # test
+  ####################
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        neovim_version: ["nightly", "stable"]
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: run tests
+        uses: nvim-neorocks/nvim-busted-action@v1
+        with:
+          nvim_version: ${{ matrix.neovim_version }}

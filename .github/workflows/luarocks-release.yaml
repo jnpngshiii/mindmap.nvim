@@ -1,0 +1,52 @@
+name: luarocks-release
+
+on:
+  push:
+    tags:
+      - "v*"
+  pull_request:
+    tags:
+      - "v*"
+
+jobs:
+  ####################
+  # test
+  ####################
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        neovim_version: ["nightly", "stable"]
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: run tests
+        uses: nvim-neorocks/nvim-busted-action@v1
+        with:
+          nvim_version: ${{ matrix.neovim_version }}
+
+  ####################
+  # luarocks-release
+  ####################
+
+  luarocks-release:
+    name: luarocks-release
+    runs-on: ubuntu-latest
+    needs:
+      - test
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: release
+        uses: nvim-neorocks/luarocks-tag-release@v7
+        env:
+          LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}
+        with:
+          dependencies: |
+            nui.nvim
