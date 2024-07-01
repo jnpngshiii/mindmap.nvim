@@ -451,6 +451,31 @@ end, {
 })
 
 ----------
+-- MindmapLogger
+----------
+
+---Set the log level for the logger.
+---@param log_level number|string Log level of the logger.
+---@return nil
+function user_func.MindmapLoggerSetLevel(log_level)
+  local ok, result = pcall(logger:set_log_level(log_level))
+  if not ok then
+    logger:error("Failed to set log level: " .. result)
+    return
+  end
+
+  logger:info("Log level set to `" .. log_level .. "`")
+end
+
+vim.api.nvim_create_user_command("MindmapLoggerSetLevel", function(opts)
+  user_func.MindmapSave(opts.fargs[1])
+end, {
+  nargs = 1,
+  complete = function(_, _, _) end,
+  desc = "Set the log level for the logger",
+})
+
+----------
 -- MindmapTest (t)
 ----------
 
