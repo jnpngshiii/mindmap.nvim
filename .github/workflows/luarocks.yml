@@ -20,4 +20,3 @@ jobs:
         with:
           dependencies: |
             nui.nvim
-            nvim-treesitter
