@@ -75,7 +75,7 @@ function Logger:log(level, source, content, extra_info)
   local level_name = vim.lsp.log_levels[level]
   local msg = string.format("%s %s [%s] %s", timestamp, level_name, source, content)
 
-  if level == vim.log.levels.ERROR then
+  if level_name == "WARN" or level_name == "ERROR" then
     extra_info = extra_info or {}
     for extra_name, extra_content in pairs(extra_info) do
       msg = msg
