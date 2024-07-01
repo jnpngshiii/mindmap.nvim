@@ -64,21 +64,24 @@ end
 ---@param level number Log level from `vim.log.levels`.
 ---@param source string Message source (e.g., "Main", "Database", "Security").
 ---@param content string Message content.
+---@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
 ---@return nil
-function Logger:log(level, source, content)
+function Logger:log(level, source, content, extra_info)
   if level < self.log_level then
     return
   end
 
-  -- Example:
-  --   2024-05-15 10:30:10 DEBUG [Database] Connecting to database
-  --   2024-05-15 10:30:15 INFO [Main] Application started
-  --   2024-05-15 10:30:20 WARN [Security] Unauthorized access attempt
-  --   2024-05-15 10:30:25 ERROR [Main] Error occurred: NullPointerException
   local timestamp = os.date("%Y-%m-%d %H:%M:%S")
   local level_name = vim.lsp.log_levels[level]
   local msg = string.format("%s %s [%s] %s", timestamp, level_name, source, content)
 
+  if level == vim.log.levels.ERROR then
+    extra_info = extra_info or {}
+    for extra_name, extra_content in pairs(extra_info) do
+      msg = msg .. "\n    Extra info: " .. extra_name .. " ="
+      msg = msg .. "\n    " .. vim.inspect(extra_content, { depth = 1 })
+    end
+  end
   self:save(msg)
 
   if level_name == "ERROR" then
@@ -110,36 +113,46 @@ end
 ---Log a TRACE level message.
 ---@param source string Message source.
 ---@param content string Message content.
-function Logger:trace(source, content)
-  self:log(vim.log.levels.TRACE, source, content)
+---@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
+---@return nil
+function Logger:trace(source, content, extra_info)
+  self:log(vim.log.levels.TRACE, source, content, extra_info)
 end
 
 ---Log a DEBUG level message.
 ---@param source string Message source.
 ---@param content string Message content.
-function Logger:debug(source, content)
-  self:log(vim.log.levels.DEBUG, source, content)
+---@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
+---@return nil
+function Logger:debug(source, content, extra_info)
+  self:log(vim.log.levels.DEBUG, source, content, extra_info)
 end
 
 ---Log an INFO level message.
 ---@param source string Message source.
 ---@param content string Message content.
-function Logger:info(source, content)
-  self:log(vim.log.levels.INFO, source, content)
+---@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
+---@return nil
+function Logger:info(source, content, extra_info)
+  self:log(vim.log.levels.INFO, source, content, extra_info)
 end
 
 ---Log a WARN level message.
 ---@param source string Message source.
 ---@param content string Message content.
-function Logger:warn(source, content)
-  self:log(vim.log.levels.WARN, source, content)
+---@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
+---@return nil
+function Logger:warn(source, content, extra_info)
+  self:log(vim.log.levels.WARN, source, content, extra_info)
 end
 
 ---Log an ERROR level message.
 ---@param source string Message source.
 ---@param content string Message content.
-function Logger:error(source, content)
-  self:log(vim.log.levels.ERROR, source, content)
+---@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
+---@return nil
+function Logger:error(source, content, extra_info)
+  self:log(vim.log.levels.ERROR, source, content, extra_info)
 end
 
 ---Register a source-specific logger.
@@ -147,20 +160,35 @@ end
 ---@return table source_logger A table with trace, debug, info, warn, and error methods.
 function Logger:register_source(source)
   return {
-    trace = function(content)
-      self:log(vim.log.levels.TRACE, source, content)
+    ---@param content string Message content.
+    ---@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
+    ---@return nil
+    trace = function(content, extra_info)
+      self:log(vim.log.levels.TRACE, source, content, extra_info)
     end,
-    debug = function(content)
-      self:log(vim.log.levels.DEBUG, source, content)
+    ---@param content string Message content.
+    ---@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
+    ---@return nil
+    debug = function(content, extra_info)
+      self:log(vim.log.levels.DEBUG, source, content, extra_info)
     end,
-    info = function(content)
-      self:log(vim.log.levels.INFO, source, content)
+    ---@param content string Message content.
+    ---@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
+    ---@return nil
+    info = function(content, extra_info)
+      self:log(vim.log.levels.INFO, source, content, extra_info)
     end,
-    warn = function(content)
-      self:log(vim.log.levels.WARN, source, content)
+    ---@param content string Message content.
+    ---@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
+    ---@return nil
+    warn = function(content, extra_info)
+      self:log(vim.log.levels.WARN, source, content, extra_info)
     end,
-    error = function(content)
-      self:log(vim.log.levels.ERROR, source, content)
+    ---@param content string Message content.
+    ---@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
+    ---@return nil
+    error = function(content, extra_info)
+      self:log(vim.log.levels.ERROR, source, content, extra_info)
     end,
   }
 end
