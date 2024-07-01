@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.3.0...v0.3.1) (2024-07-01)
+
+
+### Features
+
+* **Logger:** add `extra_info` ([12a89bd](https://github.com/jnpngshiii/mindmap.nvim/commit/12a89bd74756933ec2ddbfdb5bd0c4d3ff0d8a05))
+
 ## [0.3.0](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.2.2...v0.3.0) (2024-07-01)
 
 
