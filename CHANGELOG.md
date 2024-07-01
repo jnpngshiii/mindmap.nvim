@@ -6,6 +6,14 @@
 ### Bug Fixes
 
 * **ci:** try to fix workflow (6) ([95be29c](https://github.com/jnpngshiii/mindmap.nvim/commit/95be29c3ceaad10ec19b92ed0703362d84e3b870))
+* **ci:** try to fix workflow (7) ([bec7a6d](https://github.com/jnpngshiii/mindmap.nvim/commit/bec7a6d25014cf482a62b0a7cfa0cbdb1171beb1))
+
+## [0.2.1](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.2.0...v0.2.1) (2024-07-01)
+
+
+### Bug Fixes
+
+* **ci:** try to fix workflow (6) ([95be29c](https://github.com/jnpngshiii/mindmap.nvim/commit/95be29c3ceaad10ec19b92ed0703362d84e3b870))
 
 ## [0.2.0](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.1.5...v0.2.0) (2024-07-01)
 
