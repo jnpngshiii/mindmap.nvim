@@ -3,20 +3,19 @@
 --------------------
 
 ---@class Logger
----@field log_level number Log level of the logger.
 ---@field log_dir string Directory to store log files.
----@field log_timestamp string Timestamp used for the log file name.
+---@field log_level number Log level of the logger. Default: `vim.log.levels.INFO`.
+---@field log_timestamp string Timestamp used for the log file name. Default: `os.date("%Y-%m-%d_%H-%M-%S")`.
 local Logger = {}
 Logger.__index = Logger
 
 ---Create a new logger.
----@param log_level? number Log level of the logger. Default: `vim.log.levels.INFO`.
 ---@param log_dir? string Directory to store log files. Default: `vim.fn.stdpath("data") .. "/mindmap/logs"`.
 ---@return Logger logger The created logger.
-function Logger:new(log_level, log_dir)
+function Logger:new(log_dir)
   local logger = {
-    log_level = log_level or vim.log.levels.INFO,
     log_dir = log_dir or vim.fn.stdpath("data") .. "/mindmap/logs",
+    log_level = vim.log.levels.INFO,
     log_timestamp = os.date("%Y-%m-%d_%H-%M-%S"),
   }
   logger.__index = logger
@@ -25,6 +24,40 @@ function Logger:new(log_level, log_dir)
   vim.fn.mkdir(logger.log_dir, "p")
 
   return logger
+end
+
+---Set the log level.
+---@param log_level number|string Log level of the logger.
+---@return nil
+function Logger:set_log_level(log_level)
+  assert(
+    type(log_level) == "number" or type(log_level) == "string",
+    "the type of `log_level` must be `number` or `string`, but got `" .. type(log_level) .. "`"
+  )
+
+  if type(log_level) == "number" then
+    if log_level < vim.log.levels.TRACE or log_level > vim.log.levels.ERROR then
+      error(
+        "the `log_level` must be one of the `vim.log.levels` (`TRACE` (0), `DEBUG` (1), `INFO` (2), `WARN` (3), `ERROR` (4)), but got `"
+          .. log_level
+          .. "`"
+      )
+    end
+
+    self.log_level = log_level
+  end
+
+  if type(log_level) == "string" then
+    if not vim.tbl_contains(vim.tbl_keys(vim.log.levels), log_level) then
+      error(
+        "the `log_level` must be one of the `vim.log.levels` (`TRACE` (0), `DEBUG` (1), `INFO` (2), `WARN` (3), `ERROR` (4)), but got `"
+          .. log_level
+          .. "`"
+      )
+    end
+
+    self.log_level = vim.log.levels[log_level]
+  end
 end
 
 ---Internal method to handle logging.
@@ -134,5 +167,6 @@ end
 
 --------------------
 
-local global_logger = Logger:new(vim.log.levels.DEBUG)
+local global_logger = Logger:new()
+
 return global_logger
