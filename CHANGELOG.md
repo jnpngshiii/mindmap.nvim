@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.1.3...v0.1.4) (2024-07-01)
+
+
+### Bug Fixes
+
+* **ci:** try to fix workflow (2) ([81aa226](https://github.com/jnpngshiii/mindmap.nvim/commit/81aa226db6e7b92dcece176a864c494fda90c8e4))
+
 ## [0.1.3](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.1.2...v0.1.3) (2024-07-01)
 
 
