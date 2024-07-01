@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.1](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.1.0...v0.1.1) (2024-07-01)
+
+
+### Features
+
+* **ci:** automatic manage dependencies when testing ([a2719d4](https://github.com/jnpngshiii/mindmap.nvim/commit/a2719d4ec53ddb17a9dc1d6ff8cc55243f147a33))
+
+
+### Bug Fixes
+
+* **ci:** fix wrong dependency ([6fc11f9](https://github.com/jnpngshiii/mindmap.nvim/commit/6fc11f98cadcac280a60ef4659e38fdddeaa46c2))
+* **ci:** remove dependency `nvim-treesitter` ([844b704](https://github.com/jnpngshiii/mindmap.nvim/commit/844b704bbad10a8ee61794ae1380b7dc9ef03be7))
+
 ## 0.1.0 (2024-06-30)
 
 
