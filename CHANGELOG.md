@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.0](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.2.2...v1.0.0) (2024-07-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* **Logger:** add user_func `MindmapLoggerSetLevel`
+
+### Features
+
+* **Logger:** add user_func `MindmapLoggerSetLevel` ([44e04d5](https://github.com/jnpngshiii/mindmap.nvim/commit/44e04d56aa388148b440a3ba81ca519f8d85996a))
+
+
+### Bug Fixes
+
+* **ci:** fix wrong `release-please` version ([8c457fe](https://github.com/jnpngshiii/mindmap.nvim/commit/8c457fec08d6f71b14678571ed7ea2a24fac3230))
+
 ## [0.2.2](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.2.1...v0.2.2) (2024-07-01)
 
 
