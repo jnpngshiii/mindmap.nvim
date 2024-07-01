@@ -78,8 +78,14 @@ function Logger:log(level, source, content, extra_info)
   if level == vim.log.levels.ERROR then
     extra_info = extra_info or {}
     for extra_name, extra_content in pairs(extra_info) do
-      msg = msg .. "\n    Extra info: " .. extra_name .. " ="
-      msg = msg .. "\n    " .. vim.inspect(extra_content, { depth = 1 })
+      msg = msg
+        .. "\n    Extra info: "
+        .. extra_name
+        .. " = "
+        .. vim.inspect(extra_content, { depth = 1, indent = "      " })
+      if msg:sub(-1) == "}" then
+        msg = msg:sub(1, -2) .. "    }"
+      end
     end
   end
   self:save(msg)
