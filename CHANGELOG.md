@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.0](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.4.0...v0.5.0) (2024-07-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* **Logger:** update msg style
+
+### Features
+
+* **Logger:** update msg style ([72ed46f](https://github.com/jnpngshiii/mindmap.nvim/commit/72ed46fb832f7bafaa164983c42b55bac05ae701))
+
 ## [0.4.0](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.3.1...v0.4.0) (2024-07-02)
 
 
