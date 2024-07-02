@@ -573,7 +573,6 @@ function Graph:redo()
 end
 
 ----------
--- TODO:
 -- Spaced Repetition Methods
 ----------
 
@@ -588,24 +587,24 @@ function Graph:get_sp_info_from_edge(edge_id)
   -- TO   : Front
   -- From : Back
 
-  local to_node = self.nodes[edge.to_node_id]
-  local front, _ = to_node:get_content(edge.type)
+  local to_node = self.nodes[edge._to]
+  local front, _ = to_node:get_content(edge._type)
   front = utils.limit_string_length(front, screen_width)
 
-  local from_node = self.nodes[edge.from_node_id]
-  local _, back = from_node:get_content(edge.type)
+  local from_node = self.nodes[edge._from]
+  local _, back = from_node:get_content(edge._type)
   back = utils.limit_string_length(back, screen_width)
 
   return front,
     back,
-    edge.created_at,
-    edge.updated_at,
-    edge.due_at,
-    edge.ease,
-    edge.interval,
-    edge.answer_count,
-    edge.ease_count,
-    edge.again_count
+    edge._created_at,
+    edge._updated_at,
+    edge._due_at,
+    edge._ease,
+    edge._interval,
+    edge._answer_count,
+    edge._ease_count,
+    edge._again_count
 end
 
 ---Show card for spaced repetition.
@@ -613,8 +612,8 @@ end
 ---@return string status Status of spaced repetition. Can be "again", "good", "easy", "skip" or "quit".
 function Graph:show_card(edge_id)
   local edge = self.edges[edge_id]
-  local from_node_type = self.nodes[edge.from_node_id].type
-  local to_node_type = self.nodes[edge.to_node_id].type
+  local from_node_type = self.nodes[edge._from]._type
+  local to_node_type = self.nodes[edge._to]._type
   local front, back, _, _, _, _, _, _, _, _ = self:get_sp_info_from_edge(edge_id)
 
   --------------------
