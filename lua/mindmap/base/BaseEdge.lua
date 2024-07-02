@@ -110,19 +110,8 @@ function BaseEdge:new(
   base_edge.__index = base_edge
   setmetatable(base_edge, BaseEdge)
 
-  local success = base_edge:upgrade()
-  if not success then
-    logger.warn("Failed to upgrade edge. Return `nil`")
-    return nil
-  end
-
-  if base_edge.check_health then
-    local issues = base_edge:check_health()
-    if #issues > 0 then
-      logger.warn("Health check failed:\n" .. table.concat(issues, "\n") .. "\nReturn `nil`.")
-      return nil
-    end
-  end
+  base_edge:upgrade()
+  base_edge:check_health()
 
   return base_edge
 end
@@ -133,9 +122,15 @@ end
 ---the edge by one version.
 ---Example:
 ---  ```lua
+---  ---Upgrade the item to version 11.
+---  ---Return nothing if the upgrade succeeds.
+---  ---Raise an error if the upgrade fails.
 ---  function BaseEdge:upgrade_to_v11(self)
+---    if self._version > 11 then
+---      error("Cannot upgrade to version 11 from higher version " .. self._version)
+---    end
+---
 ---    self._new_field = "default_value"
----    return true
 ---  end
 ---  ```
 ---For multi-version upgrades (e.g., v8 to v11), this function will
@@ -143,7 +138,7 @@ end
 ---v9 to v10, v10 to v11) in order. If an intermediate upgrade
 ---function is missing, the version number will be forcibly updated
 ---without any changes to the edge's data.
----@return boolean success Whether the upgrade was successful.
+---@return nil
 function BaseEdge:upgrade()
   local current_version = self._version
   local latest_version = base_edge_version
@@ -152,25 +147,33 @@ function BaseEdge:upgrade()
     local next_version = current_version + 1
     local upgrade_func = self["upgrade_to_v" .. next_version]
     if upgrade_func then
-      local success = upgrade_func(self)
-      if not success then
-        logger.info("Failed to upgrade to `v" .. next_version .. ".`")
-        return false
+      local ok, result = pcall(upgrade_func(self))
+      if not ok then
+        -- stylua: ignore
+        logger.error(
+          "Upgrade from `v" .. current_version .. "` to `v" .. next_version .. "` failed: "
+            .. result
+        )
       end
+      -- stylua: ignore
+      logger.info(
+        "Upgrade from `v" .. current_version .. "` to `v" .. next_version .. "` succeeded."
+      )
     else
-      logger.info("Forced upgrade to `v" .. next_version .. ".`")
+      -- stylua: ignore
+      logger.warn(
+        "Upgrade from `v" .. current_version .. "` to `v" .. next_version .. "` failed: "
+          .. "cannot find upgrade function, force upgrade instead.")
     end
 
-    current_version = next_version
     self._version = current_version
+    current_version = next_version
   end
-
-  return true
 end
 
 ---Basic health check for edge.
 ---Subclasses should override this method.
----@return string[] issues List of issues. Empty if the edge is healthy.
+---@return nil
 function BaseEdge:check_health()
   local issues = {}
 
@@ -229,7 +232,13 @@ function BaseEdge:check_health()
     table.insert(issues, "Invalid `_version`: expected `number` or `nil`, got `" .. type(self._version) .. "`;")
   end
 
-  return issues
+  if not #issues == 0 then
+    -- stylua: ignore
+    logger.error(
+      "Health check failed.",
+      issues
+    )
+  end
 end
 
 ----------
@@ -243,7 +252,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseEdge:before_add_into_graph(...)
-  -- logger.info("Method `before_add_into_graph` is not implemented.")
+  -- logger.warn("Method `before_add_into_graph` is not implemented.")
 end
 
 ---@abstract
@@ -252,7 +261,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseEdge:after_add_into_graph(...)
-  -- logger.info("Method `after_add_into_graph` is not implemented.")
+  -- logger.warn("Method `after_add_into_graph` is not implemented.")
 end
 
 ---@abstract
@@ -261,7 +270,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseEdge:before_remove_from_graph(...)
-  -- logger.info("Method `before_remove_from_graph` is not implemented.")
+  -- logger.warn("Method `before_remove_from_graph` is not implemented.")
 end
 
 ---@abstract
@@ -270,7 +279,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseEdge:after_remove_from_graph(...)
-  -- logger.info("Method `after_remove_from_graph` is not implemented.")
+  -- logger.warn("Method `after_remove_from_graph` is not implemented.")
 end
 
 --------------------

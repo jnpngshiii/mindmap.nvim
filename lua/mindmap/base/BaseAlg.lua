@@ -39,19 +39,8 @@ function BaseAlg:new(version)
   base_alg.__index = base_alg
   setmetatable(base_alg, BaseAlg)
 
-  local success = base_alg:upgrade()
-  if not success then
-    logger.warn("Failed to upgrade alg. Return `nil`")
-    return nil
-  end
-
-  if base_alg.check_health then
-    local issues = base_alg:check_health()
-    if #issues > 0 then
-      logger.warn("Health check failed: \n" .. table.concat(issues, "\n") .. "\nReturn `nil`.")
-      return nil
-    end
-  end
+  base_alg:upgrade()
+  base_alg:check_health()
 
   return base_alg
 end
@@ -62,9 +51,15 @@ end
 ---the alg by one version.
 ---Example:
 ---  ```lua
+---  ---Upgrade the item to version 11.
+---  ---Return nothing if the upgrade succeeds.
+---  ---Raise an error if the upgrade fails.
 ---  function BaseAlg:upgrade_to_v11(self)
+---    if self._version > 11 then
+---      error("Cannot upgrade to version 11 from higher version " .. self._version)
+---    end
+---
 ---    self._new_field = "default_value"
----    return true
 ---  end
 ---  ```
 ---For multi-version upgrades (e.g., v8 to v11), this function will
@@ -72,7 +67,7 @@ end
 ---v9 to v10, v10 to v11) in order. If an intermediate upgrade
 ---function is missing, the version number will be forcibly updated
 ---without any changes to the alg's data.
----@return boolean success Whether the upgrade was successful.
+---@return nil
 function BaseAlg:upgrade()
   local current_version = self._version
   local latest_version = base_alg_version
@@ -81,28 +76,35 @@ function BaseAlg:upgrade()
     local next_version = current_version + 1
     local upgrade_func = self["upgrade_to_v" .. next_version]
     if upgrade_func then
-      local success = upgrade_func(self)
-      if not success then
-        logger.info("Failed to upgrade to `v" .. next_version .. ".`")
-        return false
+      local ok, result = pcall(upgrade_func(self))
+      if not ok then
+        -- stylua: ignore
+        logger.error(
+          "Upgrade from `v" .. current_version .. "` to `v" .. next_version .. "` failed: "
+            .. result
+        )
       end
+      -- stylua: ignore
+      logger.info(
+        "Upgrade from `v" .. current_version .. "` to `v" .. next_version .. "` succeeded."
+      )
     else
-      logger.info("Forced upgrade to `v" .. next_version .. ".`")
+      -- stylua: ignore
+      logger.warn(
+        "Upgrade from `v" .. current_version .. "` to `v" .. next_version .. "` failed: "
+          .. "cannot find upgrade function, force upgrade instead.")
     end
 
-    current_version = next_version
     self._version = current_version
+    current_version = next_version
   end
-
-  return true
 end
 
 ---Basic health check for alg.
 ---Subclasses should override this method.
----@return string[] issues List of issues. Empty if the alg is healthy.
+---@return nil
 function BaseAlg:check_health()
   local issues = {}
-
   if type(self.initial_ease) ~= "number" then
     table.insert(issues, "Invalid `initial_ease`: expected `number`, got `" .. type(self.initial_ease) .. "`;")
   end
@@ -110,7 +112,13 @@ function BaseAlg:check_health()
     table.insert(issues, "Invalid `initial_ease`: expected `number`, got `" .. type(self.initial_interval) .. "`;")
   end
 
-  return issues
+  if not #issues == 0 then
+    -- stylua: ignore
+    logger.error(
+      "Health check failed.",
+      issues
+    )
+  end
 end
 
 ---@abstract
@@ -120,7 +128,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-local, unused-vararg
 function BaseAlg:answer_easy(edge, ...)
-  logger.error("Method `answer_easy` is not implemented.")
+  logger.warn("Method `answer_easy` is not implemented.")
 end
 
 ---@abstract
@@ -130,7 +138,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-local, unused-vararg
 function BaseAlg:answer_good(edge, ...)
-  logger.error("Method `answer_good` is not implemented.")
+  logger.warn("Method `answer_good` is not implemented.")
 end
 
 ---@abstract
@@ -140,7 +148,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-local, unused-vararg
 function BaseAlg:answer_again(edge, ...)
-  logger.error("Method `answer_again` is not implemented.")
+  logger.warn("Method `answer_again` is not implemented.")
 end
 
 ----------

@@ -84,19 +84,8 @@ function BaseNode:new(
   base_node.__index = base_node
   setmetatable(base_node, BaseNode)
 
-  local success = base_node:upgrade()
-  if not success then
-    logger.warn("Failed to upgrade node. Return `nil`")
-    return nil
-  end
-
-  if base_node.check_health then
-    local issues = base_node:check_health()
-    if #issues > 0 then
-      logger.warn("Health check failed: \n" .. table.concat(issues, "\n") .. "\nReturn `nil`.")
-      return nil
-    end
-  end
+  base_node:upgrade()
+  base_node:check_health()
 
   return base_node
 end
@@ -107,9 +96,15 @@ end
 ---the node by one version.
 ---Example:
 ---  ```lua
+---  ---Upgrade the item to version 11.
+---  ---Return nothing if the upgrade succeeds.
+---  ---Raise an error if the upgrade fails.
 ---  function BaseNode:upgrade_to_v11(self)
+---    if self._version > 11 then
+---      error("Cannot upgrade to version 11 from higher version " .. self._version)
+---    end
+---
 ---    self._new_field = "default_value"
----    return true
 ---  end
 ---  ```
 ---For multi-version upgrades (e.g., v8 to v11), this function will
@@ -117,7 +112,7 @@ end
 ---v9 to v10, v10 to v11) in order. If an intermediate upgrade
 ---function is missing, the version number will be forcibly updated
 ---without any changes to the node's data.
----@return boolean success Whether the upgrade was successful.
+---@return nil
 function BaseNode:upgrade()
   local current_version = self._version
   local latest_version = base_node_version
@@ -126,25 +121,33 @@ function BaseNode:upgrade()
     local next_version = current_version + 1
     local upgrade_func = self["upgrade_to_v" .. next_version]
     if upgrade_func then
-      local success = upgrade_func(self)
-      if not success then
-        logger.info("Failed to upgrade to `v" .. next_version .. ".`")
-        return false
+      local ok, result = pcall(upgrade_func(self))
+      if not ok then
+        -- stylua: ignore
+        logger.error(
+          "Upgrade from `v" .. current_version .. "` to `v" .. next_version .. "` failed: "
+            .. result
+        )
       end
+      -- stylua: ignore
+      logger.info(
+        "Upgrade from `v" .. current_version .. "` to `v" .. next_version .. "` succeeded."
+      )
     else
-      logger.info("Forced upgrade to `v" .. next_version .. ".`")
+      -- stylua: ignore
+      logger.warn(
+        "Upgrade from `v" .. current_version .. "` to `v" .. next_version .. "` failed: "
+          .. "cannot find upgrade function, force upgrade instead.")
     end
 
-    current_version = next_version
     self._version = current_version
+    current_version = next_version
   end
-
-  return true
 end
 
 ---Basic health check for node.
 ---Subclasses should override this method.
----@return string[] issues List of issues. Empty if the node is healthy.
+---@return nil
 function BaseNode:check_health()
   local issues = {}
 
@@ -179,7 +182,13 @@ function BaseNode:check_health()
     table.insert(issues, "Invalid `_version`: expected `number` or `nil`, got `" .. type(self._version) .. "`;")
   end
 
-  return issues
+  if not #issues == 0 then
+    -- stylua: ignore
+    logger.error(
+      "Health check failed.",
+      issues
+    )
+  end
 end
 
 ---Get the absolute path of the file where the node is from.
@@ -201,7 +210,7 @@ end
 ---@return string[] front, string[] back Content of the node.
 ---@diagnostic disable-next-line: unused-local
 function BaseNode:get_content(edge_type)
-  logger.info("Method `get_content` is not implemented.")
+  logger.warn("Method `get_content` is not implemented.")
   return {}, {}
 end
 
@@ -216,7 +225,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:before_add_into_graph(...)
-  -- logger.info("Method `before_add_into_graph` is not implemented.")
+  -- logger.warn("Method `before_add_into_graph` is not implemented.")
 end
 
 ---@abstract
@@ -225,7 +234,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:after_add_into_graph(...)
-  -- logger.info("Method `after_add_into_graph` is not implemented.")
+  -- logger.warn("Method `after_add_into_graph` is not implemented.")
 end
 
 ---@abstract
@@ -234,7 +243,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:before_remove_from_graph(...)
-  -- logger.info("Method `before_remove_from_graph` is not implemented.")
+  -- logger.warn("Method `before_remove_from_graph` is not implemented.")
 end
 
 ---@abstract
@@ -243,7 +252,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:after_remove_from_graph(...)
-  -- logger.info("Method `after_remove_from_graph` is not implemented.")
+  -- logger.warn("Method `after_remove_from_graph` is not implemented.")
 end
 
 --------------------
