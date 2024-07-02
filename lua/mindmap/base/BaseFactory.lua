@@ -38,7 +38,9 @@ function BaseFactory:register(type_to_be_registered, cls_to_be_registered, type_
       "Register class skipped: "
         .. "class to be registered `" .. type_to_be_registered .. "` already registered."
     )
+    return
   end
+
   if not cls_to_be_inherited.new or type(cls_to_be_inherited.new) ~= "function" then
     -- stylua: ignore
     logger.error("Register class aborted: "
@@ -46,6 +48,7 @@ function BaseFactory:register(type_to_be_registered, cls_to_be_registered, type_
       { cls_to_be_inherited = cls_to_be_inherited }
     )
   end
+
   if not cls_to_be_registered.new or type(cls_to_be_registered.new) ~= "function" then
     -- stylua: ignore
     logger.warn(
