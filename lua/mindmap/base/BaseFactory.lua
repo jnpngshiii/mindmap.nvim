@@ -28,23 +28,32 @@ end
 ---@param type_to_be_registered string Type to be registered.
 ---@param cls_to_be_registered table Class to be registered.
 ---@param type_to_be_inherited? string Type of a registered class to be inherited. If not provided, use `self.base_cls` instead. Default: `nil`.
----@return boolean is_registered Whether the class is registered successfully.
+---@return nil
 function BaseFactory:register(type_to_be_registered, cls_to_be_registered, type_to_be_inherited)
-  local cls_to_be_inherited = self:get_registered_class(type_to_be_inherited or "N/A") or self.base_cls
+  local cls_to_be_inherited = self:get_registered_class(type_to_be_inherited)
 
   if self.registered_cls[type_to_be_registered] then
-    logger.warn("Type `" .. type_to_be_registered .. "` already registered. Aborting registration.")
-    return false
-  end
-  if not cls_to_be_inherited.new or type(cls_to_be_inherited.new) ~= "function" then
-    logger.error("Class to be inherited does not have a `new` method. Aborting registration.")
-    return false
-  end
-  if not cls_to_be_registered.new or type(cls_to_be_registered.new) ~= "function" then
+    -- stylua: ignore
     logger.warn(
-      "Class to be registered `"
-        .. type_to_be_registered
-        .. "` does not have a `new` method. Binding default `new` method."
+      "Register class skipped: "
+        .. "class to be registered `" .. type_to_be_registered .. "` already registered."
+    )
+    return
+  end
+
+  if not cls_to_be_inherited.new or type(cls_to_be_inherited.new) ~= "function" then
+    -- stylua: ignore
+    logger.error("Register class aborted: "
+        .. "class to be inherited `" .. type_to_be_inherited .. "` does not have a `new` method.",
+      { cls_to_be_inherited = cls_to_be_inherited }
+    )
+  end
+
+  if not cls_to_be_registered.new or type(cls_to_be_registered.new) ~= "function" then
+    -- stylua: ignore
+    logger.warn(
+      "Register class modified: "
+        .. "class to be registered `" .. cls_to_be_registered .. "` does not have a `new` method, bind default `new` method instead."
     )
 
     function cls_to_be_registered:new(...)
@@ -52,26 +61,28 @@ function BaseFactory:register(type_to_be_registered, cls_to_be_registered, type_
       ins.__index = ins
       setmetatable(ins, cls_to_be_registered)
 
-      ---@cast ins BaseFactory
       return ins
     end
   end
-
-  cls_to_be_registered.__index = cls_to_be_registered
-  setmetatable(cls_to_be_registered, cls_to_be_inherited)
-
-  self.registered_cls[type_to_be_registered] = cls_to_be_registered
-  return true
 end
 
----Get a registered class.
----@param registered_type string Registered type.
----@return table? registered_class The registered class or nil if not found.
+---Get a registered class. If `registered_type` is not provided, return `self.base_cls`.
+---@param registered_type? string Registered type.
+---@return table registered_class The registered class.
 function BaseFactory:get_registered_class(registered_type)
+  if not registered_type then
+    return self.base_cls
+  end
+
   local registered_cls = self.registered_cls[registered_type]
   if not registered_cls then
-    logger.warn("Type `" .. registered_type .. "` is not registered. Aborting retrieval.")
-    return
+    -- stylua: ignore
+    logger.error(
+      "Get registered class failed: "
+        .. "class `" .. registered_type .. "` is not registered.",
+      { registered_types = self:get_registered_types() }
+    )
+    return self.base_cls
   end
 
   return registered_cls
@@ -93,15 +104,11 @@ end
 ---@param ... any Additional arguments.
 ---@return table? created_class The created class or nil if creation fails.
 function BaseFactory:create(registered_type, ...)
-  local registered_cls = self:get_registered_class(registered_type)
-  if not registered_cls then
-    logger.error("Type `" .. registered_type .. "` is not registered. Aborting creation.")
-    return
-  end
+  local registered_class = self:get_registered_class(registered_type)
 
   -- The first argument of `new` method is the class type.
   -- In this way, we can use `create` method just like `new` method.
-  return registered_cls:new(registered_type, ...)
+  return registered_class:new(registered_type, ...)
 end
 
 --------------------
