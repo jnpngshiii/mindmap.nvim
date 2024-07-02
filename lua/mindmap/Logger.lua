@@ -75,28 +75,22 @@ function Logger:log(level, source, content, extra_info)
   local level_name = vim.lsp.log_levels[level]
   local msg = string.format("%s %s [%s] %s", timestamp, level_name, source, content)
 
-  if level_name == "WARN" or level_name == "ERROR" then
-    extra_info = extra_info or {}
-    for extra_name, extra_content in pairs(extra_info) do
-      msg = msg
-        .. "\n    Extra info: "
-        .. extra_name
-        .. " = "
-        .. vim.inspect(extra_content, { depth = 1, indent = "      " })
-      if msg:sub(-1) == "}" then
-        msg = msg:sub(1, -2) .. "    }"
-      end
+  extra_info = extra_info or {}
+  for extra_name, extra_content in pairs(extra_info) do
+    msg = msg
+      .. "\n    Extra info: "
+      .. extra_name
+      .. " = "
+      .. vim.inspect(extra_content, { depth = 1, indent = "      " })
+    if msg:sub(-1) == "}" then
+      msg = msg:sub(1, -2) .. "    }"
     end
   end
-  self:save(msg)
 
-  if level_name == "ERROR" then
-    error(msg)
-  else
-    vim.schedule(function()
-      vim.notify(msg, level)
-    end)
-  end
+  vim.schedule(function()
+    self:save(msg)
+    vim.notify(msg, level)
+  end)
 end
 
 ---Save logs to file.
