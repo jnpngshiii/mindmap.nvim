@@ -73,7 +73,7 @@ function Logger:log(level, source, content, extra_info)
 
   local timestamp = os.date("%Y-%m-%d %H:%M:%S")
   local level_name = vim.lsp.log_levels[level]
-  local msg = string.format("%s %s [%s] %s", timestamp, level_name, source, content)
+  local msg = string.format("%s [%s] <%s> %s", timestamp, level_name, source, content)
 
   extra_info = extra_info or {}
   for extra_name, extra_content in pairs(extra_info) do
