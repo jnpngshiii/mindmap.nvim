@@ -63,7 +63,7 @@ function BaseFactory:register(type_to_be_registered, cls_to_be_registered, type_
   end
 end
 
----Get a registered class. If not found, return `self.base_cls` instead.
+---Get a registered class. If `registered_type` is not provided, return `self.base_cls`.
 ---@param registered_type? string Registered type.
 ---@return table registered_class The registered class.
 function BaseFactory:get_registered_class(registered_type)
@@ -74,9 +74,11 @@ function BaseFactory:get_registered_class(registered_type)
   local registered_cls = self.registered_cls[registered_type]
   if not registered_cls then
     -- stylua: ignore
-    logger.warn(
+    logger.error(
       "Get registered class failed: "
-        .. "class `" .. registered_type .. "` is not registered, return `self.base_cls` instead.")
+        .. "class `" .. registered_type .. "` is not registered.",
+      { registered_types = self:get_registered_types() }
+    )
     return self.base_cls
   end
 
@@ -99,20 +101,11 @@ end
 ---@param ... any Additional arguments.
 ---@return table? created_class The created class or nil if creation fails.
 function BaseFactory:create(registered_type, ...)
-  local ok, result = pcall(self.get_registered_class, self, registered_type)
-  if not ok then
-    -- stylua: ignore
-    logger.error(
-      "Create instance failed: "
-        .. "class `" .. registered_type .. "` is not registered.",
-      { registered_types = self:get_registered_types() }
-    )
-    return
-  end
+  local registered_class = self:get_registered_class(registered_type)
 
   -- The first argument of `new` method is the class type.
   -- In this way, we can use `create` method just like `new` method.
-  return result:new(registered_type, ...)
+  return registered_class:new(registered_type, ...)
 end
 
 --------------------
