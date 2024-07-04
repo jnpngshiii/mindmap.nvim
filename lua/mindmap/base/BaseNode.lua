@@ -1,4 +1,4 @@
-local logger = require("mindmap.Logger"):register_source("Base.Node")
+local logger = require("mindmap.plugin_logger"):register_source("Base.Node")
 
 local utils = require("mindmap.utils")
 

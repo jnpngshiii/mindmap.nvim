@@ -1,4 +1,4 @@
-local logger = require("mindmap.Logger"):register_source("Plugin.UserFunc")
+local logger = require("mindmap.plugin_logger"):register_source("Plugin.UserFunc")
 
 local nts_utils = require("nvim-treesitter.ts_utils")
 

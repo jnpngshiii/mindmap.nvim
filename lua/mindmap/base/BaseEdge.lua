@@ -1,4 +1,4 @@
-local logger = require("mindmap.Logger"):register_source("Base.Edge")
+local logger = require("mindmap.plugin_logger"):register_source("Base.Edge")
 
 --------------------
 -- Class BaseEdge
