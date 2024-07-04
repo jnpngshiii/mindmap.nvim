@@ -7,4 +7,5 @@ source = {
 test_dependencies = {
 	"nlua",
 	"nui.nvim",
+	"logger.nvim",
 }
