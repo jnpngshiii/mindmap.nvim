@@ -1,107 +1,167 @@
 --------------------
--- Class Logger
+-- Class Event
 --------------------
 
----@class Logger
----@field log_dir string Directory to store log files.
----@field log_level number Log level of the logger. Default: `vim.log.levels.INFO`.
----@field log_timestamp string Timestamp used for the log file name. Default: `os.date("%Y-%m-%d_%H-%M-%S")`.
-local Logger = {}
-Logger.__index = Logger
+---@class Event
+---@field level number Level of the event.
+---Example:
+---  ```
+---  vim.log.levels.TRACE (0)
+---  vim.log.levels.DEBUG (1)
+---  vim.log.levels.INFO (2)
+---  vim.log.levels.WARN (3)
+---  vim.log.levels.ERROR (4)
+---  ```
+---@field source string Source of the event.
+---Example:
+---  ```
+---  "Main"
+---  "Database"
+---  "Security"
+---  ```
+---@field content string Content of the event.
+---Please do not use any punctuation marks at the end.
+---Example:
+---  ```
+---  "failed to open file"
+---  "cannot connect to database"
+---  "invalid password"
+---  ```
+---@field cause string Cause of the event. Default: "not specified".
+---Please do not use any punctuation marks at the end.
+---Example:
+---  ```
+---  "the file is not found"
+---  "the database is not running"
+---  "the password is too short"
+---  ```
+---@field action string Action used to handle the event. Default: "not specified".
+---Please do not use any punctuation marks at the end.
+---Example:
+---  ```
+---  "create a new file instead"
+---  "start the database"
+---  "change the password"
+---  ```
+---@field extra_info table Additional information of the event. Default: `{}`.
+---Example:
+---  ```
+---  {
+---    file_path = "path/to/file",
+---    mode = "w"
+---  }
+---  ```
+---@field timestamp string Timestamp of the event. Default: `os.date("%Y-%m-%d %H:%M:%S")`.
+local Event = {}
+Event.__index = Event
 
----Create a new logger.
----@param log_dir? string Directory to store log files. Default: `vim.fn.stdpath("data") .. "/mindmap/logs"`.
----@return Logger logger The created logger.
-function Logger:new(log_dir)
-  local logger = {
-    log_dir = log_dir or vim.fn.stdpath("data") .. "/mindmap/logs",
-    log_level = vim.log.levels.INFO,
-    log_timestamp = os.date("%Y-%m-%d_%H-%M-%S"),
+---Create a new event.
+---@param level number Level of the event.
+---@param source string Source of the event.
+---@param content string The event. Please do not use any punctuation marks at the end.
+---@param cause? string Cause of the event. Please do not use any punctuation marks at the end. Default: "not specified".
+---@param action? string Action used to handle the event. Please do not use any punctuation marks at the end. Default: "not specified".
+---@param extra_info? table Additional information of the event. Default: `{}`.
+---@return Event event The created event.
+function Event:new(level, source, content, cause, action, extra_info)
+  local event = {
+    level = level,
+    source = source,
+    content = content,
+    cause = cause or "not specified",
+    action = action or "not specified",
+    extra_info = extra_info or {},
+    timestamp = os.date("%Y-%m-%d %H:%M:%S"),
   }
-  logger.__index = logger
-  setmetatable(logger, Logger)
+  event.__index = event
+  setmetatable(event, Event)
 
-  vim.fn.mkdir(logger.log_dir, "p")
-
-  return logger
+  return event
 end
 
----Set the log level.
----@param log_level number|string Log level of the logger.
----@return nil
-function Logger:set_log_level(log_level)
-  assert(
-    type(log_level) == "number" or type(log_level) == "string",
-    "the type of `log_level` must be `number` or `string`, but got `" .. type(log_level) .. "`"
+---Convert an event to a massage.
+---@return string msg The converted message.
+function Event:to_msg()
+  local content = self.content
+  local cause = ""
+  local action = ""
+  if self.cause ~= "not specified" then
+    cause = ": " .. self.cause
+  end
+  if self.action ~= "not specified" then
+    action = ", " .. self.action
+  end
+
+  local msg = string.format(
+    "%s [%s] <%s> %s%s%s.",
+    self.timestamp,
+    vim.lsp.log_levels[self.level],
+    self.source,
+    content,
+    cause,
+    action
   )
 
-  if type(log_level) == "number" then
-    if log_level < vim.log.levels.TRACE or log_level > vim.log.levels.ERROR then
-      error(
-        "the `log_level` must be one of the `vim.log.levels` (`TRACE` (0), `DEBUG` (1), `INFO` (2), `WARN` (3), `ERROR` (4)), but got `"
-          .. log_level
-          .. "`"
-      )
-    end
-
-    self.log_level = log_level
-  end
-
-  if type(log_level) == "string" then
-    if not vim.tbl_contains(vim.tbl_keys(vim.log.levels), log_level) then
-      error(
-        "the `log_level` must be one of the `vim.log.levels` (`TRACE` (0), `DEBUG` (1), `INFO` (2), `WARN` (3), `ERROR` (4)), but got `"
-          .. log_level
-          .. "`"
-      )
-    end
-
-    self.log_level = vim.log.levels[log_level]
-  end
-end
-
----Internal method to handle logging.
----@param level number Log level from `vim.log.levels`.
----@param source string Message source (e.g., "Main", "Database", "Security").
----@param content string Message content.
----@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
----@return nil
-function Logger:log(level, source, content, extra_info)
-  if level < self.log_level then
-    return
-  end
-
-  local timestamp = os.date("%Y-%m-%d %H:%M:%S")
-  local level_name = vim.lsp.log_levels[level]
-  local msg = string.format("%s [%s] <%s> %s", timestamp, level_name, source, content)
-
-  extra_info = extra_info or {}
-  for extra_name, extra_content in pairs(extra_info) do
+  for extra_info_name, extra_info_content in pairs(self.extra_info) do
     msg = msg
       .. "\n    Extra info: "
-      .. extra_name
+      .. extra_info_name
       .. " = "
-      .. vim.inspect(extra_content, { depth = 1, indent = "      " })
+      .. vim.inspect(extra_info_content, { depth = 1, indent = "      " })
     if msg:sub(-1) == "}" then
       msg = msg:sub(1, -2) .. "    }"
     end
   end
 
-  vim.schedule(function()
-    self:save(msg)
-    vim.notify(msg, level)
-  end)
+  return msg
 end
 
----Save logs to file.
----@param msg string The log message to save.
+--------------------
+-- Class Logger
+--------------------
+
+---@class Logger
+---@field log_path string File path of the logger.
+---Default: `vim.fn.stdpath("data") .. "/" .. {plugin_name} .. "/" .. "logs" .. "/" .. os.date("%Y-%m-%d_%H-%M-%S") .. ".log"`.
+---@field log_level number Log level of the logger. Event with level lower than this will not be logged.
+---Default: `vim.log.levels.INFO`.
+---@field events Event Logged events of the logger.
+local Logger = {}
+Logger.__index = Logger
+
+----------
+-- Basic methods
+----------
+
+---Register a new logger for a plugin.
+---@param plugin_name string Which plugin is using this logger.
+---Log file will be saved in `vim.fn.stdpath("data") .. "/" .. {plugin_name} .. "/" .. "logs"`.
+---@param log_level number Log level of the logger. Event with level lower than this will not be logged.
+---Default: `vim.log.levels.INFO`.
+---@return Logger logger The registered logger.
+function Logger:register_plugin(plugin_name, log_level)
+  local log_dir = vim.fn.stdpath("data") .. "/" .. plugin_name .. "/" .. "logs"
+  vim.fn.mkdir(log_dir, "p")
+
+  local logger = {}
+  logger.log_path = log_dir .. "/" .. os.date("%Y-%m-%d_%H-%M-%S") .. ".log"
+  logger.log_level = log_level
+  logger.events = {}
+
+  logger.__index = logger
+  setmetatable(logger, Logger)
+
+  return logger
+end
+
+---Save a message to the log file.
+---@param msg string The message to be saved.
 ---@return nil
 function Logger:save(msg)
-  local file_path = string.format("%s/%s.log", self.log_dir, self.log_timestamp)
-  local file, err_msg = io.open(file_path, "a")
+  local file, cause = io.open(self.log_path, "a")
   if not file then
     vim.schedule(function()
-      vim.notify(string.format("[Logger] Failed to write log to file: %s", err_msg), vim.log.levels.ERROR)
+      vim.notify("Failed to save msg: " .. cause, vim.log.levels.ERROR)
     end)
     return
   end
@@ -110,91 +170,127 @@ function Logger:save(msg)
   file:close()
 end
 
----Log a TRACE level message.
----@param source string Message source.
----@param content string Message content.
----@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
+---Internal method to handle logging.
+---@param level number Level of the event.
+---@param source string Source of the event.
+---@param event_info table|string Information of the event to be logged.
+---Can be a table with keys: `content`, `cause?`, `action?`, and `extra_info?`, or a string which is the `content` of the event.
 ---@return nil
-function Logger:trace(source, content, extra_info)
-  self:log(vim.log.levels.TRACE, source, content, extra_info)
+function Logger:log(level, source, event_info)
+  if level < self.log_level then
+    return
+  end
+
+  if not vim.tbl_contains({ 0, 1, 2, 3, 4 }, level) then
+    vim.schedule(function()
+      vim.notify("Failed to log event: invalid `level`", vim.log.levels.ERROR)
+    end)
+    return
+  end
+
+  local content
+  if type(event_info) == "string" then
+    content = event_info
+  elseif type(event_info) == "table" then
+    content = event_info.content
+  end
+  if not content then
+    vim.schedule(function()
+      vim.notify("Failed to log event: `content` is not specified", vim.log.levels.ERROR)
+    end)
+    return
+  end
+  local cause = event_info.cause
+  local action = event_info.action
+  local extra_info = event_info.extra_info
+  local event = Event:new(level, source, content, cause, action, extra_info)
+
+  table.insert(self.events, event)
+  local msg = event:to_msg()
+  vim.schedule(function()
+    self:save(msg)
+    vim.notify(msg, level)
+  end)
 end
 
----Log a DEBUG level message.
----@param source string Message source.
----@param content string Message content.
----@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
+----------
+-- Convenience methods
+----------
+
+---Log an [TRACE] event. Wrapper for `Logger:log`.
+---@param source string Source of the event.
+---@param event_info table|string Information of the event to be logged.
+---Can be a table with keys: `content`, `cause?`, `action?`, and `extra_info?`, or a string which is the `content` of the event.
 ---@return nil
-function Logger:debug(source, content, extra_info)
-  self:log(vim.log.levels.DEBUG, source, content, extra_info)
+function Logger:trace(source, event_info)
+  self:log(vim.log.levels.TRACE, source, event_info)
 end
 
----Log an INFO level message.
----@param source string Message source.
----@param content string Message content.
----@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
+---Log an [DEBUG] event. Wrapper for `Logger:log`.
+---@param source string Source of the event.
+---@param event_info table|string Information of the event to be logged.
+---Can be a table with keys: `content`, `cause?`, `action?`, and `extra_info?`, or a string which is the `content` of the event.
 ---@return nil
-function Logger:info(source, content, extra_info)
-  self:log(vim.log.levels.INFO, source, content, extra_info)
+function Logger:debug(source, event_info)
+  self:log(vim.log.levels.DEBUG, source, event_info)
 end
 
----Log a WARN level message.
----@param source string Message source.
----@param content string Message content.
----@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
+---Log an [INFO] event. Wrapper for `Logger:log`.
+---@param source string Source of the event.
+---@param event_info table|string Information of the event to be logged.
+---Can be a table with keys: `content`, `cause?`, `action?`, and `extra_info?`, or a string which is the `content` of the event.
 ---@return nil
-function Logger:warn(source, content, extra_info)
-  self:log(vim.log.levels.WARN, source, content, extra_info)
+function Logger:info(source, event_info)
+  self:log(vim.log.levels.INFO, source, event_info)
 end
 
----Log an ERROR level message.
----@param source string Message source.
----@param content string Message content.
----@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
+---Log an [WARN] event. Wrapper for `Logger:log`.
+---@param source string Source of the event.
+---@param event_info table|string Information of the event to be logged.
+---Can be a table with keys: `content`, `cause?`, `action?`, and `extra_info?`, or a string which is the `content` of the event.
 ---@return nil
-function Logger:error(source, content, extra_info)
-  self:log(vim.log.levels.ERROR, source, content, extra_info)
+function Logger:warn(source, event_info)
+  self:log(vim.log.levels.WARN, source, event_info)
 end
 
----Register a source-specific logger.
+---Log an [ERROR] event. Wrapper for `Logger:log`.
+---@param source string Source of the event.
+---@param event_info table|string Information of the event to be logged.
+---Can be a table with keys: `content`, `cause?`, `action?`, and `extra_info?`, or a string which is the `content` of the event.
+---@return nil
+function Logger:error(source, event_info)
+  self:log(vim.log.levels.ERROR, source, event_info)
+end
+
+---Register a new source for this logger.
+---Waprper for `Logger:trace`, `Logger:debug`, `Logger:info`, `Logger:warn`, and `Logger:error`.
 ---@param source string The source for this logger.
----@return table source_logger A table with trace, debug, info, warn, and error methods.
+---@return table
 function Logger:register_source(source)
   return {
-    ---@param content string Message content.
-    ---@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
-    ---@return nil
-    trace = function(content, extra_info)
-      self:log(vim.log.levels.TRACE, source, content, extra_info)
+    trace = function(event_info)
+      self:trace(source, event_info)
     end,
-    ---@param content string Message content.
-    ---@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
-    ---@return nil
-    debug = function(content, extra_info)
-      self:log(vim.log.levels.DEBUG, source, content, extra_info)
+    debug = function(event_info)
+      self:debug(source, event_info)
     end,
-    ---@param content string Message content.
-    ---@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
-    ---@return nil
-    info = function(content, extra_info)
-      self:log(vim.log.levels.INFO, source, content, extra_info)
+    info = function(event_info)
+      self:info(source, event_info)
     end,
-    ---@param content string Message content.
-    ---@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
-    ---@return nil
-    warn = function(content, extra_info)
-      self:log(vim.log.levels.WARN, source, content, extra_info)
+    warn = function(event_info)
+      self:warn(source, event_info)
     end,
-    ---@param content string Message content.
-    ---@param extra_info? table[] Extra information to log. Key is the extra information name, and value is the extra information content.
-    ---@return nil
-    error = function(content, extra_info)
-      self:log(vim.log.levels.ERROR, source, content, extra_info)
+    error = function(event_info)
+      self:error(source, event_info)
     end,
   }
 end
 
 --------------------
 
-local global_logger = Logger:new()
+-- TODO: Dynamically change log level
+-- TODO: Manange all loggers in one place (`find`, ...)
+
+local global_logger = Logger:register_plugin("mindmap", vim.log.levels.INFO)
 
 return global_logger
