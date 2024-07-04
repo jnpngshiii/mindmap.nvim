@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.6.0](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.5.1...v0.6.0) (2024-07-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **Logger:** remove `Logger`, use `logger.nvim` instead
+
+### Features
+
+* **Logger:** remove `Logger`, use `logger.nvim` instead ([74a2dc1](https://github.com/jnpngshiii/mindmap.nvim/commit/74a2dc1fd221c071b265ef069112d9c9e4a6322a))
+
 ## [0.5.1](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.5.0...v0.5.1) (2024-07-04)
 
 
