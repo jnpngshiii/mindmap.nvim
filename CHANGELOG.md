@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.5.0...v0.5.1) (2024-07-04)
+
+
+### Features
+
+* **Logger:** event, cause, action, and more... ([cd1164e](https://github.com/jnpngshiii/mindmap.nvim/commit/cd1164e67048c915eb0cf4a6cbcefdca46892f64))
+
 ## [0.5.0](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.4.0...v0.5.0) (2024-07-02)
 
 
