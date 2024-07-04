@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.5.0](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.4.0...v0.5.0) (2024-07-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* **Logger:** update msg style
+
+### Features
+
+* **Logger:** update msg style ([72ed46f](https://github.com/jnpngshiii/mindmap.nvim/commit/72ed46fb832f7bafaa164983c42b55bac05ae701))
+
+## [0.4.0](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.3.1...v0.4.0) (2024-07-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* **Logger:** remove raise error behaivor
+
+### Features
+
+* **Logger:** print extra info in `WARN` log ([8831a2e](https://github.com/jnpngshiii/mindmap.nvim/commit/8831a2e998e2ce79218d39561286acaf5446a874))
+* **Logger:** remove raise error behaivor ([22e5a3c](https://github.com/jnpngshiii/mindmap.nvim/commit/22e5a3c63521b48ce076337c67b2cb2019286fe2))
+* **Logger:** update log msg of `.*Factory` ([c9cbbc7](https://github.com/jnpngshiii/mindmap.nvim/commit/c9cbbc70eacbf9ae298b2354a8cd6e8f07d2d11c))
+* **Logger:** update log msg of `Base.*` ([0fed64a](https://github.com/jnpngshiii/mindmap.nvim/commit/0fed64af088d4e61609f3bb50f76450b609944bf))
+* **Logger:** update log msg of `Graph` ([6ffa0f9](https://github.com/jnpngshiii/mindmap.nvim/commit/6ffa0f962737409407ba67327f15dbedaeed1278))
+* **Logger:** update output ([f4d8cc7](https://github.com/jnpngshiii/mindmap.nvim/commit/f4d8cc70de95595fa8b61b5414931aa015156cbd))
+
+
+### Bug Fixes
+
+* **factory:** fix a bug that would overwrite registered classes ([7e7caf6](https://github.com/jnpngshiii/mindmap.nvim/commit/7e7caf63cb5734a1e08c8dc8db613db2b9a7433c))
+* **Graph:** fix outdated sp functions ([6d3cd1b](https://github.com/jnpngshiii/mindmap.nvim/commit/6d3cd1be84ac4c59266e2343c25bc5f8ce5ac847))
+
 ## [0.3.1](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.3.0...v0.3.1) (2024-07-01)
 
 
