@@ -29,6 +29,11 @@ function utils.limit_string_length(str_or_list, limitation)
   elseif type(str_or_list) == "string" then
     str = str_or_list
   else
+    logger.warn({
+      content = "limit string length skipped",
+      cause = "invalid input type",
+      extra_info = { input_type = type(str_or_list) },
+    })
     return {}
   end
 
@@ -190,7 +195,8 @@ function utils.get_file_content(bufnr_or_file_path, start_row, end_row, start_co
 
   local file = io.open(file_path, "r")
   if not file then
-    return {}
+    logger.error({ content = "read file failed", cause = "file not found", extra_info = { file_path = file_path } })
+    error("read file failed")
   end
 
   local content = {}
@@ -257,9 +263,9 @@ function utils.with_temp_bufnr(file_path, callback, ...)
 
     local ok, content = pcall(vim.fn.readfile, file_path)
     if not ok then
-      logger.error("Failed to read file: `" .. file_path .. "`.")
+      logger.error({ content = "read file failed", cause = "file read error", extra_info = { file_path = file_path } })
       vim.api.nvim_buf_delete(bufnr, { force = true })
-      return
+      error("read file failed")
     end
 
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, true, content)
@@ -380,10 +386,88 @@ function utils.pfor(iterator, func, thread_num)
   end
 
   for _, thread in ipairs(threads) do
-    coroutine.resume(thread)
+    local success, err = coroutine.resume(thread)
+    if not success then
+      logger.error({ content = "parallel processing failed", cause = err, extra_info = { thread_num = thread_num } })
+      error("parallel processing failed")
+    end
   end
 
   return results
+end
+
+---Safely call a function and log any errors.
+---@param func function The function to call.
+---@param ... any Arguments to pass to the function.
+---@return boolean success, any result_or_error Whether the function call was successful, and the result or error message.
+function utils.safe_call(func, ...)
+  local success, result_or_error = pcall(func, ...)
+  if not success then
+    logger.error({
+      content = "function call failed",
+      cause = result_or_error,
+      extra_info = { func_name = debug.getinfo(func, "n").name },
+    })
+  end
+  return success, result_or_error
+end
+
+---Attempt to perform an operation with retries.
+---@param operation function The operation to perform.
+---@param max_attempts number The maximum number of attempts.
+---@param delay number The delay between attempts in seconds.
+---@return boolean success, any result_or_error Whether the operation was successful, and the result or error message.
+function utils.retry(operation, max_attempts, delay)
+  local attempts = 0
+  while attempts < max_attempts do
+    local success, result = utils.safe_call(operation)
+    if success then
+      return true, result
+    end
+    attempts = attempts + 1
+    if attempts < max_attempts then
+      logger.warn({
+        content = "operation retry initiated",
+        cause = result,
+        action = "retrying after delay",
+        extra_info = { attempt = attempts, max_attempts = max_attempts, delay = delay },
+      })
+      vim.wait(delay * 1000)
+    else
+      logger.error({
+        content = "operation failed after max attempts",
+        cause = result,
+        extra_info = { max_attempts = max_attempts },
+      })
+    end
+  end
+  return false, "max attempts reached"
+end
+
+---Check if a file exists.
+---@param file_path string The path to the file.
+---@return boolean exists Whether the file exists.
+function utils.file_exists(file_path)
+  local f = io.open(file_path, "r")
+  if f then
+    f:close()
+    return true
+  else
+    return false
+  end
+end
+
+---Format a number of bytes into a human-readable string.
+---@param bytes number The number of bytes.
+---@return string formatted_size The formatted size string.
+function utils.format_bytes(bytes)
+  local units = { "B", "KB", "MB", "GB", "TB" }
+  local i = 1
+  while bytes >= 1024 and i < #units do
+    bytes = bytes / 1024
+    i = i + 1
+  end
+  return string.format("%.2f %s", bytes, units[i])
 end
 
 --------------------

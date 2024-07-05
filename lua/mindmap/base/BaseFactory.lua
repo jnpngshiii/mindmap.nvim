@@ -33,28 +33,30 @@ function BaseFactory:register(type_to_be_registered, cls_to_be_registered, type_
   local cls_to_be_inherited = self:get_registered_class(type_to_be_inherited)
 
   if self.registered_cls[type_to_be_registered] then
-    -- stylua: ignore
-    logger.warn(
-      "Register class skipped: "
-        .. "class to be registered `" .. type_to_be_registered .. "` already registered."
-    )
+    logger.warn({
+      content = "register class skipped",
+      cause = "class already registered",
+      extra_info = { type = type_to_be_registered },
+    })
     return
   end
 
   if not cls_to_be_inherited.new or type(cls_to_be_inherited.new) ~= "function" then
-    -- stylua: ignore
-    logger.error("Register class aborted: "
-        .. "class to be inherited `" .. type_to_be_inherited .. "` does not have a `new` method.",
-      { cls_to_be_inherited = cls_to_be_inherited }
-    )
+    logger.error({
+      content = "register class aborted",
+      cause = "inherited class missing 'new' method",
+      extra_info = { type = type_to_be_inherited, cls_to_be_inherited = cls_to_be_inherited },
+    })
+    error("register class aborted")
   end
 
   if not cls_to_be_registered.new or type(cls_to_be_registered.new) ~= "function" then
-    -- stylua: ignore
-    logger.warn(
-      "Register class modified: "
-        .. "class to be registered `" .. cls_to_be_registered .. "` does not have a `new` method, bind default `new` method instead."
-    )
+    logger.warn({
+      content = "register class modified",
+      cause = "class missing 'new' method",
+      action = "default 'new' method bound",
+      extra_info = { type = type_to_be_registered },
+    })
 
     function cls_to_be_registered:new(...)
       local ins = cls_to_be_inherited:new(...)
@@ -64,6 +66,8 @@ function BaseFactory:register(type_to_be_registered, cls_to_be_registered, type_
       return ins
     end
   end
+
+  self.registered_cls[type_to_be_registered] = cls_to_be_registered
 end
 
 ---Get a registered class. If `registered_type` is not provided, return `self.base_cls`.
@@ -76,13 +80,12 @@ function BaseFactory:get_registered_class(registered_type)
 
   local registered_cls = self.registered_cls[registered_type]
   if not registered_cls then
-    -- stylua: ignore
-    logger.error(
-      "Get registered class failed: "
-        .. "class `" .. registered_type .. "` is not registered.",
-      { registered_types = self:get_registered_types() }
-    )
-    return self.base_cls
+    logger.error({
+      content = "get registered class failed",
+      cause = "class not registered",
+      extra_info = { type = registered_type, registered_types = self:get_registered_types() },
+    })
+    error("get registered class failed")
   end
 
   return registered_cls
@@ -108,7 +111,16 @@ function BaseFactory:create(registered_type, ...)
 
   -- The first argument of `new` method is the class type.
   -- In this way, we can use `create` method just like `new` method.
-  return registered_class:new(registered_type, ...)
+  local success, result = pcall(registered_class.new, registered_class, registered_type, ...)
+  if not success then
+    logger.error({
+      content = "create registered class failed",
+      cause = result,
+      extra_info = { type = registered_type },
+    })
+    error("create registered class failed")
+  end
+  return result
 end
 
 --------------------

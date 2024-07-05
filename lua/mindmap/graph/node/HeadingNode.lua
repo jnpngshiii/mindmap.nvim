@@ -28,8 +28,12 @@ function HeadingNode:get_ts_node(bufnr)
 
   local heading_node = ts_utils.get_heading_nodes(string.format("%08d", self._id), bufnr)[self._id]
   if not heading_node then
-    logger.error("Cannot find the treesitter node with id: `" .. self._id .. "`. Aborting retrieval.")
-    return
+    logger.error({
+      content = "retrieve treesitter node failed",
+      cause = "node not found",
+      extra_info = { id = self._id },
+    })
+    error("retrieve treesitter node failed")
   end
 
   self._cache.ts_node = heading_node
@@ -44,10 +48,20 @@ function HeadingNode:get_content(edge_type)
   local _f = function(bufnr)
     local ts_node = self:get_ts_node(bufnr)
     if not ts_node then
+      logger.warn({
+        content = "retrieve treesitter node failed",
+        cause = "node not found",
+        extra_info = { id = self._id },
+      })
       return { "No treesitter node found." }, { "No treesitter node found." }
     end
     local title_node, content_node, sub_heading_nodes = ts_utils.parse_heading_node(ts_node)
     if not title_node then
+      logger.warn({
+        content = "parse heading node failed",
+        cause = "title node not found",
+        extra_info = { id = self._id },
+      })
       return { "No title node found." }, { "No title node found." }
     end
 
@@ -81,24 +95,37 @@ function HeadingNode:after_add_into_graph()
   local _f = function(bufnr)
     local ts_node = self:get_ts_node(bufnr)
     if not ts_node then
-      logger.error("Cannot find the treesitter node. Failed to call `after_add_into_graph`.")
-      return
+      logger.error({
+        content = "add node to graph failed",
+        cause = "treesitter node not found",
+        extra_info = { id = self._id },
+      })
+      error("add node to graph failed")
     end
     local ts_node_title, _, _ = ts_utils.parse_heading_node(ts_node)
     if not ts_node_title then
-      logger.error("Cannot find the title node. Failed to call `after_add_into_graph`.")
-      return
+      logger.error({
+        content = "add node to graph failed",
+        cause = "title node not found",
+        extra_info = { id = self._id },
+      })
+      error("add node to graph failed")
     end
 
     local node_text = vim.treesitter.get_node_text(ts_node_title, bufnr)
-    ts_utils.replace_node_text(
+    local success, err = pcall(
+      ts_utils.replace_node_text,
       string.gsub(node_text, "$", " %%" .. string.format("%08d", self._id) .. "%%"),
       ts_node_title,
       self._cache.ts_node_bufnr
     )
+    if not success then
+      logger.error({ content = "update node text failed", cause = err, extra_info = { id = self._id } })
+    else
+      logger.info({ content = "add node to graph succeeded", extra_info = { id = self._id } })
+    end
   end
 
-  ---@diagnostic disable-next-line: return-type-mismatch
   return utils.with_temp_bufnr(self:get_abs_path(), _f)
 end
 
@@ -108,24 +135,37 @@ function HeadingNode:before_remove_from_graph()
   local _f = function(bufnr)
     local ts_node = self:get_ts_node(bufnr)
     if not ts_node then
-      logger.error("Cannot find the treesitter node. Failed to call `before_remove_from_graph`.")
-      return
+      logger.error({
+        content = "remove node from graph failed",
+        cause = "treesitter node not found",
+        extra_info = { id = self._id },
+      })
+      error("remove node from graph failed")
     end
     local ts_node_title, _, _ = ts_utils.parse_heading_node(ts_node)
     if not ts_node_title then
-      logger.error("Cannot find the title node. Failed to call `before_remove_from_graph`.")
-      return
+      logger.error({
+        content = "remove node from graph failed",
+        cause = "title node not found",
+        extra_info = { id = self._id },
+      })
+      error("remove node from graph failed")
     end
 
     local node_text = vim.treesitter.get_node_text(ts_node_title, bufnr)
-    ts_utils.replace_node_text(
+    local success, err = pcall(
+      ts_utils.replace_node_text,
       string.gsub(node_text, " %%" .. string.format("%08d", self._id) .. "%%", ""),
       ts_node_title,
       self._cache.ts_node_bufnr
     )
+    if not success then
+      logger.error({ content = "update node text failed", cause = err, extra_info = { id = self._id } })
+    else
+      logger.info({ content = "remove node from graph succeeded", extra_info = { id = self._id } })
+    end
   end
 
-  ---@diagnostic disable-next-line: return-type-mismatch
   return utils.with_temp_bufnr(self:get_abs_path(), _f)
 end
 

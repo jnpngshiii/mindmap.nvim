@@ -76,26 +76,29 @@ function BaseAlg:upgrade()
     local next_version = current_version + 1
     local upgrade_func = self["upgrade_to_v" .. next_version]
     if upgrade_func then
-      local ok, result = pcall(upgrade_func(self))
+      local ok, result = pcall(upgrade_func, self)
       if not ok then
-        -- stylua: ignore
-        logger.error(
-          "Upgrade from `v" .. current_version .. "` to `v" .. next_version .. "` failed: "
-            .. result
-        )
+        logger.error({
+          content = "upgrade version failed",
+          cause = result,
+          extra_info = { from_version = current_version, to_version = next_version },
+        })
+        error("upgrade version failed")
       end
-      -- stylua: ignore
-      logger.info(
-        "Upgrade from `v" .. current_version .. "` to `v" .. next_version .. "` succeeded."
-      )
+      logger.info({
+        content = "upgrade version succeeded",
+        extra_info = { from_version = current_version, to_version = next_version },
+      })
     else
-      -- stylua: ignore
-      logger.warn(
-        "Upgrade from `v" .. current_version .. "` to `v" .. next_version .. "` failed: "
-          .. "cannot find upgrade function, force upgrade instead.")
+      logger.warn({
+        content = "upgrade version skipped",
+        cause = "missing upgrade function",
+        action = "version forcibly updated",
+        extra_info = { from_version = current_version, to_version = next_version },
+      })
     end
 
-    self._version = current_version
+    self._version = next_version
     current_version = next_version
   end
 end
@@ -109,15 +112,12 @@ function BaseAlg:check_health()
     table.insert(issues, "Invalid `initial_ease`: expected `number`, got `" .. type(self.initial_ease) .. "`;")
   end
   if type(self.initial_interval) ~= "number" then
-    table.insert(issues, "Invalid `initial_ease`: expected `number`, got `" .. type(self.initial_interval) .. "`;")
+    table.insert(issues, "Invalid `initial_interval`: expected `number`, got `" .. type(self.initial_interval) .. "`;")
   end
 
-  if not #issues == 0 then
-    -- stylua: ignore
-    logger.error(
-      "Health check failed.",
-      issues
-    )
+  if #issues ~= 0 then
+    logger.error({ content = "health check failed", extra_info = { issues = issues } })
+    error("health check failed")
   end
 end
 
@@ -128,7 +128,11 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-local, unused-vararg
 function BaseAlg:answer_easy(edge, ...)
-  logger.warn("Method `answer_easy` is not implemented.")
+  logger.warn({
+    content = "method 'answer_easy' not implemented",
+    action = "operation skipped",
+    extra_info = { edge = edge },
+  })
 end
 
 ---@abstract
@@ -138,7 +142,11 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-local, unused-vararg
 function BaseAlg:answer_good(edge, ...)
-  logger.warn("Method `answer_good` is not implemented.")
+  logger.warn({
+    content = "method 'answer_good' not implemented",
+    action = "operation skipped",
+    extra_info = { edge = edge },
+  })
 end
 
 ---@abstract
@@ -148,7 +156,11 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-local, unused-vararg
 function BaseAlg:answer_again(edge, ...)
-  logger.warn("Method `answer_again` is not implemented.")
+  logger.warn({
+    content = "method 'answer_again' not implemented",
+    action = "operation skipped",
+    extra_info = { edge = edge },
+  })
 end
 
 ----------
@@ -156,7 +168,7 @@ end
 ----------
 
 ---Adjust the interval for 8 or more days with a random fuzz factor.
----See: "Anki also applies a small amount of random “fuzz” to prevent cards that
+---See: "Anki also applies a small amount of random "fuzz" to prevent cards that
 ---  were introduced at the same time and given the same ratings from sticking
 ---  together and always coming up for review on the same day."
 ---@param interval integer The interval in days.
