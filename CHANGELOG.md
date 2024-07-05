@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.6.0...v0.6.1) (2024-07-05)
+
+
+### Features
+
+* update log msg according to the api of `logger.nvim` ([c05ff89](https://github.com/jnpngshiii/mindmap.nvim/commit/c05ff892758907e758e19d5c057d253786b1507b))
+
 ## [0.6.0](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.5.1...v0.6.0) (2024-07-04)
 
 
