@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.7.0](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.6.1...v0.7.0) (2024-07-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* update accroding to `logger.nvim` v0.4.0
+* **utils:** move some func to `logger.nvim`
+
+### Features
+
+* add `buffer` keymaps for `MindmapDisplay` and `MindmapClean` ([7a03efd](https://github.com/jnpngshiii/mindmap.nvim/commit/7a03efd66cb079fefab3d2b56f6fb27cdbca1b63))
+* **alg:** remove `upgrade` method ([349767c](https://github.com/jnpngshiii/mindmap.nvim/commit/349767cb606149d0ba0a9143106d0538824e48b2))
+* update accroding to `logger.nvim` v0.4.0 ([3f341b6](https://github.com/jnpngshiii/mindmap.nvim/commit/3f341b65f97446ccada662ed1480174da313695e))
+* update log msg ([4a59b67](https://github.com/jnpngshiii/mindmap.nvim/commit/4a59b673bde542a7ca113113c443192eb8eb031d))
+* **utils:** move some func to `logger.nvim` ([0c5de05](https://github.com/jnpngshiii/mindmap.nvim/commit/0c5de05eb54b18efcae5338a6e9d8296d03f2df6))
+
+
+### Bug Fixes
+
+* **init:** fix wrong keymaps ([e87c2c2](https://github.com/jnpngshiii/mindmap.nvim/commit/e87c2c233de5368b95c48cfd37b39e590f5620ca))
+* **plugin_func:** remove useless `Logger` ([14efe71](https://github.com/jnpngshiii/mindmap.nvim/commit/14efe71aaf95f3b44944ffbaf862084195259601))
+
 ## [0.6.1](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.6.0...v0.6.1) (2024-07-05)
 
 
