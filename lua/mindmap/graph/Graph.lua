@@ -1,4 +1,4 @@
-local logger = require("mindmap.plugin_logger"):register_source("Graph")
+local logger = require("logger").register_plugin("mindmap"):register_source("Graph")
 
 local Popup = require("nui.popup")
 local Layout = require("nui.layout")

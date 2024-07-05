@@ -1,4 +1,4 @@
-local logger = require("mindmap.plugin_logger"):register_source("Factory.Alg")
+local logger = require("logger").register_plugin("mindmap"):register_source("Factory.Alg")
 
 local BaseFactory = require("mindmap.base.BaseFactory")
 

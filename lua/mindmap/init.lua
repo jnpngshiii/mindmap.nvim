@@ -1,4 +1,4 @@
-local logger = require("mindmap.plugin_logger"):register_source("Plugin.Init")
+local logger = require("logger").register_plugin("mindmap"):register_source("Plugin.Init")
 
 local plugin_func = require("mindmap.plugin_func")
 local user_func = require("mindmap.user_func")
@@ -95,41 +95,77 @@ function M.setup_default_keymaps()
   -- MindmapDisplay
   vim.api.nvim_set_keymap(
     "n",
-    keymap_prefix .. "cc",
+    keymap_prefix .. "dc",
     "<cmd>MindmapDisplay nearest card_back<CR>",
     { noremap = true, silent = true, desc = "Display nearest card back" }
   )
   vim.api.nvim_set_keymap(
     "n",
-    keymap_prefix .. "ce",
+    keymap_prefix .. "de",
     "<cmd>MindmapDisplay nearest excerpt<CR>",
     { noremap = true, silent = true, desc = "Display nearest excerpt" }
   )
   vim.api.nvim_set_keymap(
     "n",
-    keymap_prefix .. "cs",
+    keymap_prefix .. "ds",
     "<cmd>MindmapDisplay nearest sp_info<CR>",
     { noremap = true, silent = true, desc = "Display nearest spaced repetition info" }
+  )
+  vim.api.nvim_set_keymap(
+    "n",
+    keymap_prefix .. "Dc",
+    "<cmd>MindmapDisplay buffer card_back<CR>",
+    { noremap = true, silent = true, desc = "Display buffer card back" }
+  )
+  vim.api.nvim_set_keymap(
+    "n",
+    keymap_prefix .. "De",
+    "<cmd>MindmapDisplay buffer excerpt<CR>",
+    { noremap = true, silent = true, desc = "Display buffer excerpt" }
+  )
+  vim.api.nvim_set_keymap(
+    "n",
+    keymap_prefix .. "Ds",
+    "<cmd>MindmapDisplay buffer sp_info<CR>",
+    { noremap = true, silent = true, desc = "Display buffer spaced repetition info" }
   )
 
   -- MindmapClean
   vim.api.nvim_set_keymap(
     "n",
-    keymap_prefix .. "dc",
+    keymap_prefix .. "cc",
     "<cmd>MindmapClean nearest card_back<CR>",
     { noremap = true, silent = true, desc = "Clean nearest card back" }
   )
   vim.api.nvim_set_keymap(
     "n",
-    keymap_prefix .. "de",
+    keymap_prefix .. "ce",
     "<cmd>MindmapClean nearest excerpt<CR>",
     { noremap = true, silent = true, desc = "Clean nearest excerpt" }
   )
   vim.api.nvim_set_keymap(
     "n",
-    keymap_prefix .. "ds",
+    keymap_prefix .. "cs",
     "<cmd>MindmapClean nearest sp_info<CR>",
     { noremap = true, silent = true, desc = "Clean nearest spaced repetition info" }
+  )
+  vim.api.nvim_set_keymap(
+    "n",
+    keymap_prefix .. "Cc",
+    "<cmd>MindmapClean buffer card_back<CR>",
+    { noremap = true, silent = true, desc = "Clean buffer card back" }
+  )
+  vim.api.nvim_set_keymap(
+    "n",
+    keymap_prefix .. "Ce",
+    "<cmd>MindmapClean buffer excerpt<CR>",
+    { noremap = true, silent = true, desc = "Clean buffer excerpt" }
+  )
+  vim.api.nvim_set_keymap(
+    "n",
+    keymap_prefix .. "Cs",
+    "<cmd>MindmapClean buffer sp_info<CR>",
+    { noremap = true, silent = true, desc = "Clean buffer spaced repetition info" }
   )
 
   -- MindmapReview

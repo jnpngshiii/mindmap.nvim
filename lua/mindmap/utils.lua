@@ -1,4 +1,4 @@
-local logger = require("mindmap.plugin_logger"):register_source("Plugin.Utils")
+local logger = require("logger").register_plugin("mindmap"):register_source("Plugin.Utils")
 
 local utils = {}
 
@@ -394,54 +394,6 @@ function utils.pfor(iterator, func, thread_num)
   end
 
   return results
-end
-
----Safely call a function and log any errors.
----@param func function The function to call.
----@param ... any Arguments to pass to the function.
----@return boolean success, any result_or_error Whether the function call was successful, and the result or error message.
-function utils.safe_call(func, ...)
-  local success, result_or_error = pcall(func, ...)
-  if not success then
-    logger.error({
-      content = "function call failed",
-      cause = result_or_error,
-      extra_info = { func_name = debug.getinfo(func, "n").name },
-    })
-  end
-  return success, result_or_error
-end
-
----Attempt to perform an operation with retries.
----@param operation function The operation to perform.
----@param max_attempts number The maximum number of attempts.
----@param delay number The delay between attempts in seconds.
----@return boolean success, any result_or_error Whether the operation was successful, and the result or error message.
-function utils.retry(operation, max_attempts, delay)
-  local attempts = 0
-  while attempts < max_attempts do
-    local success, result = utils.safe_call(operation)
-    if success then
-      return true, result
-    end
-    attempts = attempts + 1
-    if attempts < max_attempts then
-      logger.warn({
-        content = "operation retry initiated",
-        cause = result,
-        action = "retrying after delay",
-        extra_info = { attempt = attempts, max_attempts = max_attempts, delay = delay },
-      })
-      vim.wait(delay * 1000)
-    else
-      logger.error({
-        content = "operation failed after max attempts",
-        cause = result,
-        extra_info = { max_attempts = max_attempts },
-      })
-    end
-  end
-  return false, "max attempts reached"
 end
 
 ---Check if a file exists.

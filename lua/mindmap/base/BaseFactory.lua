@@ -1,4 +1,4 @@
-local logger = require("mindmap.plugin_logger"):register_source("Base.Factory")
+local logger = require("logger").register_plugin("mindmap"):register_source("Base.Factory")
 
 --------------------
 -- Class BaseFactory
@@ -68,6 +68,10 @@ function BaseFactory:register(type_to_be_registered, cls_to_be_registered, type_
   end
 
   self.registered_cls[type_to_be_registered] = cls_to_be_registered
+  logger.debug({
+    content = "register class succeeded",
+    extra_info = { registered_type = type_to_be_registered, registered_class = cls_to_be_registered },
+  })
 end
 
 ---Get a registered class. If `registered_type` is not provided, return `self.base_cls`.
