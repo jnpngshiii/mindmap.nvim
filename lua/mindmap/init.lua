@@ -95,19 +95,19 @@ function M.setup_default_keymaps()
   -- MindmapDisplay
   vim.api.nvim_set_keymap(
     "n",
-    keymap_prefix .. "cc",
+    keymap_prefix .. "dc",
     "<cmd>MindmapDisplay nearest card_back<CR>",
     { noremap = true, silent = true, desc = "Display nearest card back" }
   )
   vim.api.nvim_set_keymap(
     "n",
-    keymap_prefix .. "ce",
+    keymap_prefix .. "de",
     "<cmd>MindmapDisplay nearest excerpt<CR>",
     { noremap = true, silent = true, desc = "Display nearest excerpt" }
   )
   vim.api.nvim_set_keymap(
     "n",
-    keymap_prefix .. "cs",
+    keymap_prefix .. "ds",
     "<cmd>MindmapDisplay nearest sp_info<CR>",
     { noremap = true, silent = true, desc = "Display nearest spaced repetition info" }
   )
@@ -115,19 +115,19 @@ function M.setup_default_keymaps()
   -- MindmapClean
   vim.api.nvim_set_keymap(
     "n",
-    keymap_prefix .. "dc",
+    keymap_prefix .. "cc",
     "<cmd>MindmapClean nearest card_back<CR>",
     { noremap = true, silent = true, desc = "Clean nearest card back" }
   )
   vim.api.nvim_set_keymap(
     "n",
-    keymap_prefix .. "de",
+    keymap_prefix .. "ce",
     "<cmd>MindmapClean nearest excerpt<CR>",
     { noremap = true, silent = true, desc = "Clean nearest excerpt" }
   )
   vim.api.nvim_set_keymap(
     "n",
-    keymap_prefix .. "ds",
+    keymap_prefix .. "cs",
     "<cmd>MindmapClean nearest sp_info<CR>",
     { noremap = true, silent = true, desc = "Clean nearest spaced repetition info" }
   )
