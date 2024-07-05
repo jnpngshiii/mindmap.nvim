@@ -10,14 +10,18 @@ function ts_utils.get_root_node(bufnr)
 
   local lang_tree = vim.treesitter.get_parser(bufnr, "norg")
   if not lang_tree then
-    logger.error("Cannot get norg tree in the given buffer")
-    return
+    logger.error({ content = "get norg tree failed", cause = "parser not found", extra_info = { bufnr = bufnr } })
+    error("get norg tree failed")
   end
 
   local neorg_doc_tree = lang_tree:parse()[1]
   if not neorg_doc_tree then
-    logger.error("Cannot parse norg tree in the given buffer")
-    return
+    logger.error({
+      content = "parse norg tree failed",
+      cause = "document tree not found",
+      extra_info = { bufnr = bufnr },
+    })
+    error("parse norg tree failed")
   end
 
   return neorg_doc_tree:root()
@@ -79,8 +83,12 @@ function ts_utils.parse_heading_node(heading_node)
 
   local sub_heading_level = tonumber(string.match(heading_node:type(), "%d")) + 1
   if not sub_heading_level then
-    logger.error("Node `%s` is not a heading node. Aborting parsing.")
-    return title_node, content_node, sub_heading_nodes
+    logger.error({
+      content = "parse heading node failed",
+      cause = "invalid heading node type",
+      extra_info = { node_type = heading_node:type() },
+    })
+    error("parse heading node failed")
   end
 
   local parsed_query = vim.treesitter.query.parse(

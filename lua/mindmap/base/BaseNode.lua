@@ -121,26 +121,29 @@ function BaseNode:upgrade()
     local next_version = current_version + 1
     local upgrade_func = self["upgrade_to_v" .. next_version]
     if upgrade_func then
-      local ok, result = pcall(upgrade_func(self))
+      local ok, result = pcall(upgrade_func, self)
       if not ok then
-        -- stylua: ignore
-        logger.error(
-          "Upgrade from `v" .. current_version .. "` to `v" .. next_version .. "` failed: "
-            .. result
-        )
+        logger.error({
+          content = "upgrade version failed",
+          cause = result,
+          extra_info = { from_version = current_version, to_version = next_version },
+        })
+      else
+        logger.info({
+          content = "upgrade version succeeded",
+          extra_info = { from_version = current_version, to_version = next_version },
+        })
       end
-      -- stylua: ignore
-      logger.info(
-        "Upgrade from `v" .. current_version .. "` to `v" .. next_version .. "` succeeded."
-      )
     else
-      -- stylua: ignore
-      logger.warn(
-        "Upgrade from `v" .. current_version .. "` to `v" .. next_version .. "` failed: "
-          .. "cannot find upgrade function, force upgrade instead.")
+      logger.warn({
+        content = "upgrade version skipped",
+        cause = "missing upgrade function",
+        action = "version forcibly updated",
+        extra_info = { from_version = current_version, to_version = next_version },
+      })
     end
 
-    self._version = current_version
+    self._version = next_version
     current_version = next_version
   end
 end
@@ -182,12 +185,9 @@ function BaseNode:check_health()
     table.insert(issues, "Invalid `_version`: expected `number` or `nil`, got `" .. type(self._version) .. "`;")
   end
 
-  if not #issues == 0 then
-    -- stylua: ignore
-    logger.error(
-      "Health check failed.",
-      issues
-    )
+  if #issues ~= 0 then
+    logger.error({ content = "health check failed", extra_info = { issues = issues } })
+    error("health check failed")
   end
 end
 
@@ -210,7 +210,7 @@ end
 ---@return string[] front, string[] back Content of the node.
 ---@diagnostic disable-next-line: unused-local
 function BaseNode:get_content(edge_type)
-  logger.warn("Method `get_content` is not implemented.")
+  logger.warn({ content = "method 'get_content' not implemented", action = "operation skipped" })
   return {}, {}
 end
 
@@ -225,7 +225,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:before_add_into_graph(...)
-  -- logger.warn("Method `before_add_into_graph` is not implemented.")
+  -- logger.warn({ content = "method 'before_add_into_graph' not implemented", action = "operation skipped" })
 end
 
 ---@abstract
@@ -234,7 +234,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:after_add_into_graph(...)
-  -- logger.warn("Method `after_add_into_graph` is not implemented.")
+  -- logger.warn({ content = "method 'after_add_into_graph' not implemented", action = "operation skipped" })
 end
 
 ---@abstract
@@ -243,7 +243,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:before_remove_from_graph(...)
-  -- logger.warn("Method `before_remove_from_graph` is not implemented.")
+  -- logger.warn({ content = "method 'before_remove_from_graph' not implemented", action = "operation skipped" })
 end
 
 ---@abstract
@@ -252,7 +252,7 @@ end
 ---@return nil
 ---@diagnostic disable-next-line: unused-vararg
 function BaseNode:after_remove_from_graph(...)
-  -- logger.warn("Method `after_remove_from_graph` is not implemented.")
+  -- logger.warn({ content = "method 'after_remove_from_graph' not implemented", action = "operation skipped" })
 end
 
 --------------------

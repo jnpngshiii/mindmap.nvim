@@ -28,8 +28,8 @@ function user_func.MindmapAddNearestHeadingAsHeadingNode()
       ts_node = ts_node:parent()
     end
     if not ts_node then
-      logger:error("[Mindmap]", "Cannot find the treesitter node of the nearest heading.")
-      return
+      logger.error({ content = "add nearest heading failed", cause = "heading node not found" })
+      error("add nearest heading failed")
     end
 
     local new_node = graph.node_factory:create("HeadingNode", #graph.nodes + 1, file_name, rel_file_dir, {}, {
@@ -84,8 +84,8 @@ end, {
 ---@return nil
 function user_func.MindmapRemove(location)
   if not vim.tbl_contains(location_list, location) then
-    logger.error("Invalid `location`.")
-    return
+    logger.error({ content = "remove nodes failed", cause = "invalid location" })
+    error("remove nodes failed")
   end
 
   local graph = plugin_func.find_graph()
@@ -118,23 +118,20 @@ end, {
 ---@param to_node_location? string Location of the target node(s). If nil, links to the source node(s). Can be "latest", "nearest", "telescope", or "buffer".
 function user_func.MindmapLink(from_node_location, edge_type, to_node_location)
   if not vim.tbl_contains(location_list, from_node_location) then
-    logger.error("Invalid `from_node_location`.")
-    return
+    logger.error({ content = "link nodes failed", cause = "invalid from_node_location" })
+    error("link nodes failed")
   end
 
   to_node_location = to_node_location or from_node_location
   if to_node_location and not vim.tbl_contains(location_list, to_node_location) then
-    logger.error("Invalid `to_node_location`.")
-    return
+    logger.error({ content = "link nodes failed", cause = "invalid to_node_location" })
+    error("link nodes failed")
   end
 
   local graph = plugin_func.find_graph()
   if not vim.tbl_contains(graph.edge_factory:get_registered_types(), edge_type) then
-    logger:error(
-      "[MindmapLink]",
-      string.format("Invalid edge type `%s`. Type must be registered in graph first.", edge_type)
-    )
-    return
+    logger.error({ content = "link nodes failed", cause = "invalid edge type", extra_info = { edge_type = edge_type } })
+    error("link nodes failed")
   end
 
   graph:transact(function()
@@ -199,12 +196,12 @@ vim.api.nvim_create_user_command("MindmapUnlink", function(opts)
         local quoted_str = value:sub(2, -2)
 
         if quoted_str:sub(1, 8) == "function" then
-          local func, _ = loadstring("return " .. quoted_str)
+          local func, err = loadstring("return " .. quoted_str)
           if func then
             criteria[key] = func()
           else
-            logger.error("Invalid Lua function for key `" .. key .. "`.")
-            return
+            logger.error({ content = "parse criteria failed", cause = err, extra_info = { key = key, value = value } })
+            error("parse criteria failed")
           end
         else
           criteria[key] = quoted_str
@@ -215,8 +212,12 @@ vim.api.nvim_create_user_command("MindmapUnlink", function(opts)
 
       i = i + 2
     else
-      logger.error("Odd number of arguments. Key `" .. args[i] .. "` has no value.")
-      return
+      logger.error({
+        content = "parse criteria failed",
+        cause = "odd number of arguments",
+        extra_info = { key = args[i] },
+      })
+      error("parse criteria failed")
     end
   end
 
@@ -239,11 +240,12 @@ end, {
 ---@param show_type string Type of information to display. Can be "card_back", "excerpt", or "sp_info".
 function user_func.MindmapDisplay(location, show_type)
   if not vim.tbl_contains(location_list, location) then
-    logger.error("Invalid `location`.")
+    logger.error({ content = "display nodes failed", cause = "invalid location" })
+    error("display nodes failed")
   end
   if not vim.tbl_contains({ "card_back", "excerpt", "sp_info" }, show_type) then
-    logger.error("Invalid `show_type`.")
-    return
+    logger.error({ content = "display nodes failed", cause = "invalid show_type" })
+    error("display nodes failed")
   end
 
   local graph = plugin_func.find_graph()
@@ -311,11 +313,12 @@ end, {
 ---@param clean_type string Type of virtual text to clean. Can be "card_back", "excerpt", or "sp_info".
 function user_func.MindmapClean(location, clean_type)
   if not vim.tbl_contains(location_list, location) then
-    logger.error("Invalid `location`.")
+    logger.error({ content = "clean nodes failed", cause = "invalid location" })
+    error("clean nodes failed")
   end
   if not vim.tbl_contains({ "card_back", "excerpt", "sp_info" }, clean_type) then
-    logger.error("Invalid `clean_type`.")
-    return
+    logger.error({ content = "clean nodes failed", cause = "invalid clean_type" })
+    error("clean nodes failed")
   end
 
   local graph = plugin_func.find_graph()
@@ -351,7 +354,12 @@ end, {
 ---@return nil
 function user_func.MindmapUndo()
   local graph = plugin_func.find_graph()
-  graph:undo()
+  local ok, result = pcall(graph.undo, graph)
+  if not ok then
+    logger.error({ content = "undo operation failed", cause = result })
+    error("undo operation failed")
+  end
+  logger.info({ content = "undo operation succeeded" })
 end
 
 vim.api.nvim_create_user_command("MindmapUndo", function()
@@ -369,7 +377,12 @@ end, {
 ---@return nil
 function user_func.MindmapRedo()
   local graph = plugin_func.find_graph()
-  graph:redo()
+  local ok, result = pcall(graph.redo, graph)
+  if not ok then
+    logger.error({ content = "redo operation failed", cause = result })
+    error("redo operation failed")
+  end
+  logger.info({ content = "redo operation succeeded" })
 end
 
 vim.api.nvim_create_user_command("MindmapRedo", function()
@@ -387,6 +400,11 @@ end, {
 ---@param location string Location of card(s) to review. Can be "latest", "nearest", "telescope", or "buffer".
 ---@return nil
 function user_func.MindmapReview(location)
+  if not vim.tbl_contains(location_list, location) then
+    logger.error({ content = "review cards failed", cause = "invalid location" })
+    error("review cards failed")
+  end
+
   local graph = plugin_func.find_graph()
   local nodes = plugin_func.find_heading_nodes(graph, location)
 
@@ -394,16 +412,18 @@ function user_func.MindmapReview(location)
     for _, edge_id in ipairs(node._data.incoming_edge_ids or {}) do
       local edge = graph.edges[edge_id]
       if edge._due_at <= os.time() then
-        local status = graph:show_card(edge_id)
-        if status == "quit" then
-          logger.info("Review session ended.")
+        local ok, status = pcall(graph.show_card, graph, edge_id)
+        if not ok then
+          logger.error({ content = "show card failed", cause = status, extra_info = { edge_id = edge_id } })
+        elseif status == "quit" then
+          logger.info({ content = "review session ended", action = "review terminated" })
           return
         end
       end
     end
   end
 
-  logger.info("Review completed for all due cards.")
+  logger.info({ content = "review completed", extra_info = { location = location } })
 end
 
 vim.api.nvim_create_user_command("MindmapReview", function(opts)
@@ -427,19 +447,26 @@ function user_func.MindmapSave(save_dir)
   save_dir = save_dir or ({ utils.get_file_path() })[4]
   if save_dir == "all" then
     for _, graph in pairs(plugin_func.get_cache().graphs) do
-      graph:save()
+      local ok, result = pcall(graph.save, graph)
+      if not ok then
+        logger.error({ content = "save graph failed", cause = result, extra_info = { graph = graph } })
+      end
     end
-    logger.info("Saved all graphs.")
-  end
+    logger.info({ content = "save all graphs succeeded" })
+  else
+    local graph = plugin_func.find_graph(save_dir)
+    if not graph then
+      logger.error({ content = "save graph failed", cause = "graph not found", extra_info = { save_dir = save_dir } })
+      error("save graph failed")
+    end
 
-  local graph = plugin_func.find_graph(save_dir)
-  if not graph then
-    logger.error("No graph found.")
-    return
+    local ok, result = pcall(graph.save, graph)
+    if not ok then
+      logger.error({ content = "save graph failed", cause = result, extra_info = { save_dir = save_dir } })
+      error("save graph failed")
+    end
+    logger.info({ content = "save graph succeeded", extra_info = { save_dir = save_dir } })
   end
-
-  graph:save()
-  logger:info("graph", "Graph saved to `" .. save_dir .. "`.")
 end
 
 vim.api.nvim_create_user_command("MindmapSave", function(opts)
@@ -448,31 +475,6 @@ end, {
   nargs = 1,
   complete = function(_, _, _) end,
   desc = "Save graph(s)",
-})
-
-----------
--- MindmapLogger
-----------
-
----Set the log level for the logger.
----@param log_level number|string Log level of the logger.
----@return nil
-function user_func.MindmapLoggerSetLevel(log_level)
-  local ok, result = pcall(logger:set_log_level(log_level))
-  if not ok then
-    logger:error("Failed to set log level: " .. result)
-    return
-  end
-
-  logger:info("Log level set to `" .. log_level .. "`")
-end
-
-vim.api.nvim_create_user_command("MindmapLoggerSetLevel", function(opts)
-  user_func.MindmapSave(opts.fargs[1])
-end, {
-  nargs = 1,
-  complete = function(_, _, _) end,
-  desc = "Set the log level for the logger",
 })
 
 ----------

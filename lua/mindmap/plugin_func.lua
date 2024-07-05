@@ -60,6 +60,7 @@ end
 function plugin_func.find_namespace(namespace)
   if not plugin_data.cache.namespaces[namespace] then
     plugin_data.cache.namespaces[namespace] = vim.api.nvim_create_namespace("mindmap_" .. namespace)
+    logger.info({ content = "create namespace succeeded", extra_info = { namespace = namespace } })
   end
 
   return plugin_data.cache.namespaces[namespace]
@@ -100,6 +101,7 @@ function plugin_func.find_graph(save_dir)
       plugin_data.config.thread_num
     )
     plugin_data.cache.graphs[created_graph.save_dir] = created_graph
+    logger.info({ content = "create graph succeeded", extra_info = { save_dir = save_dir } })
   end
 
   return plugin_data.cache.graphs[save_dir]
@@ -114,11 +116,12 @@ end
 function plugin_func.find_heading_nodes(graph, location, force_add, id_regex)
   local valid_locations = { latest = true, nearest = true, telescope = true, buffer = true }
   if type(location) ~= "userdata" and not valid_locations[location] then
-    logger:error(
-      "[Func]",
-      string.format("Invalid location `%s`. Must be TSNode, `latest`, `nearest`, `telescope` or `buffer`", location)
-    )
-    return {}
+    logger.error({
+      content = "find heading nodes failed",
+      cause = "invalid location",
+      extra_info = { location = location },
+    })
+    error("find heading nodes failed")
   end
   id_regex = id_regex or "%d%d%d%d%d%d%d%d"
   force_add = force_add and (id_regex == "%d%d%d%d%d%d%d%d")
@@ -127,7 +130,7 @@ function plugin_func.find_heading_nodes(graph, location, force_add, id_regex)
   local function process_node(ts_node)
     local title_ts_node, _, _ = ts_utils.parse_heading_node(ts_node)
     if not title_ts_node then
-      logger:debug("[Func]", "Cannot find the title treesitter node. Skipping.")
+      logger.debug({ content = "find title node skipped", cause = "title node not found" })
       return nil
     end
 
@@ -136,7 +139,7 @@ function plugin_func.find_heading_nodes(graph, location, force_add, id_regex)
 
     if not id then
       if not force_add then
-        logger:debug("[Func]", "Cannot find the node ID. Skipping.")
+        logger.debug({ content = "find node skipped", cause = "node id not found" })
         return nil
       end
 
@@ -144,8 +147,8 @@ function plugin_func.find_heading_nodes(graph, location, force_add, id_regex)
       local file_name, _, rel_file_path = utils.get_file_info()
       local ok, node = graph:add_node("HeadingNode", id, file_name, rel_file_path, {}, { ts_node = ts_node })
       if not ok or not node then
-        logger:error("[Func]", "Cannot force add a new node. Skipping.")
-        return nil
+        logger.error({ content = "force add node failed" })
+        error("force add node failed")
       end
 
       return node
@@ -168,14 +171,17 @@ function plugin_func.find_heading_nodes(graph, location, force_add, id_regex)
       ts_node = ts_node:parent()
     end
     if not ts_node then
-      logger:error("[Func]", "Cannot find the treesitter node of the nearest heading.")
+      logger.error({ content = "find nearest heading failed", cause = "heading node not found" })
       return {}
     end
     local node = process_node(ts_node)
     return node and { [node._id] = node } or {}
   elseif location == "telescope" then
-    -- TODO: Implement telescope functionality
-    logger:warn("[Func]", "Telescope functionality not yet implemented.")
+    logger.warn({
+      content = "find heading nodes skipped",
+      cause = "telescope functionality not implemented",
+      action = "empty table returned",
+    })
     return {}
   elseif location == "buffer" then
     local found_nodes = {}

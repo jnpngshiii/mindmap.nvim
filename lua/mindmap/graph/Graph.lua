@@ -95,11 +95,7 @@ function Graph:load()
   local json_path = self.save_dir .. "/" .. ".mindmap.json"
   local json, _ = io.open(json_path, "r")
   if not json then
-    -- stylua: ignore
-    logger:warn(
-      "Load graph from `" .. json_path .. "` failed: "
-        .. "cannot open file."
-    )
+    logger.warn({ content = "load graph failed", cause = "cannot open file", extra_info = { path = json_path } })
     return
   end
 
@@ -107,11 +103,7 @@ function Graph:load()
   json:close()
 
   if json_content == "" then
-    -- stylua: ignore
-    logger:warn(
-      "Load graph from `" .. json_path .. "` failed: "
-        .. "cannot load empty file."
-    )
+    logger.warn({ content = "load graph failed", cause = "empty file", extra_info = { path = json_path } })
     return
   end
   json_content = vim.fn.json_decode(json_content)
@@ -122,6 +114,8 @@ function Graph:load()
   for edge_id, edge in pairs(json_content.edges) do
     self.edges[edge_id] = self.edge_factory:from_table(edge._type, edge)
   end
+
+  logger.info({ content = "load graph succeeded", extra_info = { path = json_path } })
 end
 
 ---Save the graph to `{self.save_dir}/.mindmap.json`.
@@ -141,17 +135,15 @@ function Graph:save()
   local json_path = self.save_dir .. "/" .. ".mindmap.json"
   local json, _ = io.open(json_path, "w")
   if not json then
-    -- stylua: ignore
-    logger:error(
-      "Save graph to `" .. json_path .. "` failed: "
-        .. "cannot open file."
-    )
+    logger.error({ content = "save graph failed", cause = "cannot open file", extra_info = { path = json_path } })
     return
   end
 
   local json_content = vim.fn.json_encode(graph_tbl)
   json:write(json_content)
   json:close()
+
+  logger.info({ content = "save graph succeeded", extra_info = { path = json_path } })
 end
 
 ---Create a savepoint.
@@ -193,16 +185,19 @@ function Graph:add_node(node_or_node_type, ...)
   elseif type(node_or_node_type) == "string" then
     node = self.node_factory:create(node_or_node_type, ...)
     if not node then
-      logger:warn("Add node failed. Can not create `" .. node_or_node_type .. "`.")
+      logger.warn({
+        content = "add node failed",
+        cause = "cannot create node",
+        extra_info = { type = node_or_node_type },
+      })
       return false, nil
     end
   else
-    logger:error(
-
-      "Add node failed. The type of node_or_node_type must be `string` or `table`, but got `"
-        .. type(node_or_node_type)
-        .. "`."
-    )
+    logger.error({
+      content = "add node failed",
+      cause = "invalid node_or_node_type",
+      extra_info = { type = type(node_or_node_type) },
+    })
     return false, nil
   end
 
@@ -243,7 +238,7 @@ function Graph:add_node(node_or_node_type, ...)
 
   -- Others --
 
-  logger:info("Add `" .. node._type .. "` `" .. node._id .. "` to graph.")
+  logger.info({ content = "add node succeeded", extra_info = { type = node._type, id = node._id } })
   return true, node
 end
 
@@ -260,16 +255,19 @@ function Graph:add_edge(edge_or_edge_type, ...)
   elseif type(edge_or_edge_type) == "string" then
     edge = self.edge_factory:create(edge_or_edge_type, ...)
     if not edge then
-      logger:warn("Add edge failed. Can not create `" .. edge_or_edge_type .. "`.")
+      logger.warn({
+        content = "add edge failed",
+        cause = "cannot create edge",
+        extra_info = { type = edge_or_edge_type },
+      })
       return false, nil
     end
   else
-    logger:error(
-
-      "Add edge failed. The type of edge_or_edge_type must be `string` or `table`, but got `"
-        .. type(edge_or_edge_type)
-        .. "`."
-    )
+    logger.error({
+      content = "add edge failed",
+      cause = "invalid edge_or_edge_type",
+      extra_info = { type = type(edge_or_edge_type) },
+    })
     return false, nil
   end
 
@@ -310,7 +308,7 @@ function Graph:add_edge(edge_or_edge_type, ...)
 
   -- Others --
 
-  logger:info("Add `" .. edge._type .. "` `" .. edge._id .. "` to graph.")
+  logger.info({ content = "add edge succeeded", extra_info = { type = edge._type, id = edge._id } })
   return true, edge
 end
 
@@ -401,7 +399,7 @@ end
 function Graph:remove_edge(edge_id)
   local edge = self.edges[edge_id]
   if not edge then
-    logger:warn("Remove edge failed. Can not find edge `" .. edge_id .. "`.")
+    logger.warn({ content = "remove edge failed", cause = "edge not found", extra_info = { id = edge_id } })
     return false
   end
 
@@ -441,7 +439,7 @@ function Graph:remove_edge(edge_id)
 
   -- Others --
 
-  logger:info("Remove `" .. edge._type .. "` `" .. edge._id .. "` from graph.")
+  logger.info({ content = "remove edge succeeded", extra_info = { type = edge._type, id = edge._id } })
   return true
 end
 
@@ -453,7 +451,7 @@ end
 function Graph:remove_node(node_id)
   local node = self.nodes[node_id]
   if not node then
-    logger:warn("Remove node failed. Can not find node `" .. node_id .. "`.")
+    logger.warn({ content = "remove node failed", cause = "node not found", extra_info = { id = node_id } })
     return false
   end
 
@@ -493,7 +491,7 @@ function Graph:remove_node(node_id)
 
   -- Others --
 
-  logger:info("Remove `" .. node._type .. "` `" .. node._id .. "` from graph.")
+  logger.info({ content = "remove node succeeded", extra_info = { type = node._type, id = node._id } })
   return true
 end
 
@@ -508,7 +506,7 @@ end
 function Graph:transact(closure, description)
   self.lock:acquire()
   self.current_transaction = Transaction:begin(self:create_savepoint(), description)
-  logger:info("Transaction `" .. self.current_transaction.description .. "` begin.")
+  logger.info({ content = "transaction begin", extra_info = { description = self.current_transaction.description } })
 
   local success, err_msg = pcall(closure)
   if success then
@@ -520,23 +518,30 @@ function Graph:transact(closure, description)
       table.insert(self.undo_stack, self.current_transaction)
       self.redo_stack = {}
 
-      logger:info("Transaction `" .. self.current_transaction.description .. "` commit completed.")
+      logger.info({
+        content = "transaction commit succeeded",
+        extra_info = { description = self.current_transaction.description },
+      })
     else
       success = false
-      logger:error("Transaction `" .. self.current_transaction.description .. "` commit failed.")
+      logger.error({
+        content = "transaction commit failed",
+        extra_info = { description = self.current_transaction.description },
+      })
     end
   end
 
   if not success then
-    logger:warn("Transaction `" .. self.current_transaction.description .. "` failed: " .. err_msg .. ".")
-    -- Just simply rollback the savepoint now.
+    logger.warn({
+      content = "transaction failed",
+      cause = err_msg,
+      extra_info = { description = self.current_transaction.description },
+    })
     self:rollback_savepoint(self.current_transaction.savepoint)
-    logger:warn("Transaction `" .. self.current_transaction.description .. "` rollback completed.")
-    -- if self.current_transaction:rollback() then
-    --   logger:info( "Transaction rollback completed.")
-    -- else
-    --   logger:error( "Transaction rollback failed.")
-    -- end
+    logger.warn({
+      content = "transaction rollback completed",
+      extra_info = { description = self.current_transaction.description },
+    })
   end
 
   self.current_transaction = nil
@@ -549,7 +554,7 @@ end
 function Graph:undo()
   local transaction = table.remove(self.undo_stack)
   if not transaction then
-    logger:info("No transaction to undo.")
+    logger.info({ content = "undo failed", cause = "no transaction to undo" })
     return false
   end
 
@@ -561,6 +566,7 @@ function Graph:undo()
   end
   table.insert(self.redo_stack, transaction)
 
+  logger.info({ content = "undo succeeded", extra_info = { description = transaction.description } })
   return true
 end
 
@@ -569,7 +575,7 @@ end
 function Graph:redo()
   local transaction = table.remove(self.redo_stack)
   if not transaction then
-    logger:info("No operation to redo.")
+    logger.info({ content = "redo failed", cause = "no operation to redo" })
     return false
   end
 
@@ -581,6 +587,7 @@ function Graph:redo()
   end
   table.insert(self.undo_stack, transaction)
 
+  logger.info({ content = "redo succeeded", extra_info = { description = transaction.description } })
   return true
 end
 
@@ -678,12 +685,12 @@ function Graph:show_card(edge_id)
   until choice == string.byte(" ") or choice == string.byte("s") or choice == string.byte("q")
 
   if choice == string.byte("s") then
-    logger:info("Skip spaced repetition of the current card.")
+    logger.info({ content = "skip spaced repetition", extra_info = { edge_id = edge_id } })
     status = "skip"
     card_ui:unmount()
     return status
   elseif choice == string.byte("q") then
-    logger:info("Quit spaced repetition of the current deck.")
+    logger.info({ content = "quit spaced repetition", extra_info = { edge_id = edge_id } })
     status = "quit"
     card_ui:unmount()
     return status
@@ -709,22 +716,22 @@ function Graph:show_card(edge_id)
     or choice == string.byte("q")
 
   if choice == string.byte("1") or choice == string.byte("a") then
-    logger:debug("Answer again to edge `" .. edge_id .. "`.")
+    logger.debug({ content = "answer again", extra_info = { edge_id = edge_id } })
     self.alg:answer_again(edge)
     status = "again"
   elseif choice == string.byte(" ") or choice == string.byte("2") or choice == string.byte("g") then
-    logger:debug("Answer good to edge `" .. edge_id .. "`.")
+    logger.debug({ content = "answer good", extra_info = { edge_id = edge_id } })
     self.alg:answer_good(edge)
     status = "good"
   elseif choice == string.byte("3") or choice == string.byte("e") then
-    logger:debug("Answer easy to edge `" .. edge_id .. "`.")
+    logger.debug({ content = "answer easy", extra_info = { edge_id = edge_id } })
     self.alg:answer_easy(edge)
     status = "easy"
   elseif choice == string.byte("s") then
-    logger:info("Skip spaced repetition of the current card.")
+    logger.info({ content = "skip card", extra_info = { edge_id = edge_id } })
     status = "skip"
   elseif choice == string.byte("q") then
-    logger:info("Quit spaced repetition of the current deck.")
+    logger.info({ content = "quit spaced repetition", extra_info = { edge_id = edge_id } })
     status = "quit"
   end
 
