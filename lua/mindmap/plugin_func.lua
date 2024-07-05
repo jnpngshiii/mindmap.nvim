@@ -127,7 +127,7 @@ function plugin_func.find_heading_nodes(graph, location, force_add, id_regex)
   local function process_node(ts_node)
     local title_ts_node, _, _ = ts_utils.parse_heading_node(ts_node)
     if not title_ts_node then
-      logger.debug({ content = "find title node skipped", cause = "title node not found" })
+      logger.debug({ content = "find node skipped", cause = "title node not found" })
       return nil
     end
 
