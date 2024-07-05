@@ -1,4 +1,4 @@
-local logger = require("mindmap.plugin_logger"):register_source("Base.Alg")
+local logger = require("logger").register_plugin("mindmap"):register_source("Base.Alg")
 
 --------------------
 -- Class BaseAlg
