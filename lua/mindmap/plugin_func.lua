@@ -22,8 +22,6 @@ local ChildrenEdge = require("mindmap.graph.edge.ChildrenEdge")
 local AnkiAlg = require("mindmap.graph.alg.AnkiAlg")
 local SimpleAlg = require("mindmap.graph.alg.SimpleAlg")
 local SM2Alg = require("mindmap.graph.alg.SM2Alg")
---   Logger:
-local Logger = require("mindmap.logger")
 -- Utils:
 local utils = require("mindmap.utils")
 local ts_utils = require("mindmap.ts_utils")
@@ -86,7 +84,6 @@ function plugin_func.find_graph(save_dir)
     alg_factory:register("SimpleAlg", SimpleAlg)
     alg_factory:register("SM2Alg", SM2Alg)
     alg_factory:register("AnkiAlg", AnkiAlg)
-    local logger = Logger:new(plugin_data.config.log_level, plugin_data.config.show_log_in_nvim)
 
     local created_graph = Graph:new(
       save_dir,
