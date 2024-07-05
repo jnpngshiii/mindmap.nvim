@@ -18,7 +18,6 @@ function BaseFactory:new(base_cls)
     base_cls = base_cls,
     registered_cls = {},
   }
-  factory.__index = factory
   setmetatable(factory, BaseFactory)
 
   return factory
@@ -51,20 +50,11 @@ function BaseFactory:register(type_to_be_registered, cls_to_be_registered, type_
   end
 
   if not cls_to_be_registered.new or type(cls_to_be_registered.new) ~= "function" then
-    logger.warn({
-      content = "register class modified",
-      cause = "class missing 'new' method",
-      action = "default 'new' method bound",
-      extra_info = { type = type_to_be_registered },
+    logger.error({
+      content = "register class aborted",
+      cause = "register class missing 'new' method",
+      extra_info = { type = type_to_be_inherited, cls_to_be_inherited = cls_to_be_inherited },
     })
-
-    function cls_to_be_registered:new(...)
-      local ins = cls_to_be_inherited:new(...)
-      ins.__index = ins
-      setmetatable(ins, cls_to_be_registered)
-
-      return ins
-    end
   end
 
   self.registered_cls[type_to_be_registered] = cls_to_be_registered

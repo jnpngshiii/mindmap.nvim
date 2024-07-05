@@ -19,7 +19,6 @@ function EdgeFactory:new(base_cls)
     base_cls = base_cls,
     registered_cls = {},
   }
-  factory.__index = factory
   setmetatable(factory, EdgeFactory)
 
   return factory

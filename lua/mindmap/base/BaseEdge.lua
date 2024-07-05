@@ -107,7 +107,6 @@ function BaseEdge:new(
     _state = _state or "active",
     _version = _version or base_edge_version,
   }
-  base_edge.__index = base_edge
   setmetatable(base_edge, BaseEdge)
 
   base_edge:upgrade()

@@ -1,5 +1,6 @@
 local logger = require("logger").register_plugin("mindmap"):register_source("Node.Excerpt")
 
+local BaseNode = require("mindmap.base.BaseNode")
 local utils = require("mindmap.utils")
 
 --------------------
@@ -12,6 +13,15 @@ local utils = require("mindmap.utils")
 ---@field data.end_row integer End row of the excerpt.
 ---@field data.end_col integer End column of the excerpt.
 local ExcerptNode = {}
+ExcerptNode.__index = ExcerptNode
+setmetatable(ExcerptNode, BaseNode)
+
+function ExcerptNode:new(...)
+  local ins = BaseNode:new(...)
+  setmetatable(ins, ExcerptNode)
+
+  return ins
+end
 
 ----------
 -- Basic Method

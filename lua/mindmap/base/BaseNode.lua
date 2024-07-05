@@ -81,7 +81,6 @@ function BaseNode:new(
     _state = _state or "active",
     _version = _version or base_node_version,
   }
-  base_node.__index = base_node
   setmetatable(base_node, BaseNode)
 
   base_node:upgrade()
