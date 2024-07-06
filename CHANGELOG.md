@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.7.0...v0.7.1) (2024-07-06)
+
+
+### Bug Fixes
+
+* a fix an inheritance bug ([46d1124](https://github.com/jnpngshiii/mindmap.nvim/commit/46d112442b5ede3d3bfcbcbf27c62dd5e36e2985))
+
 ## [0.7.0](https://github.com/jnpngshiii/mindmap.nvim/compare/v0.6.1...v0.7.0) (2024-07-05)
 
 
