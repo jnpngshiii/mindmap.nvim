@@ -58,7 +58,7 @@ end
 function plugin_func.find_namespace(namespace)
   if not plugin_data.cache.namespaces[namespace] then
     plugin_data.cache.namespaces[namespace] = vim.api.nvim_create_namespace("mindmap_" .. namespace)
-    logger.info({ content = "create namespace succeeded", extra_info = { namespace = namespace } })
+    logger.debug({ content = "create namespace succeeded", extra_info = { namespace = namespace } })
   end
 
   return plugin_data.cache.namespaces[namespace]
@@ -98,7 +98,7 @@ function plugin_func.find_graph(save_dir)
       plugin_data.config.thread_num
     )
     plugin_data.cache.graphs[created_graph.save_dir] = created_graph
-    logger.info({ content = "create graph succeeded", extra_info = { save_dir = save_dir } })
+    logger.debug({ content = "create graph succeeded", extra_info = { save_dir = save_dir } })
   end
 
   return plugin_data.cache.graphs[save_dir]
