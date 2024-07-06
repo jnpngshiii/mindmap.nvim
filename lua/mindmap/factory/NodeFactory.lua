@@ -19,7 +19,6 @@ function NodeFactory:new(base_cls)
     base_cls = base_cls,
     registered_cls = {},
   }
-  factory.__index = factory
   setmetatable(factory, NodeFactory)
 
   return factory

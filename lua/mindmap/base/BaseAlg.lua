@@ -36,7 +36,6 @@ function BaseAlg:new(version)
     initial_interval = 1,
     version = version or base_alg_version,
   }
-  base_alg.__index = base_alg
   setmetatable(base_alg, BaseAlg)
 
   base_alg:check_health()

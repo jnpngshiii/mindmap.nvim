@@ -1,5 +1,6 @@
 local logger = require("logger").register_plugin("mindmap"):register_source("Node.Heading")
 
+local BaseNode = require("mindmap.base.BaseNode")
 local utils = require("mindmap.utils")
 local ts_utils = require("mindmap.ts_utils")
 
@@ -11,6 +12,15 @@ local ts_utils = require("mindmap.ts_utils")
 ---@field _cache.ts_node userdata|nil See: `HeadingNode:get_ts_node`.
 ---@field _cache.ts_node_bufnr number|nil See: `HeadingNode:get_ts_node`.
 local HeadingNode = {}
+HeadingNode.__index = HeadingNode
+setmetatable(HeadingNode, BaseNode)
+
+function HeadingNode:new(...)
+  local ins = BaseNode:new(...)
+  setmetatable(ins, HeadingNode)
+
+  return ins
+end
 
 ----------
 -- Basic Method

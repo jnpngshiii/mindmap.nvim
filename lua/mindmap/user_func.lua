@@ -1,4 +1,5 @@
-local logger = require("mindmap.plugin_logger"):register_source("Plugin.UserFunc")
+local logger = require("logger").register_plugin("mindmap"):register_source("Plugin.UserFunc")
+local log_utils = require("logger").log_utils
 
 local nts_utils = require("nvim-treesitter.ts_utils")
 
@@ -254,7 +255,13 @@ function user_func.MindmapDisplay(location, show_type)
   local screen_width = vim.api.nvim_win_get_width(0) - 20
 
   for _, node in pairs(nodes) do
-    local line_num = ts_utils.get_node_start_line(node._cache.ts_node)
+    -- NOTE: `get_ts_node` is not a method of `BaseNode`
+    local success, ts_node_or_event_inf = log_utils.safe_call("get ts node failed", node.get_ts_node, node)
+    if not success then
+      error(logger.error(ts_node_or_event_inf, false):to_msg())
+    end
+
+    local line_num = ts_node_or_event_inf:range()[1]
     utils.clear_virtual_text(0, namespace, line_num, line_num + 1)
 
     for index, edge_id in ipairs(node._data.incoming_edge_ids or {}) do

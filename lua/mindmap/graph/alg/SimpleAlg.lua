@@ -1,11 +1,22 @@
 local logger = require("logger").register_plugin("mindmap"):register_source("Alg.Simple")
 
+local BaseAlg = require("mindmap.base.BaseAlg")
+
 --------------------
 -- Class SimpleAlg
 --------------------
 
 ---@class SimpleAlg : BaseAlg
 local SimpleAlg = {}
+SimpleAlg.__index = SimpleAlg
+setmetatable(SimpleAlg, BaseAlg)
+
+function SimpleAlg:new(...)
+  local ins = BaseAlg:new(...)
+  setmetatable(ins, SimpleAlg)
+
+  return ins
+end
 
 ----------
 -- Basic Method
