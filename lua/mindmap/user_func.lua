@@ -1,4 +1,4 @@
-local logger = require("logger").register_plugin("mindmap"):register_source("Plugin.UserFunc")
+local logger = require("logger").register_plugin("mindmap"):register_source("UFunc")
 local log_utils = require("logger").log_utils
 
 local nts_utils = require("nvim-treesitter.ts_utils")
@@ -172,7 +172,7 @@ function user_func.MindmapUnlink(criteria)
 
   graph:transact(function()
     local default_criteria = {
-      { "_state", "active" },
+      { "_status", "active" },
     }
     criteria = vim.tbl_extend("force", default_criteria, criteria or {})
 
@@ -251,8 +251,16 @@ function user_func.MindmapDisplay(location, show_type)
 
   local graph = plugin_func.find_graph()
   local nodes = plugin_func.find_heading_nodes(graph, location)
+  logger.trace({
+    content = "find heading nodes",
+    extra_info = {
+      location = location,
+      found_nodes = nodes,
+    },
+  })
+
   local namespace = plugin_func.find_namespace(show_type)
-  local screen_width = vim.api.nvim_win_get_width(0) - 20
+  -- local screen_width = vim.api.nvim_win_get_width(0) - 20
 
   for _, node in pairs(nodes) do
     -- NOTE: `get_ts_node` is not a method of `BaseNode`
@@ -261,23 +269,30 @@ function user_func.MindmapDisplay(location, show_type)
       error(logger.error(ts_node_or_event_inf, false):to_msg())
     end
 
-    local line_num = ts_node_or_event_inf:range()[1]
+    local line_num, _, _, _ = ts_node_or_event_inf:range()
     utils.clear_virtual_text(0, namespace, line_num, line_num + 1)
 
-    for index, edge_id in ipairs(node._data.incoming_edge_ids or {}) do
-      local edge = graph.edges[edge_id]
+    local edges = graph:find_edges({ _to = node._id, state = true })
+    for index, edge in ipairs(edges or {}) do
       local from_node = graph.nodes[edge._from]
+      logger.trace({
+        content = "display something...",
+        extra_info = {
+          show_type = show_type,
+          edge = edge,
+        },
+      })
 
       if show_type == "card_back" then
         local _, back = from_node:get_content(edge._type)
         back[1] = string.format("* Card %s [%s]: %s", index, edge._type, back[1])
-        back = utils.limit_string_length(back, screen_width)
+        -- back = utils.limit_string_length(back, screen_width)
         -- FIXME: wrong order
         utils.add_virtual_text(0, namespace, line_num, back)
       elseif show_type == "excerpt" and from_node._type == "ExcerptNode" then
         local _, back = from_node:get_content(edge._type)
         back[1] = string.format("%s: %s", index, back[1])
-        back = utils.limit_string_length(back, screen_width)
+        -- back = utils.limit_string_length(back, screen_width)
         -- FIXME: wrong order
         utils.add_virtual_text(0, namespace, line_num, back)
       elseif show_type == "sp_info" then

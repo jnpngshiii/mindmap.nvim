@@ -34,6 +34,14 @@ end
 function ts_utils.get_heading_nodes(id, bufnr)
   id = id or "%d%d%d%d%d%d%d%d"
   bufnr = bufnr or 0
+  logger.trace({
+    content = "call `get_heading_nodes`",
+    extra_info = {
+      id = id,
+      bufnr = bufnr,
+    },
+  })
+
   local heading_nodes = {}
 
   local root_node = ts_utils.get_root_node(bufnr)
@@ -55,20 +63,51 @@ function ts_utils.get_heading_nodes(id, bufnr)
   for _, heading_node in parsed_query:iter_captures(root_node, 0) do
     local title_node, _, _ = ts_utils.parse_heading_node(heading_node)
     if not title_node then
+      logger.trace({
+        content = "parse heading node failed",
+        cause = "title node not found",
+        extra_info = {
+          node_type = heading_node:type(),
+        },
+      })
       goto continue
     end
 
     local title_node_text = vim.treesitter.get_node_text(title_node, bufnr)
     if not title_node_text then
+      logger.trace({
+        content = "get node text failed",
+        cause = "title node text not found",
+        extra_info = {
+          node_type = title_node:type(),
+        },
+      })
       goto continue
     end
 
     -- Just handle the first match.
-    local heading_node_id = tonumber(string.match(title_node_text, "%%" .. id .. "%%"))
-    if heading_node_id then
-      heading_nodes[heading_node_id] = heading_node
+    local heading_node_id = string.match(title_node_text, "" .. id .. "")
+    if not heading_node_id then
+      logger.trace({
+        content = "match heading node failed",
+        cause = "heading node id not found",
+        extra_info = {
+          node_type = title_node:type(),
+          title_node_text = title_node_text,
+        },
+      })
+      goto continue
     end
 
+    heading_nodes[heading_node_id] = heading_node
+    logger.trace({
+      content = "match heading node success",
+      extra_info = {
+        heading_node_id = heading_node_id,
+        node_type = title_node:type(),
+        title_node_text = title_node_text,
+      },
+    })
     ::continue::
   end
 

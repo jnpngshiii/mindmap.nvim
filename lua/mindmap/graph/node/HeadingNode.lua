@@ -36,11 +36,12 @@ function HeadingNode:get_ts_node(bufnr)
     return self._cache.ts_node
   end
 
-  local heading_node = ts_utils.get_heading_nodes(string.format("%08d", self._id), bufnr)[self._id]
+  local id_str = string.format("%08d", self._id)
+  local heading_node = ts_utils.get_heading_nodes(id_str, bufnr)[id_str]
   if not heading_node then
     logger.error({
       content = "retrieve treesitter node failed",
-      cause = "node not found",
+      cause = "treesitter node not found",
       extra_info = { id = self._id },
     })
     error("retrieve treesitter node failed")
