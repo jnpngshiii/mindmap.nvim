@@ -422,6 +422,42 @@ function utils.format_bytes(bytes)
   return string.format("%.2f %s", bytes, units[i])
 end
 
+---Implements multiple inheritance for Lua classes.
+---@param cls table The class table to be extended
+---@param ... table The base classes to inherit from
+---@return table class The extended class
+function utils.setinheritance(cls, ...)
+  local bases = { ... }
+
+  if type(cls) ~= "table" then
+    error("Class must be a table")
+  end
+  for i, base in ipairs(bases) do
+    if type(base) ~= "table" then
+      error(string.format("Base class #%d is not a table", i))
+    end
+  end
+
+  --- Search for a key in the base classes
+  --- @param _ table The table being indexed
+  --- @param k any The key to search for
+  --- @return any The value found in the base classes, or nil if not found
+  local function search(_, k)
+    for i = 1, #bases do
+      v = bases[i][k]
+      if v then
+        return v
+      end
+    end
+
+    return nil
+  end
+
+  setmetatable(cls, { __index = search })
+
+  return cls
+end
+
 --------------------
 
 return utils
