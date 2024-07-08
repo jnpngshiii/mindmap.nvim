@@ -24,7 +24,7 @@ local logger = require("logger").register_plugin("mindmap"):register_source("Bas
 ---@field _answer_count integer Total number of answers for the edge.
 ---@field _ease_count integer Number of "easy" answers for the edge.
 ---@field _again_count integer Number of "again" answers for the edge.
----@field _status string State of the edge ("active", "removed", or "archived"). Default: `"active"`.
+---@field _status string Status of the edge ("active", "removed", or "archived"). Default: `"active"`.
 ---@field _version integer Version of the edge.
 local BaseEdge = {}
 BaseEdge.__index = BaseEdge
@@ -66,7 +66,7 @@ local base_edge_version = 13
 ---@param _answer_count integer Total number of answers for the edge.
 ---@param _ease_count integer Number of "easy" answers for the edge.
 ---@param _again_count integer Number of "again" answers for the edge.
----@param _status string State of the edge ("active", "removed", or "archived"). Default: `"active"`.
+---@param _status string Status of the edge ("active", "removed", or "archived"). Default: `"active"`.
 ---@param _version integer Version of the edge.
 ---@return BaseEdge? base_edge The created edge, or nil if check health failed.
 function BaseEdge:new(

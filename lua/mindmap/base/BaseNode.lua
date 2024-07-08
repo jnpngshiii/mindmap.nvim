@@ -20,7 +20,7 @@ local utils = require("mindmap.utils")
 ---@field _cache table Cache of the node.
 ---@field _cache.abs_file_path string See: `BaseNode:get_abs_path`.
 ---@field _created_at integer Creation time of the node in UNIX timestamp format.
----@field _status string State of the node. Can be "active", "removed", or "archived". Default: `"active"`.
+---@field _status string Status of the node. Can be "active", "removed", or "archived". Default: `"active"`.
 ---@field _version integer Version of the node.
 local BaseNode = {}
 BaseNode.__index = BaseNode
@@ -54,7 +54,7 @@ local base_node_version = 11
 ---@param _data? table Data of the node. Subclasses should put their own data in this field.
 ---@param _cache? table Cache of the node.
 ---@param _created_at? integer Creation time of the node in UNIX timestamp format.
----@param _status? string State of the node. Default is "active". Can be "active", "removed", or "archived".
+---@param _status? string Status of the node. Default is "active". Can be "active", "removed", or "archived".
 ---@param _version? integer Version of the node.
 ---@return BaseNode? base_node The created node, or nil if check health failed.
 function BaseNode:new(
