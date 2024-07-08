@@ -1,4 +1,4 @@
-local logger = require("logger").register_plugin("mindmap"):register_source("Plugin.Func")
+local logger = require("logger").register_plugin("mindmap"):register_source("PFunc")
 
 -- nvim-treesitter:
 local nts_utils = require("nvim-treesitter.ts_utils")
@@ -152,7 +152,7 @@ function plugin_func.find_heading_nodes(graph, location, force_add, id_regex)
     end
 
     local node = graph.nodes[id]
-    return (node and node._state == "active") and node or nil
+    return (node and node._status == "active") and node or nil
   end
 
   -- Handle different location types
@@ -161,7 +161,7 @@ function plugin_func.find_heading_nodes(graph, location, force_add, id_regex)
     return node and { [node._id] = node } or {}
   elseif location == "latest" then
     local latest_node = graph.nodes[#graph.nodes]
-    return (latest_node and latest_node._state == "active") and { [latest_node._id] = latest_node } or {}
+    return (latest_node and latest_node._status == "active") and { [latest_node._id] = latest_node } or {}
   elseif location == "nearest" then
     local ts_node = nts_utils.get_node_at_cursor()
     while ts_node and not ts_node:type():match("^heading%d$") do

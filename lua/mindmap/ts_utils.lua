@@ -1,4 +1,4 @@
-local logger = require("logger").register_plugin("mindmap"):register_source("Plugin.TSUtils")
+local logger = require("logger").register_plugin("mindmap"):register_source("TSUtils", vim.log.levels.INFO)
 
 local ts_utils = {}
 
