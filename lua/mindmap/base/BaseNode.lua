@@ -20,7 +20,7 @@ local utils = require("mindmap.utils")
 ---@field _cache table Cache of the node.
 ---@field _cache.abs_file_path string See: `BaseNode:get_abs_path`.
 ---@field _created_at integer Creation time of the node in UNIX timestamp format.
----@field _state string State of the node. Can be "active", "removed", or "archived". Default: `"active"`.
+---@field _status string State of the node. Can be "active", "removed", or "archived". Default: `"active"`.
 ---@field _version integer Version of the node.
 local BaseNode = {}
 BaseNode.__index = BaseNode
@@ -54,7 +54,7 @@ local base_node_version = 11
 ---@param _data? table Data of the node. Subclasses should put their own data in this field.
 ---@param _cache? table Cache of the node.
 ---@param _created_at? integer Creation time of the node in UNIX timestamp format.
----@param _state? string State of the node. Default is "active". Can be "active", "removed", or "archived".
+---@param _status? string State of the node. Default is "active". Can be "active", "removed", or "archived".
 ---@param _version? integer Version of the node.
 ---@return BaseNode? base_node The created node, or nil if check health failed.
 function BaseNode:new(
@@ -66,7 +66,7 @@ function BaseNode:new(
   _data,
   _cache,
   _created_at,
-  _state,
+  _status,
   _version
 )
   local base_node = {
@@ -78,7 +78,7 @@ function BaseNode:new(
     _data = _data or {},
     _cache = _cache or {},
     _created_at = _created_at or tonumber(os.time()),
-    _state = _state or "active",
+    _status = _status or "active",
     _version = _version or base_node_version,
   }
   setmetatable(base_node, BaseNode)
@@ -177,8 +177,8 @@ function BaseNode:check_health()
   if type(self._created_at) ~= "number" then
     table.insert(issues, "Invalid `_created_at`: expected `number` or `nil`, got `" .. type(self._created_at) .. "`;")
   end
-  if type(self._state) ~= "string" then
-    table.insert(issues, "Invalid `_state`: expected `string` or `nil`, got `" .. type(self._state) .. "`;")
+  if type(self._status) ~= "string" then
+    table.insert(issues, "Invalid `_status`: expected `string` or `nil`, got `" .. type(self._status) .. "`;")
   end
   if type(self._version) ~= "number" then
     table.insert(issues, "Invalid `_version`: expected `number` or `nil`, got `" .. type(self._version) .. "`;")

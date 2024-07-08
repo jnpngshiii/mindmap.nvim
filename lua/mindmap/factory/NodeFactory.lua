@@ -37,7 +37,7 @@ function NodeFactory:to_table(node)
     _data = node._data,
     -- _cache = node._cache,
     _created_at = node._created_at,
-    _state = node._state,
+    _status = node._status,
     _version = node._version,
   }
 end
@@ -58,7 +58,7 @@ function NodeFactory:from_table(registered_type, tbl)
     tbl._data,
     {}, -- tbl._cache,
     tbl._created_at,
-    tbl._state,
+    tbl._status,
     tbl._version
   )
 end

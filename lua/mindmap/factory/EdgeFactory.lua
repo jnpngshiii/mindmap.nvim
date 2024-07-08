@@ -44,7 +44,7 @@ function EdgeFactory:to_table(edge)
     _answer_count = edge._answer_count,
     _ease_count = edge._ease_count,
     _again_count = edge._again_count,
-    _state = edge._state,
+    _status = edge._status,
     _version = edge._version,
   }
 end
@@ -72,7 +72,7 @@ function EdgeFactory:from_table(registered_type, tbl)
     tbl._answer_count,
     tbl._ease_count,
     tbl._again_count,
-    tbl._state,
+    tbl._status,
     tbl._version
   )
 end

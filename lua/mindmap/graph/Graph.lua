@@ -213,7 +213,7 @@ function Graph:add_node(node_or_node_type, ...)
     -- Main action --
 
     self.nodes[node._id] = node
-    node._state = "active"
+    node._status = "active"
 
     -- Post action --
 
@@ -283,7 +283,7 @@ function Graph:add_edge(edge_or_edge_type, ...)
     -- Main action --
 
     self.edges[edge._id] = edge
-    edge._state = "active"
+    edge._status = "active"
 
     -- Post action --
 
@@ -322,7 +322,7 @@ end
 ---  ```
 ---  Graph.find_nodes({
 ---    {"_type", "SimpleNode"},
----    {"_state", "active"},
+---    {"_status", "active"},
 ---    {"_hello", function(field) return field == "Hello" end}
 ---  })
 ---  ```
@@ -355,7 +355,7 @@ end
 ---  ```
 ---  Graph.find_edges({
 ---    {"_type", "SimpleEdge"},
----    {"_state", "active"},
+---    {"_status", "active"},
 ---    {"_hello", function(field) return field == "Hello" end}
 ---  })
 ---  ```
@@ -414,7 +414,7 @@ function Graph:remove_edge(edge_id)
 
     -- Main action --
 
-    self.edges[edge_id]._state = "removed"
+    self.edges[edge_id]._status = "removed"
 
     -- Post action --
 
@@ -466,7 +466,7 @@ function Graph:remove_node(node_id)
 
     -- Main action --
 
-    self.nodes[node_id]._state = "removed"
+    self.nodes[node_id]._status = "removed"
 
     -- Post action --
 

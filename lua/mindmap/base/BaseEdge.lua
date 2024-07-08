@@ -24,7 +24,7 @@ local logger = require("logger").register_plugin("mindmap"):register_source("Bas
 ---@field _answer_count integer Total number of answers for the edge.
 ---@field _ease_count integer Number of "easy" answers for the edge.
 ---@field _again_count integer Number of "again" answers for the edge.
----@field _state string State of the edge ("active", "removed", or "archived"). Default: `"active"`.
+---@field _status string State of the edge ("active", "removed", or "archived"). Default: `"active"`.
 ---@field _version integer Version of the edge.
 local BaseEdge = {}
 BaseEdge.__index = BaseEdge
@@ -66,7 +66,7 @@ local base_edge_version = 13
 ---@param _answer_count integer Total number of answers for the edge.
 ---@param _ease_count integer Number of "easy" answers for the edge.
 ---@param _again_count integer Number of "again" answers for the edge.
----@param _state string State of the edge ("active", "removed", or "archived"). Default: `"active"`.
+---@param _status string State of the edge ("active", "removed", or "archived"). Default: `"active"`.
 ---@param _version integer Version of the edge.
 ---@return BaseEdge? base_edge The created edge, or nil if check health failed.
 function BaseEdge:new(
@@ -85,7 +85,7 @@ function BaseEdge:new(
   _answer_count,
   _ease_count,
   _again_count,
-  _state,
+  _status,
   _version
 )
   local base_edge = {
@@ -104,7 +104,7 @@ function BaseEdge:new(
     _answer_count = _answer_count or 0,
     _ease_count = _ease_count or 0,
     _again_count = _again_count or 0,
-    _state = _state or "active",
+    _status = _status or "active",
     _version = _version or base_edge_version,
   }
   setmetatable(base_edge, BaseEdge)
@@ -227,8 +227,8 @@ function BaseEdge:check_health()
   if type(self._again_count) ~= "number" then
     table.insert(issues, "Invalid `_again_count`: expected `number` or `nil`, got `" .. type(self._again_count) .. "`;")
   end
-  if type(self._state) ~= "string" then
-    table.insert(issues, "Invalid `_state`: expected `string` or `nil`, got `" .. type(self._state) .. "`;")
+  if type(self._status) ~= "string" then
+    table.insert(issues, "Invalid `_status`: expected `string` or `nil`, got `" .. type(self._status) .. "`;")
   end
   if type(self._version) ~= "number" then
     table.insert(issues, "Invalid `_version`: expected `number` or `nil`, got `" .. type(self._version) .. "`;")
